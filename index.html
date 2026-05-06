@@ -1,10 +1,4 @@
-import os
-
-# Путь к итоговому файлу
-file_path = "AetherLab_Final.html"
-
-# Текст объединенного кода
-final_code = """<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -31,7 +25,6 @@ final_code = """<!DOCTYPE html>
             --warning: #FF9500; 
             --radius: 12px; 
         }
-        
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         body { background-color: var(--bg-body); color: var(--text-main); overflow: hidden; font-size: 14px; }
         .hidden { display: none !important; }
@@ -45,6 +38,7 @@ final_code = """<!DOCTYPE html>
         .sidebar { width: 250px; background-color: var(--bg-panel); border-right: 1px solid var(--border); padding: 32px 24px; display: flex; flex-direction: column; transition: 0.3s; z-index: 1000; }
         .content { flex: 1; padding: 40px; overflow-y: auto; background: var(--bg-body); position: relative; }
 
+        /* АНИМАЦИИ ПЕРЕХОДОВ */
         .fade-in { animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
@@ -113,10 +107,9 @@ final_code = """<!DOCTYPE html>
         .chat-msgs { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; scroll-behavior: smooth; }
         .chat-input-area { display: flex; padding: 16px; border-top: 1px solid var(--border); background: var(--bg-panel); gap: 12px; align-items: center; }
         .chat-input-area input { margin-bottom: 0; flex: 1; }
-        .msg { max-width: 75%; padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.5; word-wrap: break-word; animation: fadeIn 0.2s ease-out; position: relative; }
+        .msg { max-width: 75%; padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.5; word-wrap: break-word; animation: fadeIn 0.2s ease-out; }
         .msg-me { background: var(--accent); color: #000; align-self: flex-end; border-bottom-right-radius: 4px; }
         .msg-them { background: var(--bg-glass); color: #fff; align-self: flex-start; border: 1px solid var(--border); border-bottom-left-radius: 4px; }
-        .msg-sender { font-size: 10px; font-weight: bold; margin-bottom: 4px; opacity: 0.7; }
         .msg-time { font-size: 10px; opacity: 0.5; margin-top: 6px; text-align: right; }
         
         .admin-chat-layout { display: flex; height: calc(100vh - 160px); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
@@ -126,12 +119,14 @@ final_code = """<!DOCTYPE html>
         .admin-chat-user.active { border-left: 3px solid var(--accent); }
         .typing-indicator { font-size: 12px; color: var(--text-muted); padding: 0 24px 8px 24px; font-style: italic; }
 
+        /* ЭЛЕМЕНТЫ ПРОФИЛЯ, УВЕДОМЛЕНИЙ И АВАТАРКИ */
         .bell-wrap { position: relative; cursor: pointer; display: flex; align-items: center; color: var(--text-main); }
         .unread-dot { position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; background: var(--warning); border-radius: 50%; border: 2px solid var(--bg-panel); }
         .avatar-wrap { position: relative; width: 34px; height: 34px; border-radius: 50%; background: #222; border: 1px solid var(--border); cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
         .chat-unread-indicator { width: 8px; height: 8px; background: var(--warning); border-radius: 50%; display: inline-block; }
 
+        /* МОБИЛЬНАЯ АДАПТАЦИЯ */
         .mobile-header { display: none; background: var(--bg-panel); border-bottom: 1px solid var(--border); padding: 16px 20px; justify-content: space-between; align-items: center; }
         .hamburger { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; }
 
@@ -221,12 +216,12 @@ final_code = """<!DOCTYPE html>
             
             <div id="userSupportBtn" class="hidden">
                 <div class="admin-label" style="margin-top: 16px;">Поддержка</div>
-                <button class="menu-btn" id="btn-userChat" onclick="nav('userChat')"><span>Связь с администрацией</span> <div id="chatUnreadDot" class="unread-dot hidden" style="position: static; margin-left: 8px;"></div></button>
+                <button class="menu-btn" id="btn-userChat" onclick="nav('userChat')"><span>Связь с администрацией</span> <div id="chatUnreadDot" class="chat-unread-indicator hidden"></div></button>
             </div>
 
             <div id="adminPanel" class="hidden">
                 <div class="admin-label">Управление</div>
-                <button class="menu-btn" onclick="nav('adminChats')">Связь с кабинетами</button>
+                <button class="menu-btn" onclick="nav('adminChats')">Связь с артистами</button>
                 <button class="menu-btn" onclick="nav('adminUsers')">Кабинеты</button>
                 <button class="menu-btn" onclick="nav('adminReleases')">Все релизы</button>
                 <button class="menu-btn" onclick="nav('adminDeleted')">Удалённые</button>
@@ -280,28 +275,16 @@ final_code = """<!DOCTYPE html>
                             <div class="chat-tab" id="tab-Moderator" onclick="setChatFilter('Moderator')">Модераторы</div>
                             <div class="chat-tab" id="tab-Administrator" onclick="setChatFilter('Administrator')">Администраторы</div>
                         </div>
-                        <div style="padding: 16px; border-bottom: 1px solid var(--border);"><input type="text" id="adminChatSearch" placeholder="Поиск пользователя..." oninput="renderAdminChatList()" style="margin-bottom: 0;"></div>
+                        <div style="padding: 16px; border-bottom: 1px solid var(--border);"><input type="text" id="adminChatSearch" placeholder="Поиск пользователя..." oninput="renderAdminChatList()" style="margin-bottom: 0; padding: 10px; font-size: 13px;"></div>
                         <div id="adminChatUserList" style="flex: 1; overflow-y: auto;"></div>
                     </div>
                     <div style="flex: 1; display: flex; flex-direction: column; background: #000;">
                         <div id="adminChatBox" class="chat-msgs" style="flex: 1;"><div class="empty-state"><h2>Выберите диалог</h2><p class="text-sm">Выберите пользователя слева для начала общения</p></div></div>
                         <div id="adminTypingInd" class="typing-indicator hidden">Собеседник печатает...</div>
-                        <div class="chat-input-area hidden" id="adminChatInputArea"><input type="text" id="adminChatInput" placeholder="Напишите сообщение..." autocomplete="off"><button class="btn-primary" onclick="sendMessageAsAdmin()">Отправить</button></div>
+                        <div class="chat-input-area hidden" id="adminChatInputArea"><input type="text" id="adminChatInput" placeholder="Ответить..." autocomplete="off"><button class="btn-primary" onclick="sendMessageAsAdmin()">Отправить</button></div>
                     </div>
                 </div>
             </div>
-
-            <div id="sec-adminUsers" class="view-section hidden">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;"><p class="text-sm">Управление всеми зарегистрированными кабинетами</p><button class="btn-primary" onclick="showCreateCabinetDialog()">+ Открыть новый кабинет</button></div>
-                <div id="adminUsersList"></div>
-            </div>
-
-            <div id="sec-adminReleases" class="view-section hidden">
-                <div class="form-group" style="max-width: 500px; margin-bottom: 24px;"><input type="text" id="searchAdminReleases" placeholder="Поиск по названию, UPC, артисту, email..." oninput="renderAdminReleases(false)" style="border-radius: 30px; padding-left: 20px;"></div>
-                <div id="adminReleasesList"></div>
-            </div>
-
-            <div id="sec-adminDeleted" class="view-section hidden"><div id="adminDeletedList"></div></div>
 
             <div id="sec-newRelease" class="view-section hidden">
                 <div style="display: flex; gap: 40px; max-width: 900px; flex-wrap: wrap;">
@@ -342,13 +325,30 @@ final_code = """<!DOCTYPE html>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;"><div class="form-group"><label>Нецензурная лексика <span class="req-star">*</span></label><select id="t_explicit"><option value="Нет">Нет</option><option value="Да">Да</option></select></div><div class="form-group"><label>ISRC (Штрихкод трека)</label><input type="text" id="t_isrc" placeholder="Если есть"></div></div>
                 <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;"><button class="btn-primary" style="flex: 1; min-width: 200px;" onclick="saveTrackEdit()">Сохранить и вернуться</button><button class="btn-outline" style="min-width: 120px;" onclick="cancelTrackEdit()">Отмена</button></div>
             </div>
+
+            <div id="sec-adminUsers" class="view-section hidden">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                    <p class="text-sm">Управление всеми зарегистрированными кабинетами</p>
+                    <button class="btn-primary" onclick="showCreateCabinetDialog()">+ Открыть новый кабинет</button>
+                </div>
+                <div id="adminUsersList"></div>
+            </div>
+            
+            <div id="sec-adminReleases" class="view-section hidden">
+                <div class="form-group" style="max-width: 500px; margin-bottom: 24px;">
+                    <input type="text" id="searchAdminReleases" placeholder="Поиск по названию, UPC, артисту, email..." oninput="renderAdminReleases(false)" style="border-radius: 30px; padding-left: 20px;">
+                </div>
+                <div id="adminReleasesList"></div>
+            </div>
+            
+            <div id="sec-adminDeleted" class="view-section hidden"><div id="adminDeletedList"></div></div>
         </div>
     </div>
 
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyCha28N_EYVSNtYlSjYtY8IPCbK3PMo5EU",
-        authDomain: "aetherlab.firebaseapp.com",
+        authDomain: "glambank.firebaseapp.com",
         databaseURL: "https://glambank-default-rtdb.europe-west1.firebasedatabase.app",
         projectId: "glambank",
         storageBucket: "glambank.firebasestorage.app",
@@ -359,32 +359,23 @@ final_code = """<!DOCTYPE html>
     const db = firebase.database();
 
     const ADMIN_EMAIL = 'denisbiletskiy0@gmail.com'; 
-    let appState = { users: [], releases: [], chats: {} };
-    let currentUser = null;
-    let authMode = 'login';
-    let currentChatTab = 'Artist';
-    let activeAdminChatUser = null;
-    let currentSection = 'overview';
-    let isDraftDirty = false; 
-    let currentDraftId = null; 
-    let draftRelease = { coverFile: null, tracks: [] }; 
-    let editTrackId = null;
-
-    const yBox = document.getElementById('r_year'); yBox.innerHTML = ''; 
-    for(let y=2026; y>=2000; y--) yBox.innerHTML += `<option value="${y}">${y}</option>`;
-
+    
     class UI {
         static alert(title, text) { document.getElementById('uiAlertTitle').innerText = title; document.getElementById('uiAlertText').innerHTML = text; document.getElementById('uiAlert').classList.remove('hidden'); }
-        static prompt(title, fields, onConfirm) {
-            document.getElementById('uiPromptTitle').innerText = title;
+        static prompt(title, fields, onConfirm) { 
+            document.getElementById('uiPromptTitle').innerText = title; 
             document.getElementById('uiPromptInputs').innerHTML = fields.map(f => {
                 if(f.type === 'select') {
-                    return `<div class="form-group"><label>${f.label || ''}</label><select id="prompt_${f.id}">${f.options.map(o => `<option value="${o.v}" ${f.value===o.v?'selected':''}>${o.t}</option>`).join('')}</select></div>`;
+                    let opts = f.options.map(o => `<option value="${o.v}" ${o.v===f.value?'selected':''}>${o.t}</option>`).join('');
+                    return `<div class="form-group"><label>${f.label || ''}</label><select id="prompt_${f.id}">${opts}</select></div>`;
                 }
                 return `<div class="form-group"><label>${f.label || ''}</label><input type="${f.type||'text'}" id="prompt_${f.id}" placeholder="${f.placeholder||''}" value="${f.value||''}"></div>`;
-            }).join('');
-            document.getElementById('uiPrompt').classList.remove('hidden');
-            document.getElementById('uiPromptConfirm').onclick = () => { const res = {}; fields.forEach(f => res[f.id] = document.getElementById(`prompt_${f.id}`).value); this.closePrompt(); onConfirm(res); };
+            }).join(''); 
+            document.getElementById('uiPrompt').classList.remove('hidden'); 
+            document.getElementById('uiPromptConfirm').onclick = () => { 
+                const results = {}; fields.forEach(f => results[f.id] = document.getElementById(`prompt_${f.id}`).value); 
+                this.closePrompt(); onConfirm(results); 
+            }; 
         }
         static closePrompt() { document.getElementById('uiPrompt').classList.add('hidden'); }
         static confirm(title, onConfirm) { document.getElementById('uiConfirmTitle').innerText = title; document.getElementById('uiConfirm').classList.remove('hidden'); document.getElementById('uiConfirmBtn').onclick = () => { this.closeConfirm(); onConfirm(); }; }
@@ -393,208 +384,498 @@ final_code = """<!DOCTYPE html>
 
     function saveUserDB(u) { db.ref('users/' + u.id).set(u); }
     function saveReleaseDB(r) { db.ref('releases/' + r.id).set(r); }
+    function saveChatDB(email, msgs) { db.ref('chats/' + email.replace(/\./g, '_')).set(msgs); }
+
+    let appState = { users: [], releases: [], chats: {} }; 
+    let currentUser = null; 
+    let authMode = 'login'; 
+    let currentSection = 'overview'; 
+    let isDraftDirty = false; 
+    let currentDraftId = null; 
+    let draftRelease = { coverFile: null, tracks: [] }; 
+    let editTrackId = null; 
+    let activeAdminChatUser = null; 
+    let currentChatTab = 'Artist';
+    
+    const yBox = document.getElementById('r_year'); yBox.innerHTML = ''; for(let y=2026; y>=2000; y--) yBox.innerHTML += `<option value="${y}">${y}</option>`;
 
     db.ref('/').on('value', (snapshot) => {
-        const data = snapshot.val() || {};
+        if (!snapshot.exists()) return;
+        const data = snapshot.val();
         appState.users = data.users ? Object.values(data.users) : [];
         appState.releases = data.releases ? Object.values(data.releases) : [];
-        appState.chats = data.chats || {};
+        appState.chats = {};
+        if (data.chats) Object.keys(data.chats).forEach(k => { appState.chats[k] = data.chats[k]; });
 
-        if(currentUser) {
-            const updated = appState.users.find(u => u.id === currentUser.id);
-            if(updated) {
-                currentUser = updated;
+        if(currentUser) { 
+            const updatedUser = appState.users.find(u => u.id === currentUser.id);
+            if(updatedUser) {
+                currentUser = updatedUser;
+                document.getElementById('userAvatar').src = currentUser.avatar || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
                 document.getElementById('userNameDisplay').innerText = currentUser.login;
                 document.getElementById('userRoleDisplay').innerText = getRoleName(currentUser.role);
-                document.getElementById('userAvatar').src = currentUser.avatar || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
-                if(currentUser.isBanned) logout();
+            }
+            if(currentUser.isBanned) { 
+                document.getElementById('banView').classList.remove('hidden'); 
+                if(currentUser.isDeletedCabinet) {
+                    document.getElementById('banTitleText').innerText = "Ваш кабинет удален";
+                }
+                document.getElementById('appView').classList.add('hidden'); 
+                document.getElementById('mobHeader').classList.add('hidden'); 
+                return; 
             }
             refreshUI();
             checkNotifications();
         }
     });
 
-    function getRoleName(r) { const names = {'Administrator': 'Администратор', 'Moderator': 'Модератор', 'Artist': 'Артист'}; return names[r] || 'Артист'; }
+    let typingTimeout;
+    function notifyTyping(isTyping, targetEmail) { 
+        if(!currentUser) return;
+        const safeMyEmail = ['Administrator','Moderator'].includes(currentUser.role) ? 'admin' : currentUser.email.replace(/\./g, '_');
+        db.ref('typing/' + safeMyEmail).set({ target: targetEmail, isTyping, ts: Date.now() }); 
+    }
+    db.ref('typing').on('value', (snap) => {
+        if(!currentUser) return;
+        const data = snap.val() || {};
+        const isAdmin = ['Administrator','Moderator'].includes(currentUser.role);
+        if(!isAdmin && data.admin && data.admin.target === currentUser.email) { document.getElementById('userTypingInd').classList.toggle('hidden', !data.admin.isTyping); }
+        if(isAdmin && activeAdminChatUser) {
+            const safeUser = activeAdminChatUser.replace(/\./g, '_');
+            if(data[safeUser] && data[safeUser].target === 'admin') document.getElementById('adminTypingInd').classList.toggle('hidden', !data[safeUser].isTyping);
+            else document.getElementById('adminTypingInd').classList.add('hidden');
+        }
+    });
+    document.getElementById('userChatInput').addEventListener('input', () => { notifyTyping(true, 'admin'); clearTimeout(typingTimeout); typingTimeout = setTimeout(() => notifyTyping(false, 'admin'), 1500); });
+    document.getElementById('adminChatInput').addEventListener('input', () => { if(activeAdminChatUser) { notifyTyping(true, activeAdminChatUser); clearTimeout(typingTimeout); typingTimeout = setTimeout(() => notifyTyping(false, activeAdminChatUser), 1500); } });
+
+    function getDeviceInfo() {
+        const ua = navigator.userAgent; let b = "Неизвестный браузер";
+        if(ua.includes("Firefox")) b = "Firefox"; else if(ua.includes("Edg")) b = "Edge"; else if(ua.includes("Chrome")) b = "Chrome"; else if(ua.includes("Safari")) b = "Safari";
+        const isMobile = /Mobi|Android/i.test(ua) ? "(Телефон)" : "(ПК)"; return `${b} ${isMobile}`;
+    }
+
+    function recordDevice(user) {
+        if(!user.devices) user.devices = [];
+        const d = getDeviceInfo();
+        if(!user.devices.includes(d)) { user.devices.push(d); saveUserDB(user); }
+    }
+    
+    function getRoleName(role) {
+        const names = { 'Administrator': 'Администратор', 'Moderator': 'Модератор', 'Artist': 'Артист' };
+        return names[role] || 'Артист';
+    }
 
     function toggleAuthMode() { authMode = authMode === 'login' ? 'reg' : 'login'; document.getElementById('regFields').classList.toggle('hidden', authMode === 'login'); document.getElementById('mainAuthBtn').innerText = authMode === 'login' ? 'Войти в кабинет' : 'Создать кабинет'; document.getElementById('switchAuthBtn').innerText = authMode === 'login' ? 'Создать кабинет' : 'Уже есть аккаунт'; }
-
+    
     function processAuth() {
         const email = document.getElementById('authEmail').value.toLowerCase().trim(); const pass = document.getElementById('authPassword').value; const login = document.getElementById('regLogin').value;
-        if(!email.includes('@') || !pass) return UI.alert("Ошибка", "Заполните данные");
-        if(authMode === 'login') {
-            if(email === ADMIN_EMAIL && pass === 'Retro!22848.lol') {
+        if(!email.includes('@') || !pass) return UI.alert("Ошибка", "Заполните почту и пароль");
+        if(authMode === 'login') { 
+            if(email === ADMIN_EMAIL && pass === 'Retro!22848.lol') { 
                 currentUser = appState.users.find(u => u.email === ADMIN_EMAIL);
                 if(!currentUser) {
-                    currentUser = { id: 'admin_root', email, pass, login: 'Денис', role: 'Administrator', passwordHistory: [{pass, date: new Date().toLocaleString()}], isBanned: false, notifications: [] };
+                    currentUser = { id: 'admin_root', email: ADMIN_EMAIL, login: 'Денис', pass: pass, role: 'Administrator', passwordHistory: [{pass: pass, date: new Date().toLocaleString()}], isBanned: false, notifications: [] };
                     saveUserDB(currentUser);
                 }
-                startApp();
-            } else {
-                const u = appState.users.find(x => x.email === email && x.pass === pass);
-                if(u) { currentUser = u; startApp(); } else UI.alert("Ошибка", "Неверный вход");
-            }
-        } else {
-            if(!login) return UI.alert("Ошибка", "Укажите логин");
-            if(appState.users.find(x => x.email === email)) return UI.alert("Ошибка", "Почта занята");
-            const newUser = { id: Date.now().toString(), email, pass, login, role: 'Artist', passwordHistory: [{pass, date: new Date().toLocaleString()}], isBanned: false, notifications: [], avatar: '', isDeletedCabinet: false };
-            saveUserDB(newUser); currentUser = newUser; startApp();
+                recordDevice(currentUser); startApp(); 
+            } 
+            else { 
+                const u = appState.users.find(x => x.email === email && x.pass === pass); 
+                if(u) { currentUser = u; recordDevice(currentUser); startApp(); } 
+                else UI.alert("Ошибка", "Неверная почта или пароль"); 
+            } 
+        } else { 
+            if(!login) return UI.alert("Ошибка", "Укажите логин"); if(appState.users.find(x => x.email === email)) return UI.alert("Ошибка", "Почта занята"); 
+            const newUser = { id: Date.now().toString(), email, pass, login, role: 'Artist', passwordHistory: [{pass: pass, date: new Date().toLocaleString()}], isBanned: false, banReason: '', devices: [getDeviceInfo()], notifications: [], unreadAdminMsg: false, avatar: '', isDeletedCabinet: false }; 
+            appState.users.push(newUser); saveUserDB(newUser); currentUser = newUser; startApp();
         }
     }
 
     function startApp() {
-        document.getElementById('authView').classList.add('hidden'); document.getElementById('appView').classList.remove('hidden');
+        if(currentUser.isBanned) { 
+            document.getElementById('banView').classList.remove('hidden'); 
+            if(currentUser.isDeletedCabinet) {
+                document.getElementById('banTitleText').innerText = "Ваш кабинет удален";
+            }
+            document.getElementById('authView').classList.add('hidden'); 
+            return; 
+        }
+        document.getElementById('authView').classList.add('hidden'); document.getElementById('appView').classList.remove('hidden'); document.getElementById('userNameDisplay').innerText = currentUser.login; document.getElementById('userRoleDisplay').innerText = getRoleName(currentUser.role);
         if(window.innerWidth <= 768) document.getElementById('mobHeader').classList.remove('hidden');
-        if(currentUser.role === 'Administrator' || currentUser.role === 'Moderator') { document.getElementById('adminPanel').classList.remove('hidden'); document.getElementById('userSupportBtn').classList.add('hidden'); }
+        if(['Administrator', 'Moderator'].includes(currentUser.role)) { document.getElementById('adminPanel').classList.remove('hidden'); document.getElementById('userSupportBtn').classList.add('hidden'); } 
         else { document.getElementById('userSupportBtn').classList.remove('hidden'); document.getElementById('bellWrapDesktop').classList.remove('hidden'); }
+        document.getElementById('userAvatar').src = currentUser.avatar || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
         nav('overview', true);
+        checkNotifications();
+    }
+    function logout() { location.reload(); }
+
+    function openSettings() {
+        UI.prompt("Настройки профиля", [
+            {id: 'l', label: 'Изменить логин', placeholder: currentUser.login, value: currentUser.login}, 
+            {id: 'p', label: 'Изменить пароль', placeholder: 'Новый пароль (пусто = без изменений)', type: 'password'}
+        ], (data) => {
+            let changed = false;
+            if(data.l && data.l !== currentUser.login) { currentUser.login = data.l; changed = true; }
+            if(data.p && data.p !== currentUser.pass) { 
+                currentUser.pass = data.p; 
+                if(!currentUser.passwordHistory) currentUser.passwordHistory = [];
+                currentUser.passwordHistory.push({pass: data.p, date: new Date().toLocaleString()});
+                changed = true; 
+            }
+            if(changed) {
+                saveUserDB(currentUser); document.getElementById('userNameDisplay').innerText = currentUser.login; UI.alert("Успешно", "Данные обновлены");
+            }
+        });
+    }
+
+    function uploadAvatar(input) {
+        const file = input.files[0]; if(!file) return;
+        if(file.size > 2*1024*1024) return UI.alert("Ошибка", "Аватарка должна быть не больше 2 МБ");
+        const reader = new FileReader(); reader.readAsDataURL(file);
+        reader.onload = () => { currentUser.avatar = reader.result; saveUserDB(currentUser); document.getElementById('userAvatar').src = reader.result; };
+    }
+
+    function pushNotification(userEmail, text) {
+        const u = appState.users.find(x => x.email === userEmail);
+        if (u) {
+            if(!u.notifications) u.notifications = [];
+            u.notifications.push({ text, date: new Date().toLocaleString(), read: false });
+            saveUserDB(u);
+        }
+    }
+
+    function checkNotifications() {
+        if (!currentUser) return;
+        const notifs = currentUser.notifications || [];
+        const unreadCount = notifs.filter(n => !n.read).length;
+        const bellIcons = document.querySelectorAll('.bell-icon');
+        const bellDots = document.querySelectorAll('.unread-dot:not(#chatUnreadDot)');
+        
+        if (unreadCount > 0) {
+            bellIcons.forEach(b => b.classList.add('shake'));
+            bellDots.forEach(d => d.classList.remove('hidden'));
+        } else {
+            bellIcons.forEach(b => b.classList.remove('shake'));
+            bellDots.forEach(d => d.classList.add('hidden'));
+        }
+
+        if (currentUser.unreadAdminMsg) document.getElementById('chatUnreadDot').classList.remove('hidden');
+        else document.getElementById('chatUnreadDot').classList.add('hidden');
+    }
+
+    function showNotifications() {
+        if (!currentUser) return;
+        const notifs = currentUser.notifications || [];
+        const listHtml = notifs.slice().reverse().map(n => `<div style="padding: 12px; border-bottom: 1px solid var(--border); ${n.read?'opacity:0.6':''}"><div style="font-size: 13px;">${n.text}</div><div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">${n.date}</div></div>`).join('');
+        
+        UI.alert("Уведомления", listHtml ? listHtml : 'Нет новых уведомлений');
+        
+        if (notifs.some(n => !n.read)) {
+            currentUser.notifications.forEach(n => n.read = true);
+            saveUserDB(currentUser);
+            checkNotifications();
+        }
     }
 
     function nav(section, force = false) {
-        if(currentSection === 'newRelease' && isDraftDirty && !force) {
-            UI.confirm("Сохранить черновик?", () => { saveDraftAsIs(); isDraftDirty = false; nav(section, true); });
+        if(currentUser.isBanned) return;
+        if(currentSection === 'newRelease' && isDraftDirty && !force && section !== 'newRelease') {
+            document.getElementById('uiDraftConfirm').classList.remove('hidden');
+            document.getElementById('draftSaveBtn').onclick = () => { saveDraftAsIs(); document.getElementById('uiDraftConfirm').classList.add('hidden'); isDraftDirty = false; nav(section, true); };
+            document.getElementById('draftDeleteBtn').onclick = () => { if(currentDraftId) { const idx = appState.releases.findIndex(r => r.id === currentDraftId); if(idx>=0){ appState.releases.splice(idx,1); db.ref('releases/'+currentDraftId).remove(); } } document.getElementById('uiDraftConfirm').classList.add('hidden'); isDraftDirty = false; nav(section, true); };
             return;
         }
-        currentSection = section;
-        document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden'));
-        document.getElementById('sec-' + section).classList.remove('hidden');
-        document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('pageTitle').innerText = section; 
+
+        if(section === 'userChat' && currentUser.unreadAdminMsg) {
+            currentUser.unreadAdminMsg = false; saveUserDB(currentUser);
+        }
+
+        currentSection = section; 
+        document.querySelectorAll('.view-section').forEach(s => { s.classList.add('hidden'); s.classList.remove('fade-in'); }); 
+        const activeSec = document.getElementById('sec-' + section);
+        activeSec.classList.remove('hidden');
+        void activeSec.offsetWidth; 
+        activeSec.classList.add('fade-in');
+
+        document.querySelectorAll('.sidebar .menu-btn').forEach(b => b.classList.remove('active')); if(event && event.target && event.target.closest('.menu-btn')) event.target.closest('.menu-btn').classList.add('active');
+        const titles = { 'overview': 'Обзор', 'yourMusic': 'Ваша музыка', 'newRelease': 'Новый релиз', 'adminUsers': 'Управление кабинетами', 'adminReleases': 'Все релизы', 'adminDeleted': 'Удаленные', 'userChat': 'Связь с администрацией', 'adminChats': 'Связь с артистами' };
+        document.getElementById('pageTitle').innerText = titles[section] || 'Раздел';
         refreshUI();
     }
 
     function refreshUI() {
-        if(currentSection === 'overview') renderOverview();
-        if(currentSection === 'yourMusic') renderYourMusic();
-        if(currentSection === 'adminUsers') renderAdminUsers();
-        if(currentSection === 'adminReleases') renderAdminReleases(false);
-        if(currentSection === 'userChat') renderUserChat();
+        if(currentSection === 'overview') renderOverview(); 
+        if(currentSection === 'yourMusic') renderYourMusic(); 
+        if(currentSection === 'adminUsers') renderAdminUsers(); 
+        if(currentSection === 'adminReleases') renderAdminReleases(false); 
+        if(currentSection === 'adminDeleted') renderAdminReleases(true); 
+        if(currentSection === 'userChat') renderUserChat(); 
         if(currentSection === 'adminChats') renderAdminChatList();
     }
 
     function renderOverview() {
-        let list = appState.releases; if (currentUser.role === 'Artist') list = list.filter(r => r.userEmail === currentUser.email);
-        list = list.filter(r => !r.isDeleted && r.status !== 'Черновик');
-        const mod = list.filter(r => r.status === 'Модерация').length; const ok = list.filter(r => r.status === 'Одобрен').length; const rej = list.filter(r => r.status === 'Отклонён').length;
-        document.getElementById('dashboardStats').innerHTML = `<div class="stat-card"><div class="stat-num" style="color: var(--warning);">${mod}</div><div class="stat-label">Модерация</div></div><div class="stat-card"><div class="stat-num" style="color: var(--success);">${ok}</div><div class="stat-label">Принято</div></div><div class="stat-card"><div class="stat-num" style="color: var(--danger);">${rej}</div><div class="stat-label">Отказ</div></div>`;
+        let list = appState.releases; if (!['Administrator','Moderator'].includes(currentUser.role)) { list = list.filter(r => r.userEmail === currentUser.email); document.getElementById('overviewDesc').innerText = "Статистика по вашим релизам"; } else { document.getElementById('overviewDesc').innerText = "Глобальная статистика"; }
+        list = list.filter(r => !r.isDeleted && r.status !== 'Черновик'); const mod = list.filter(r => r.status === 'Модерация').length; const ok = list.filter(r => r.status === 'Одобрен').length; const rej = list.filter(r => r.status === 'Отклонён').length;
+        document.getElementById('dashboardStats').innerHTML = `<div class="stat-card"><div class="stat-num" style="color: var(--warning);">${mod}</div><div class="stat-label">На модерации</div></div><div class="stat-card"><div class="stat-num" style="color: var(--success);">${ok}</div><div class="stat-label">Принятых</div></div><div class="stat-card"><div class="stat-num" style="color: var(--danger);">${rej}</div><div class="stat-label">Отклонённых</div></div>`;
     }
 
-    function renderAdminUsers() {
-        document.getElementById('adminUsersList').innerHTML = appState.users.filter(u => !u.isDeletedCabinet).map(u => `
-            <div class="card">
-                <div><div style="font-weight:600;">${u.login}</div><div class="role-glow">${getRoleName(u.role)}</div><div class="text-sm">${u.email}</div></div>
-                <div><button class="btn-outline" onclick="showCabinetInfo('${u.id}')">Инфо</button><button class="btn-outline" onclick="changeUserRole('${u.id}')">Роль</button><button class="btn-danger" onclick="toggleBan('${u.id}')">${u.isBanned?'Разбан':'Бан'}</button></div>
-            </div>
-        `).join('');
+    // ИСПОЛЬЗУЕМ СТАРУЮ НАДЁЖНУЮ ЛОГИКУ ЧАТОВ ИЗ ГЛАМБАНКА (ОДИН ЧАТ НА ЮЗЕРА)
+    function getChat(email) { return appState.chats[email.replace(/\./g, '_')] || []; }
+
+    function renderUserChat() {
+        const box = document.getElementById('userChatBox'); const msgs = getChat(currentUser.email);
+        box.innerHTML = msgs.length ? msgs.map(m => `<div class="msg ${m.from === 'admin' ? 'msg-them' : 'msg-me'}">${m.text}<div class="msg-time">${m.time}</div></div>`).join('') : `<p class="text-sm" style="text-align:center; margin-top:20px;">У вас пока нет сообщений.</p>`;
+        if(box.scrollHeight > 0) box.scrollTop = box.scrollHeight;
+    }
+
+    function sendMessageAsUser() {
+        const input = document.getElementById('userChatInput'); if(!input.value.trim()) return; const msgText = input.value.trim(); const msg = { from: 'user', text: msgText, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
+        const msgs = getChat(currentUser.email); msgs.push(msg); input.value = ''; notifyTyping(false, 'admin'); 
+        renderUserChat(); 
+        saveChatDB(currentUser.email, msgs);
+    }
+
+    function setChatFilter(role) {
+        currentChatTab = role;
+        document.querySelectorAll('.chat-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-' + role).classList.add('active');
+        activeAdminChatUser = null;
+        document.getElementById('adminChatInputArea').classList.add('hidden');
+        document.getElementById('adminChatBox').innerHTML = `<div class="empty-state"><h2>Выберите диалог</h2></div>`;
+        renderAdminChatList();
+    }
+
+    function renderAdminChatList() {
+        const list = document.getElementById('adminChatUserList'); const searchVal = document.getElementById('adminChatSearch').value.toLowerCase();
+        let usersToChat = appState.users.filter(u => u.id !== currentUser.id && !u.isDeletedCabinet && (u.role || 'Artist') === currentChatTab);
+        if (searchVal) usersToChat = usersToChat.filter(u => u.login.toLowerCase().includes(searchVal) || u.email.toLowerCase().includes(searchVal));
+        list.innerHTML = usersToChat.map(u => { const msgs = getChat(u.email); const lastMsg = msgs.length ? msgs[msgs.length-1].text : 'Нет сообщений'; return `<div class="admin-chat-user ${activeAdminChatUser === u.email ? 'active' : ''}" onclick="selectAdminChat('${u.email}')"><div style="font-weight: 600;">${u.login}</div><div class="role-glow" style="font-size: 9px; margin-bottom:4px;">${getRoleName(u.role)}</div><div class="text-sm" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: ${msgs.length ? '#fff' : 'var(--text-muted)'};">${lastMsg}</div></div>`; }).join('');
+        if (activeAdminChatUser) {
+            const box = document.getElementById('adminChatBox'); const msgs = getChat(activeAdminChatUser);
+            box.innerHTML = msgs.length ? msgs.map(m => `<div class="msg ${m.from === 'admin' ? 'msg-me' : 'msg-them'}">${m.text}<div class="msg-time">${m.time}</div></div>`).join('') : `<p class="text-sm" style="text-align:center; margin-top:20px;">Диалог пуст</p>`; 
+            box.scrollTop = box.scrollHeight;
+        }
+    }
+
+    function selectAdminChat(email) { activeAdminChatUser = email; document.getElementById('adminChatInputArea').classList.remove('hidden'); renderAdminChatList(); }
+
+    function sendMessageAsAdmin() {
+        if(!activeAdminChatUser) return; const input = document.getElementById('adminChatInput'); if(!input.value.trim()) return; const msg = { from: 'admin', text: input.value.trim(), time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
+        const msgs = getChat(activeAdminChatUser); msgs.push(msg); input.value = ''; notifyTyping(false, activeAdminChatUser); 
+        renderAdminChatList(); 
+        saveChatDB(activeAdminChatUser, msgs);
+        
+        const u = appState.users.find(x => x.email === activeAdminChatUser);
+        if(u) { u.unreadAdminMsg = true; saveUserDB(u); }
+    }
+
+    // НОВЫЙ МОДУЛЬ УПРАВЛЕНИЯ КАБИНЕТАМИ С РОЛЯМИ И ДОП ФУНКЦИЯМИ
+    function showCreateCabinetDialog() {
+        const roles = [{v: 'Administrator', t: 'Администратор'}, {v: 'Moderator', t: 'Модератор'}, {v: 'Artist', t: 'Артист'}];
+        UI.prompt("Выберите роль нового кабинета", [{ id: 'role', label: 'Роль', type: 'select', options: roles }], (res) => {
+            const selectedRole = roles.find(r => r.v === res.role);
+            UI.prompt(`Открытие кабинета: ${selectedRole.t}`, [{id: 'login', label: 'Логин', placeholder: 'Введите логин'}, {id: 'email', label: 'Почта', type: 'email', placeholder: 'Введите почту'}, {id: 'pass', label: 'Пароль', placeholder: 'Введите пароль'}], (userData) => {
+                if(!userData.login || !userData.email || !userData.pass) return UI.alert("Ошибка", "Заполните все поля");
+                let checkEmail = userData.email.toLowerCase();
+                if(appState.users.find(x => x.email === checkEmail)) return UI.alert("Ошибка", "Почта уже занята");
+                const newUser = { id: 'u' + Date.now(), login: userData.login, email: checkEmail, pass: userData.pass, role: res.role, passwordHistory: [{pass: userData.pass, date: new Date().toLocaleString()}], isBanned: false, banReason: '', notifications: [], avatar: '', isDeletedCabinet: false };
+                saveUserDB(newUser); UI.alert("Успешно", "Новый кабинет успешно открыт.");
+                if(currentSection === 'adminUsers') renderAdminUsers();
+            });
+        });
     }
 
     function showCabinetInfo(id) {
-        const u = appState.users.find(x => x.id === id);
-        let history = u.passwordHistory.map(h => `<div class="text-sm">${h.pass} (${h.date})</div>`).join('');
-        UI.alert(`Инфо: ${u.login}`, `<b>Почта:</b> ${u.email}<br><b>Роль:</b> ${u.role}<br><b>Пароли:</b><br>${history}`);
+        const u = appState.users.find(x => x.id === id); if(!u) return;
+        let historyHtml = (u.passwordHistory && u.passwordHistory.length > 0) ? u.passwordHistory.slice().reverse().map((h, i) => `<div style="margin-bottom:8px; padding:8px; background:var(--bg-glass); border: 1px solid var(--border); border-radius:8px;"><span class="${i===0?'pass-current':'pass-old'}">${i===0?'Текущий':'Старый'}</span> <code style="margin: 0 10px; font-size:14px; color:#fff;">${h.pass}</code> <span class="text-sm">(${h.date})</span></div>`).join('') : `<p class="text-sm">История паролей отсутствует.</p>`;
+        let infoContent = `<div style="text-align:left;"><p style="margin-bottom:8px;"><b>Логин:</b> ${u.login}</p><p style="margin-bottom:8px;"><b>Почта:</b> ${u.email}</p><p style="margin-bottom:16px;"><b>Роль:</b> <span class="role-glow" style="display:inline-block; margin:0;">${getRoleName(u.role)}</span></p><h4 style="margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:6px;">Все пароли:</h4><div style="max-height: 200px; overflow-y: auto;">${historyHtml}</div></div>`;
+        UI.alert(`Информация: ${u.login}`, infoContent);
     }
 
     function changeUserRole(id) {
         const u = appState.users.find(x => x.id === id);
-        UI.prompt("Роль", [{id:'role', type:'select', value:u.role, options:[{v:'Artist',t:'Артист'},{v:'Moderator',t:'Модератор'},{v:'Administrator',t:'Админ'}]}], (res) => {
-            u.role = res.role; saveUserDB(u); renderAdminUsers();
+        if(u.email === ADMIN_EMAIL) return UI.alert("Ошибка", "Нельзя изменить роль главного администратора.");
+        UI.prompt("Изменение роли", [{ id: 'role', label: `Текущая роль: ${getRoleName(u.role)}`, type: 'select', value: u.role, options: [{v: 'Artist', t: 'Артист'}, {v: 'Moderator', t: 'Модератор'}, {v: 'Administrator', t: 'Администратор'}] }], (res) => {
+            u.role = res.role; saveUserDB(u); UI.alert("Успешно", `Роль кабинета изменена на: ${getRoleName(res.role)}`); renderAdminUsers();
         });
     }
 
-    function toggleBan(id) { const u = appState.users.find(x => x.id === id); u.isBanned = !u.isBanned; saveUserDB(u); renderAdminUsers(); }
-
-    function setChatFilter(r) { currentChatTab = r; activeAdminChatUser = null; renderAdminChatList(); }
-    function getChatKey(e1, e2) { return [e1, e2].sort().map(e => e.replace(/\./g, '_')).join('_X_'); }
-
-    function renderAdminChatList() {
-        const list = appState.users.filter(u => u.id !== currentUser.id && !u.isDeletedCabinet && (u.role || 'Artist') === currentChatTab);
-        document.getElementById('adminChatUserList').innerHTML = list.map(u => `<div class="admin-chat-user ${activeAdminChatUser===u.email?'active':''}" onclick="selectAdminChat('${u.email}')"><b>${u.login}</b><div class="role-glow" style="font-size:9px;">${getRoleName(u.role)}</div></div>`).join('');
+    function renderAdminUsers() {
+        document.getElementById('adminUsersList').innerHTML = appState.users.filter(u => !u.isDeletedCabinet).map(u => {
+            let buttons = `<button class="btn-outline" style="padding: 6px 10px; font-size: 12px; margin-right: 8px;" onclick="showCabinetInfo('${u.id}')">Информация</button><button class="btn-outline" style="padding: 6px 10px; font-size: 12px; margin-right: 8px;" onclick="changeUserRole('${u.id}')">Роль</button><button class="btn-outline" style="padding: 6px 10px; font-size: 12px; color: ${u.isBanned?'var(--success)':'var(--danger)'}" onclick="toggleBan('${u.id}')">${u.isBanned?'Разбанить':'Бан'}</button>`;
+            if(u.isBanned && u.email !== ADMIN_EMAIL) buttons += `<button class="btn-danger" style="padding: 6px 10px; font-size: 12px; margin-left: 8px;" onclick="deleteCabinet('${u.id}')">Удалить</button>`;
+            return `<div class="card"><div><div style="font-weight: 600; font-size: 16px;">${u.login}</div><div class="role-glow">${getRoleName(u.role)}</div><div class="text-sm" style="margin-top:4px;">Браузеры: <span style="color:var(--success)">${u.devices ? u.devices.join(', ') : 'Нет данных'}</span></div></div><div style="display:flex; align-items:center; gap:4px; flex-wrap:wrap;">${buttons}</div></div>`;
+        }).join('');
     }
 
-    function selectAdminChat(e) { activeAdminChatUser = e; document.getElementById('adminChatInputArea').classList.remove('hidden'); renderAdminMessages(); }
-
-    function renderAdminMessages() {
-        const chatKey = getChatKey(currentUser.email, activeAdminChatUser); const msgs = appState.chats[chatKey] || [];
-        document.getElementById('adminChatBox').innerHTML = msgs.map(m => `<div class="msg ${m.fromEmail===currentUser.email?'msg-me':'msg-them'}"><div class="msg-sender">${m.senderName}</div>${m.text}</div>`).join('');
+    function toggleBan(id) {
+        const u = appState.users.find(x => x.id === id);
+        if(u.email === ADMIN_EMAIL) return UI.alert("Ошибка", "Нельзя заблокировать главного администратора.");
+        if(u.isBanned) { u.isBanned = false; u.banReason = ''; saveUserDB(u); renderAdminUsers(); } 
+        else { UI.prompt("Блокировка", [{id: 'r', placeholder: 'Причина закрытия'}], (res) => { u.isBanned = true; u.banReason = res.r || 'Нарушение правил'; saveUserDB(u); renderAdminUsers(); }); }
     }
 
-    function sendMessageAsAdmin() {
-        const input = document.getElementById('adminChatInput'); if(!input.value.trim()) return;
-        const chatKey = getChatKey(currentUser.email, activeAdminChatUser); const msgs = appState.chats[chatKey] || [];
-        msgs.push({ fromEmail: currentUser.email, senderName: currentUser.login, text: input.value.trim(), time: new Date().toLocaleTimeString() });
-        db.ref('chats/' + chatKey).set(msgs); input.value = ''; renderAdminMessages();
+    function deleteCabinet(id) {
+        UI.confirm("Полностью удалить этот кабинет? Он исчезнет из списка навсегда.", () => {
+            const u = appState.users.find(x => x.id === id);
+            if(u) {
+                u.isDeletedCabinet = true; u.isBanned = true; u.banReason = "Ваш кабинет был навсегда удален администрацией."; saveUserDB(u);
+                if (activeAdminChatUser === u.email) { activeAdminChatUser = null; document.getElementById('adminChatInputArea').classList.add('hidden'); document.getElementById('adminChatBox').innerHTML = `<div class="empty-state"><h2>Выберите диалог</h2></div>`; }
+                renderAdminUsers(); if(currentSection === 'adminChats') renderAdminChatList();
+            }
+        });
     }
 
-    function renderUserChat() {
-        const chatKey = getChatKey(currentUser.email, 'support_channel'); const msgs = appState.chats[chatKey] || [];
-        document.getElementById('userChatBox').innerHTML = msgs.map(m => `<div class="msg ${m.fromEmail===currentUser.email?'msg-me':'msg-them'}"><b>${m.senderName}:</b><br>${m.text}</div>`).join('');
-    }
-
-    function sendMessageAsUser() {
-        const input = document.getElementById('userChatInput'); if(!input.value.trim()) return;
-        const chatKey = getChatKey(currentUser.email, 'support_channel'); const msgs = appState.chats[chatKey] || [];
-        msgs.push({ fromEmail: currentUser.email, senderName: currentUser.login, text: input.value.trim(), time: new Date().toLocaleTimeString() });
-        db.ref('chats/' + chatKey).set(msgs); input.value = ''; renderUserChat();
+    function saveDraftAsIs(showSuccess = false) {
+        const releaseData = { id: currentDraftId || Date.now().toString(), userId: currentUser.id, userEmail: currentUser.email, type: document.getElementById('r_type').value, title: document.getElementById('r_title').value || 'Без названия', artist: document.getElementById('r_artist').value || currentUser.login, genre: document.getElementById('r_genre').value, year: document.getElementById('r_year').value, releaseDate: document.getElementById('r_releaseDate').value, upc: document.getElementById('r_upc').value, comment: document.getElementById('r_comment').value, status: 'Черновик', date: new Date().toLocaleDateString(), coverFile: draftRelease.coverFile, tracks: draftRelease.tracks, isDeleted: false, adminIsrc: '' };
+        const existingIdx = appState.releases.findIndex(r => r.id === releaseData.id); if(existingIdx >= 0) appState.releases[existingIdx] = releaseData; else appState.releases.push(releaseData); 
+        currentDraftId = releaseData.id; saveReleaseDB(releaseData); isDraftDirty = false;
+        if(showSuccess) UI.alert("Успешно", "Черновик сохранён.");
     }
 
     function startNewRelease() {
-        draftRelease = { coverFile: null, tracks: [] }; currentDraftId = null; isDraftDirty = false;
-        document.getElementById('sec-newRelease').classList.remove('hidden'); nav('newRelease', true);
+        draftRelease = { coverFile: null, tracks: [] }; currentDraftId = null; isDraftDirty = false; document.querySelectorAll('.error-field').forEach(el => el.classList.remove('error-field'));
+        ['r_type','r_title','r_artist','r_genre','r_upc','r_releaseDate','r_comment'].forEach(id => document.getElementById(id).value = id === 'r_artist' ? currentUser.login : '');
+        document.getElementById('coverPreview').src = ''; document.getElementById('coverPreview').classList.add('hidden'); document.getElementById('coverHint').classList.remove('hidden'); document.getElementById('submitReleaseBtn').innerText = "Отправить релиз на модерацию";
+        document.getElementById('saveDraftChangesBtn').classList.add('hidden');
+        renderDraftTracks(); toggleReleaseType(); nav('newRelease', true);
     }
 
-    function toggleReleaseType() { document.getElementById('tracklistArea').classList.toggle('hidden', !document.getElementById('r_type').value); }
+    function editDraft(id) {
+        const r = appState.releases.find(x => x.id === id); currentDraftId = id; isDraftDirty = false; document.querySelectorAll('.error-field').forEach(el => el.classList.remove('error-field'));
+        draftRelease.coverFile = r.coverFile; draftRelease.tracks = r.tracks || [];
+        ['type','title','artist','genre','year','upc','releaseDate','comment'].forEach(key => { document.getElementById('r_'+key).value = (key==='title' && r.title==='Без названия') ? '' : (r[key] || ''); });
+        if(r.coverFile) { document.getElementById('coverPreview').src = r.coverFile; document.getElementById('coverPreview').classList.remove('hidden'); document.getElementById('coverHint').classList.add('hidden'); } else { document.getElementById('coverPreview').classList.add('hidden'); document.getElementById('coverHint').classList.remove('hidden'); }
+        
+        document.getElementById('submitReleaseBtn').innerText = ['Administrator','Moderator'].includes(currentUser.role) ? "Сохранить для админа" : "Отправить релиз на модерацию";
+        if (r.status === 'Черновик') document.getElementById('saveDraftChangesBtn').classList.remove('hidden'); else document.getElementById('saveDraftChangesBtn').classList.add('hidden');
+
+        renderDraftTracks(); toggleReleaseType(); nav('newRelease', true);
+    }
+
+    function deleteDraft(id) { UI.confirm("Удалить этот черновик навсегда?", () => { const idx = appState.releases.findIndex(r => r.id === id); if(idx>=0){ appState.releases.splice(idx,1); db.ref('releases/'+id).remove(); } renderYourMusic(); }); }
 
     function handleCoverUpload(input) {
-        const file = input.files[0]; if(!file) return; const reader = new FileReader();
-        reader.readAsDataURL(file); reader.onload = () => { draftRelease.coverFile = reader.result; document.getElementById('coverPreview').src = reader.result; document.getElementById('coverPreview').classList.remove('hidden'); };
+        const file = input.files[0]; if(!file) return; const img = new Image(); img.src = URL.createObjectURL(file);
+        img.onload = () => { 
+            if((img.width === 1400 || img.width === 3000) && img.width === img.height) { 
+                const reader = new FileReader(); reader.readAsDataURL(file);
+                reader.onload = () => { document.getElementById('r_cover_box').classList.remove('error-field'); draftRelease.coverFile = reader.result; isDraftDirty = true; document.getElementById('coverPreview').src = reader.result; document.getElementById('coverPreview').classList.remove('hidden'); document.getElementById('coverHint').classList.add('hidden'); };
+            } else { UI.alert("Ошибка", "Размер 1400x1400 или 3000x3000 px"); input.value = ""; } 
+        };
     }
 
+    function toggleReleaseType() { const type = document.getElementById('r_type').value; if(type) document.getElementById('tracklistArea').classList.remove('hidden'); else document.getElementById('tracklistArea').classList.add('hidden'); }
+
+    // УМНОЕ НАЗВАНИЕ ТРЕКОВ ДЛЯ СИНГЛА ИЗ НОВОГО КОДА
     function addTracks(input) {
-        const files = Array.from(input.files);
-        files.forEach(file => {
+        const files = Array.from(input.files); if(!files.length) return;
+        const rType = document.getElementById('r_type').value; const rTitle = document.getElementById('r_title').value.trim(); const rArtist = document.getElementById('r_artist').value.trim();
+        files.forEach(file => { 
+            if(file.size > 50*1024*1024) return UI.alert("Ошибка", `Файл ${file.name} больше 50 МБ.`); 
             const reader = new FileReader(); reader.readAsDataURL(file);
-            reader.onload = () => {
+            reader.onload = () => { 
+                isDraftDirty = true; 
                 let trackTitle = file.name.replace(/\.[^/.]+$/, "");
-                if(document.getElementById('r_type').value === 'Сингл') trackTitle = document.getElementById('r_title').value;
-                draftRelease.tracks.push({ id: Date.now()+Math.random(), filename: file.name, audioFile: reader.result, title: trackTitle, artist: document.getElementById('r_artist').value, isFilled: false });
-                renderDraftTracks();
+                if (rType === 'Сингл' && rTitle) trackTitle = rTitle;
+                draftRelease.tracks.push({ id: Date.now()+Math.random(), filename: file.name, audioFile: reader.result, title: trackTitle, artist: rArtist, version: '', author: '', comp: '', type: 'Original', lang: '', lyrics: '', explicit: 'Нет', isrc: '', isFilled: false }); renderDraftTracks(); 
             };
         });
+        input.value = ""; 
     }
 
     function renderDraftTracks() {
-        document.getElementById('draftTracksList').innerHTML = draftRelease.tracks.map((t, i) => `
-            <div class="track-list-item"><div>${i+1}. ${t.title}</div><button class="btn-outline" onclick="openTrackEdit(${t.id})">Инфо</button></div>
-        `).join('');
+        document.getElementById('draftTracksList').innerHTML = draftRelease.tracks.map((t, idx) => {
+            const statusLabel = t.isFilled ? '<span style="color:var(--success); font-size: 11px;">✓ Заполнено</span>' : '<span style="color:var(--danger); font-size: 11px; font-weight:bold;">! Требует заполнения</span>';
+            return `<div class="track-list-item" style="${!t.isFilled ? 'border-color: var(--danger);' : ''}"><div><div style="font-weight: 500; font-size: 15px;">${idx+1}. ${t.title}</div><div class="text-sm" style="margin-top:4px;">${t.filename} &nbsp;|&nbsp; ${statusLabel}</div></div><div style="display: flex; gap: 8px;"><button class="btn-outline" style="padding: 6px 12px; font-size: 12px;" onclick="openTrackEdit(${t.id})">Редактировать</button><button class="btn-danger" style="padding: 6px 12px; font-size: 12px;" onclick="removeDraftTrack(${t.id})">Удалить</button></div></div>`
+        }).join('');
     }
 
+    function removeDraftTrack(id) { draftRelease.tracks = draftRelease.tracks.filter(t => t.id !== id); isDraftDirty = true; renderDraftTracks(); }
+
     function openTrackEdit(id) {
-        editTrackId = id; const t = draftRelease.tracks.find(x => x.id === id);
-        document.getElementById('t_title').value = t.title; document.getElementById('t_artist').value = t.artist;
+        const t = draftRelease.tracks.find(x => x.id === id); editTrackId = id; document.querySelectorAll('.error-field').forEach(el => el.classList.remove('error-field'));
+        ['title','artist','version','author','comp','type','lang','lyrics','explicit','isrc'].forEach(k => document.getElementById('t_'+k).value = t[k] || ''); document.getElementById('te_filename').innerText = t.filename;
         document.getElementById('sec-newRelease').classList.add('hidden'); document.getElementById('sec-trackEdit').classList.remove('hidden');
     }
 
     function saveTrackEdit() {
+        const reqFields = ['t_title', 't_artist', 't_author', 't_comp', 't_lang'];
+        let hasErr = false;
+        reqFields.forEach(id => { const el = document.getElementById(id); if(!el.value) { el.classList.add('error-field'); hasErr = true; } });
+        if(hasErr) return UI.alert("Ошибка", "Заполните все обязательные поля (отмечены красной звездочкой).");
         const t = draftRelease.tracks.find(x => x.id === editTrackId);
-        t.title = document.getElementById('t_title').value; t.artist = document.getElementById('t_artist').value; t.isFilled = true;
-        document.getElementById('sec-trackEdit').classList.add('hidden'); document.getElementById('sec-newRelease').classList.remove('hidden');
-        renderDraftTracks();
+        ['title','artist','version','author','comp','type','lang','lyrics','explicit','isrc'].forEach(k => t[k] = document.getElementById('t_'+k).value); t.isFilled = true; isDraftDirty = true;
+        cancelTrackEdit(); renderDraftTracks();
     }
+    function cancelTrackEdit() { document.getElementById('sec-trackEdit').classList.add('hidden'); document.getElementById('sec-newRelease').classList.remove('hidden'); editTrackId = null; }
 
     function submitFinalRelease() {
-        const data = { id: Date.now().toString(), userEmail: currentUser.email, title: document.getElementById('r_title').value, artist: document.getElementById('r_artist').value, status: 'Модерация', coverFile: draftRelease.coverFile, tracks: draftRelease.tracks, isDeleted: false };
-        saveReleaseDB(data); UI.alert("Готово", "Отправлено!"); nav('yourMusic', true);
+        document.querySelectorAll('.error-field').forEach(el => el.classList.remove('error-field')); let hasError = false;
+        ['r_type', 'r_title', 'r_artist', 'r_genre', 'r_year', 'r_releaseDate'].forEach(id => { const el = document.getElementById(id); if(!el.value) { el.classList.add('error-field'); hasError = true; }});
+        if(!draftRelease.coverFile) { document.getElementById('r_cover_box').classList.add('error-field'); hasError = true; }
+        if(hasError) return UI.alert("Ошибка", "Заполните обязательные поля релиза.");
+        const type = document.getElementById('r_type').value; if(draftRelease.tracks.length === 0) return UI.alert("Ошибка", "Добавьте трек");
+        for(let i=0; i < draftRelease.tracks.length; i++) { if(!draftRelease.tracks[i].isFilled) return UI.alert("Ошибка", `Заполните инфо о треке №${i+1}`); }
+        const existingRelease = appState.releases.find(r => r.id === currentDraftId);
+        const isAdmin = ['Administrator','Moderator'].includes(currentUser.role);
+        const releaseData = { id: currentDraftId || Date.now().toString(), userId: (existingRelease && isAdmin) ? existingRelease.userId : currentUser.id, userEmail: (existingRelease && isAdmin) ? existingRelease.userEmail : currentUser.email, type, title: document.getElementById('r_title').value, artist: document.getElementById('r_artist').value, genre: document.getElementById('r_genre').value, year: document.getElementById('r_year').value, releaseDate: document.getElementById('r_releaseDate').value, comment: document.getElementById('r_comment').value, status: (existingRelease && isAdmin) ? existingRelease.status : 'Модерация', date: existingRelease ? existingRelease.date : new Date().toLocaleDateString(), coverFile: draftRelease.coverFile, tracks: draftRelease.tracks, isDeleted: false, upc: document.getElementById('r_upc').value, adminIsrc: existingRelease ? existingRelease.adminIsrc : '' };
+        const existingIdx = appState.releases.findIndex(r => r.id === releaseData.id); if(existingIdx >= 0) appState.releases[existingIdx] = releaseData; else appState.releases.push(releaseData);
+        saveReleaseDB(releaseData); isDraftDirty = false; 
+        if(!isAdmin) { UI.alert("Успешно!", "Релиз отправлен на модерацию."); nav('yourMusic', true); } else { UI.alert("Сохранено!", "Изменения применены."); nav('adminReleases', true); }
+    }
+
+    function renderCard(r, isAdmin) {
+        let status = ''; if(r.status === 'Черновик') status = '<span class="badge badge-draft">Черновик</span>'; else if(r.status === 'Модерация') status = '<span class="badge badge-mod">Модерация</span>'; else if(r.status === 'Одобрен') status = '<span class="badge badge-ok">Одобрен</span>'; else if(r.status === 'Отклонён') status = `<span class="badge badge-err" style="cursor:pointer" onclick="UI.alert('Отклонен', '${r.rejectReason}')">Отклонен ⓘ</span>`; if(r.isDeleted) status = '<span class="badge badge-err">Удален</span>';
+        const coverSrc = r.coverFile || ''; let actions = '';
+        const isModOrAdmin = ['Administrator', 'Moderator'].includes(currentUser.role);
+
+        if(isAdmin && !r.isDeleted && isModOrAdmin) { 
+            actions = `<button class="btn-outline" style="padding: 6px 10px; font-size: 12px; margin-right: 8px;" onclick="viewReleaseAdmin('${r.id}')">Подробнее</button><button class="btn-outline" style="padding: 6px 10px; font-size: 12px; margin-right: 8px;" onclick="editDraft('${r.id}')">Изменить</button>`;
+            if(r.status !== 'Черновик') actions += `<button class="btn-outline" style="padding: 6px 10px; font-size: 12px; border-color: var(--warning); color: var(--warning); margin-right: 8px;" onclick="admRevoke('${r.id}')">Отозвать</button>`;
+            if(r.status === 'Модерация') actions += `<button class="btn-outline" style="padding: 6px; border-color: var(--success); color: var(--success); margin-right: 4px;" onclick="admApprove('${r.id}')">✓</button><button class="btn-outline" style="padding: 6px; border-color: var(--danger); color: var(--danger);" onclick="admReject('${r.id}')">✗</button>`;
+            actions += `<button class="btn-danger" style="padding: 6px 10px; font-size: 12px; margin-left: 8px;" onclick="admDelete('${r.id}')">Удалить</button>`; 
+        } 
+        else if (isAdmin && r.isDeleted && isModOrAdmin) { actions = `<button class="btn-outline" style="padding: 6px 10px; font-size: 12px; margin-right: 8px;" onclick="viewReleaseAdmin('${r.id}')">Просмотр</button><button class="btn-success" style="padding: 6px 10px; font-size: 12px;" onclick="admRestore('${r.id}')">Восстановить</button>`; } 
+        else if (!isAdmin) { 
+            actions = `<button class="btn-outline" style="padding: 6px 10px; font-size: 12px; margin-right: 8px;" onclick="viewReleaseAdmin('${r.id}')">Информация</button>`; 
+            if (r.status === 'Черновик') { actions += `<button class="btn-outline" style="padding: 6px 10px; font-size: 12px; margin-right: 8px;" onclick="editDraft('${r.id}')">Изменить</button><button class="btn-danger" style="padding: 6px 10px; font-size: 12px;" onclick="deleteDraft('${r.id}')">Удалить</button>`; } 
+        }
+        return `<div class="card"><div style="display: flex; align-items: center; flex: 1;"><img src="${coverSrc}" class="card-cover"><div><div class="card-title">${r.title} <span style="font-weight: normal; color: var(--text-muted); font-size: 15px;">— ${r.type || 'Не выбран'}</span></div><div class="card-artist">${r.artist} • ${r.tracks ? r.tracks.length : 0} трек(ов) ${isAdmin ? `• От: ${r.userEmail}` : ''}</div>${r.upc ? `<div class="text-sm" style="color: var(--success); margin-top: 4px;">UPC: ${r.upc}</div>` : ''}</div></div><div style="display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">${status}${actions ? `<div style="margin-left: 10px; padding-left: 10px; border-left: 1px solid var(--border); display:flex; flex-wrap: wrap; gap: 4px;">${actions}</div>` : ''}</div></div>`;
     }
 
     function renderYourMusic() {
-        document.getElementById('userReleasesList').innerHTML = appState.releases.filter(r => r.userEmail === currentUser.email && !r.isDeleted).map(r => `
-            <div class="card"><img src="${r.coverFile}" class="card-cover"><div><b>${r.title}</b><br>${r.artist}</div><div class="badge badge-mod">${r.status}</div></div>
-        `).join('');
+        const searchQuery = document.getElementById('searchReleases').value.toLowerCase();
+        const list = appState.releases.filter(r => { if (r.userEmail !== currentUser.email || r.isDeleted) return false; if (!searchQuery) return true; return `${r.title} ${r.artist} ${r.upc || ''}`.toLowerCase().includes(searchQuery); });
+        const container = document.getElementById('userReleasesList');
+        if (list.length === 0 && !searchQuery) { container.innerHTML = `<div class="empty-state"><h2>Нет релизов</h2><button class="btn-primary" style="padding: 16px 24px; font-size: 16px; margin-top: 20px;" onclick="startNewRelease()">Создать релиз</button></div>`; } 
+        else { container.innerHTML = list.map(r => renderCard(r, false)).reverse().join(''); }
     }
 
-    function logout() { location.reload(); }
+    function renderAdminReleases(showDeleted) {
+        let list = appState.releases.filter(r => r.isDeleted === showDeleted);
+        if (!showDeleted) {
+            const searchInput = document.getElementById('searchAdminReleases'); const searchVal = searchInput ? searchInput.value.toLowerCase() : '';
+            if (searchVal) list = list.filter(r => `${r.title} ${r.artist} ${r.upc || ''} ${r.userEmail || ''}`.toLowerCase().includes(searchVal));
+        }
+        document.getElementById(showDeleted ? 'adminDeletedList' : 'adminReleasesList').innerHTML = list.length ? list.map(r => renderCard(r, true)).reverse().join('') : '<p class="text-sm">Список пуст</p>';
+    }
+
+    function admApprove(id) { UI.prompt("Принять релиз", [{id:'upc', placeholder:'UPC'}, {id:'isrc', placeholder:'ISRC'}], (res) => { const r = appState.releases.find(x => x.id === id); r.status = 'Одобрен'; if(res.upc) r.upc = res.upc; if(res.isrc) r.adminIsrc = res.isrc; saveReleaseDB(r); pushNotification(r.userEmail, `✅ Ваш релиз "${r.title}" был одобрен модератором.`); renderAdminReleases(false); }); }
+    function admReject(id) { UI.prompt("Отклонить релиз", [{id:'reason', placeholder:'Причина'}], (res) => { const r = appState.releases.find(x => x.id === id); r.status = 'Отклонён'; r.rejectReason = res.reason || 'Не соответствует требованиям'; saveReleaseDB(r); pushNotification(r.userEmail, `❌ Ваш релиз "${r.title}" был отклонен. Причина: ${r.rejectReason}`); renderAdminReleases(false); }); }
+    function admDelete(id) { UI.confirm("Перенести в удаленные?", () => { const r = appState.releases.find(x => x.id === id); r.isDeleted = true; saveReleaseDB(r); renderAdminReleases(false); }); }
+    function admRestore(id) { const r = appState.releases.find(x => x.id === id); r.isDeleted = false; saveReleaseDB(r); renderAdminReleases(true); }
+    function admRevoke(id) { UI.confirm("Отозвать артисту?", () => { const r = appState.releases.find(x => x.id === id); r.status = 'Черновик'; saveReleaseDB(r); pushNotification(r.userEmail, `⚠️ Ваш релиз "${r.title}" был отозван модератором и возвращен в Черновики.`); renderAdminReleases(false); }); }
+
+    function viewReleaseAdmin(id) {
+        const r = appState.releases.find(x => x.id === id); const coverUrl = r.coverFile || '';
+        document.getElementById('admRelCover').src = coverUrl; document.getElementById('admCoverDl').onclick = () => { const a = document.createElement('a'); a.href = coverUrl; a.download = `${r.artist}-${r.title}.jpg`; a.click(); };
+        document.getElementById('admRelInfo').innerHTML = `<div style="font-size: 28px; font-weight: bold; margin-bottom: 4px;">${r.title}</div><div style="color: var(--text-muted); margin-bottom: 24px; font-size: 16px;">Артист: <span style="color:#fff;">${r.artist}</span></div><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; font-size: 14px; background: rgba(255,255,255,0.02); padding: 20px; border-radius: 12px; border: 1px solid var(--border);"><div><b>Формат:</b> ${r.type}</div><div><b>Жанр:</b> ${r.genre}</div><div><b>Год:</b> ${r.year}</div><div><b>Дата:</b> ${r.releaseDate}</div><div><b>UPC:</b> ${r.upc || '-'}</div><div><b>ISRC:</b> ${r.adminIsrc || '-'}</div></div>`;
+        document.getElementById('admRelTracks').innerHTML = r.tracks.map((t, i) => `<div style="background: var(--bg-glass); border: 1px solid var(--border); padding: 16px; border-radius: 12px; margin-bottom: 10px; word-break: break-all;"><div style="font-weight: 600;">${i+1}. ${t.title}</div><audio controls src="${t.audioFile}" style="width: 100%; margin: 10px 0;"></audio><div class="text-sm">Артист: ${t.artist} | ISRC: ${t.isrc || '-'}</div></div>`).join('');
+        document.getElementById('adminReleaseModal').classList.remove('hidden');
+    }
 </script>
 </body>
-</html>"""
-
-with open(file_path, "w", encoding="utf-8") as f:
-    f.write(final_code)
+</html>
