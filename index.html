@@ -62,12 +62,13 @@
         .error-field { border-color: var(--danger) !important; box-shadow: 0 0 0 1px var(--danger); }
 
         button { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-size: 14px; }
-        button:active { transform: scale(0.96); } 
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        button:active:not(:disabled) { transform: scale(0.96); } 
         
         .btn-primary { background: var(--accent); color: #000; }
-        .btn-primary:hover { background: var(--accent-bg); box-shadow: 0 4px 12px rgba(255,255,255,0.1); }
+        .btn-primary:hover:not(:disabled) { background: var(--accent-bg); box-shadow: 0 4px 12px rgba(255,255,255,0.1); }
         .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
-        .btn-outline:hover { background: var(--bg-glass); border-color: var(--text-muted); }
+        .btn-outline:hover:not(:disabled) { background: var(--bg-glass); border-color: var(--text-muted); }
         .btn-danger { background: rgba(255, 59, 48, 0.1); color: var(--danger); border: 1px solid rgba(255, 59, 48, 0.2); }
         .btn-success { background: rgba(52, 199, 89, 0.1); color: var(--success); border: 1px solid rgba(52, 199, 89, 0.2); }
         
@@ -207,7 +208,8 @@
             <div id="regFields" class="hidden"><div class="form-group"><input type="text" id="regLogin" placeholder="Логин"></div></div>
             <div class="form-group"><input type="email" id="authEmail" placeholder="Почта" onkeypress="if(event.key === 'Enter') processAuth()"></div>
             <div class="form-group"><input type="password" id="authPassword" placeholder="Пароль" onkeypress="if(event.key === 'Enter') processAuth()"></div>
-            <button class="btn-primary" id="mainAuthBtn" style="width: 100%; margin-top: 8px;" onclick="processAuth()">Войти в кабинет</button>
+            
+            <button class="btn-primary" id="mainAuthBtn" style="width: 100%; margin-top: 8px;" onclick="processAuth()" disabled>Подключение...</button>
             <button class="btn-outline" style="width: 100%; margin-top: 12px; border: none;" onclick="toggleAuthMode()" id="switchAuthBtn">Создать кабинет</button>
         </div>
     </div>
@@ -388,7 +390,6 @@
         emailjs.init("R-MbAs_m2hjNl4p7W");
     })();
 
-    // УНИВЕРСАЛЬНАЯ ФУНКЦИЯ ОТПРАВКИ ПИСЬМА
     function sendEmailNotification(subject, text) {
         emailjs.send("service_z6is65e", "template_51w35gn", {
             subject: subject,
@@ -449,10 +450,19 @@
     let draftRelease = { coverFile: null, tracks: [] }; 
     let editTrackId = null; 
     let activeAdminChatUser = null; 
+    let isDBLoaded = false; // <-- ФЛАГ ЗАГРУЗКИ БАЗЫ
     
     const yBox = document.getElementById('r_year'); yBox.innerHTML = ''; for(let y=2026; y>=2000; y--) yBox.innerHTML += `<option value="${y}">${y}</option>`;
 
     db.ref('/').on('value', (snapshot) => {
+        // Разблокируем кнопку при получении ответа от сервера
+        isDBLoaded = true;
+        const authBtn = document.getElementById('mainAuthBtn');
+        if(authBtn && authBtn.disabled) {
+            authBtn.disabled = false;
+            authBtn.innerText = authMode === 'login' ? 'Войти в кабинет' : 'Создать кабинет';
+        }
+
         if (!snapshot.exists()) return;
         const data = snapshot.val();
         appState.users = data.users ? Object.values(data.users) : [];
@@ -520,9 +530,20 @@
         return names[role] || 'Артист';
     }
 
-    function toggleAuthMode() { authMode = authMode === 'login' ? 'reg' : 'login'; document.getElementById('regFields').classList.toggle('hidden', authMode === 'login'); document.getElementById('mainAuthBtn').innerText = authMode === 'login' ? 'Войти в кабинет' : 'Создать кабинет'; document.getElementById('switchAuthBtn').innerText = authMode === 'login' ? 'Создать кабинет' : 'Уже есть аккаунт'; }
+    function toggleAuthMode() { 
+        authMode = authMode === 'login' ? 'reg' : 'login'; 
+        document.getElementById('regFields').classList.toggle('hidden', authMode === 'login'); 
+        
+        const authBtn = document.getElementById('mainAuthBtn');
+        if (!authBtn.disabled) {
+            authBtn.innerText = authMode === 'login' ? 'Войти в кабинет' : 'Создать кабинет'; 
+        }
+        document.getElementById('switchAuthBtn').innerText = authMode === 'login' ? 'Создать кабинет' : 'Уже есть аккаунт'; 
+    }
     
     function processAuth() {
+        if (!isDBLoaded) return UI.alert("Ожидание", "База данных еще загружается с сервера, подождите пару секунд...");
+
         const email = document.getElementById('authEmail').value.toLowerCase().trim(); 
         const pass = document.getElementById('authPassword').value; 
         const login = document.getElementById('regLogin').value;
@@ -544,7 +565,7 @@
             } 
         } else { 
             if(!login) return UI.alert("Ошибка", "Укажите логин"); 
-            if(appState.users.find(x => x.email === email)) return UI.alert("Ошибка", "Почта занята"); 
+            if(appState.users.find(x => x.email === email)) return UI.alert("Ошибка", "Почта уже занята"); 
             const newUser = { id: Date.now().toString(), email, pass, login, role: 'Artist', passwordHistory: [{pass: pass, date: new Date().toLocaleString()}], isBanned: false, banReason: '', devices: [getDeviceInfo()], notifications: [], unreadAdminMsg: false, avatar: '', isDeletedCabinet: false }; 
             appState.users.push(newUser); saveUserDB(newUser); currentUser = newUser; startApp();
         }
@@ -721,7 +742,6 @@
         document.getElementById('dashboardStats').innerHTML = `<div class="stat-card"><div class="stat-num" style="color: var(--warning);">${mod}</div><div class="stat-label">На модерации</div></div><div class="stat-card"><div class="stat-num" style="color: var(--success);">${ok}</div><div class="stat-label">Принятых</div></div><div class="stat-card"><div class="stat-num" style="color: var(--danger);">${rej}</div><div class="stat-label">Отклонённых</div></div>`;
     }
 
-    // ЧАТЫ И УВЕДОМЛЕНИЯ EMAILJS (2. ОТПРАВКА СООБЩЕНИЯ В ПОДДЕРЖКУ)
     function getChat(email) { return appState.chats[email.replace(/\./g, '_')] || []; }
 
     function renderUserChat() {
@@ -737,7 +757,6 @@
         renderUserChat(); 
         saveChatDB(currentUser.email, msgs);
         
-        // --- ТРИГГЕР EMAILJS ПРИ ОТПРАВКЕ СООБЩЕНИЯ АРТИСТОМ ---
         sendEmailNotification(
             "Новое сообщение в поддержку AetherLab", 
             `Артист ${currentUser.login} (${currentUser.email}) написал вам:\n\n"${msgText}"`
@@ -776,7 +795,6 @@
         if(u) { u.unreadAdminMsg = true; saveUserDB(u); }
     }
 
-    // УПРАВЛЕНИЕ КАБИНЕТАМИ
     function showCreateCabinetDialog() {
         const roles = [{v: 'Administrator', t: 'Администратор'}, {v: 'Artist', t: 'Артист'}];
         UI.prompt("Выберите роль нового кабинета", [{ id: 'role', label: 'Роль', type: 'select', options: roles }], (res) => {
@@ -852,7 +870,6 @@
         });
     }
 
-    // НОВЫЙ РЕЛИЗ И 3. УВЕДОМЛЕНИЕ О РЕЛИЗЕ EMAILJS
     function saveDraftAsIs(showSuccess = false) {
         const releaseData = { id: currentDraftId || Date.now().toString(), userId: currentUser.id, userEmail: currentUser.email, type: document.getElementById('r_type').value, title: document.getElementById('r_title').value || 'Без названия', artist: document.getElementById('r_artist').value || currentUser.login, genre: document.getElementById('r_genre').value, year: document.getElementById('r_year').value, releaseDate: document.getElementById('r_releaseDate').value, upc: document.getElementById('r_upc').value, comment: document.getElementById('r_comment').value, status: 'Черновик', date: new Date().toLocaleDateString(), coverFile: draftRelease.coverFile, tracks: draftRelease.tracks, isDeleted: false, adminIsrc: '' };
         const existingIdx = appState.releases.findIndex(r => r.id === releaseData.id); if(existingIdx >= 0) appState.releases[existingIdx] = releaseData; else appState.releases.push(releaseData); 
@@ -953,7 +970,6 @@
         if(!isAdmin) { 
             UI.alert("Успешно!", "Релиз отправлен на модерацию."); 
             navCatalog('all'); 
-            // --- ТРИГГЕР EMAILJS ПРИ ОТПРАВКЕ РЕЛИЗА НА МОДЕРАЦИЮ ---
             sendEmailNotification(
                 "Новый релиз на модерации", 
                 `Артист ${currentUser.login} (${currentUser.email}) отправил релиз "${releaseData.title}" (${releaseData.type}) на проверку.\n\nЗайдите в панель управления, чтобы проверить.`
