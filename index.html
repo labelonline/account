@@ -8,6 +8,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         
@@ -105,7 +107,6 @@
         .upload-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
         .track-list-item { background: #000; border: 1px solid var(--border); padding: 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; transition: 0.2s; }
         
-        /* ЧАТЫ С ИСПРАВЛЕННЫМ БАГОМ ПРЫЖКОВ */
         .chat-wrap { display: flex; flex-direction: column; height: calc(100vh - 160px); max-width: 800px; background: #000; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; position: relative; }
         .chat-msgs { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; scroll-behavior: smooth; position: relative;}
         .chat-input-area { display: flex; padding: 16px; border-top: 1px solid var(--border); background: var(--bg-panel); gap: 12px; align-items: center; position: relative; z-index: 2; }
@@ -121,18 +122,15 @@
         .admin-chat-user:hover, .admin-chat-user.active { background: var(--bg-glass); }
         .admin-chat-user.active { border-left: 3px solid var(--accent); }
         
-        /* Плавный индикатор (больше не прыгает) */
         .typing-indicator { position: absolute; bottom: 75px; left: 24px; font-size: 12px; color: var(--text-muted); font-style: italic; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 10;}
         .typing-indicator.show { opacity: 1; }
 
-        /* ЭЛЕМЕНТЫ ПРОФИЛЯ, УВЕДОМЛЕНИЙ И АВАТАРКИ */
         .bell-wrap { position: relative; cursor: pointer; display: flex; align-items: center; color: var(--text-main); }
         .unread-dot { position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; background: var(--warning); border-radius: 50%; border: 2px solid var(--bg-panel); }
         .avatar-wrap { position: relative; width: 34px; height: 34px; border-radius: 50%; background: #222; border: 1px solid var(--border); cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
         .chat-unread-indicator { width: 8px; height: 8px; background: var(--warning); border-radius: 50%; display: inline-block; }
 
-        /* МОБИЛЬНАЯ АДАПТАЦИЯ */
         .mobile-header { display: none; background: var(--bg-panel); border-bottom: 1px solid var(--border); padding: 16px 20px; justify-content: space-between; align-items: center; }
         .hamburger { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; }
 
@@ -378,6 +376,22 @@
     </div>
 
 <script>
+    // 1. ИНИЦИАЛИЗАЦИЯ И ПОДКЛЮЧЕНИЕ EMAILJS
+    (function(){
+        emailjs.init("R-MbAs_m2hjNl4p7W");
+    })();
+
+    // УНИВЕРСАЛЬНАЯ ФУНКЦИЯ ОТПРАВКИ ПИСЬМА
+    function sendEmailNotification(subject, text) {
+        emailjs.send("service_z6is65e", "template_51w35gn", {
+            subject: subject,
+            message: text
+        }).then(
+            (res) => console.log('Уведомление успешно отправлено!', res.status),
+            (err) => console.error('Ошибка отправки уведомления:', err)
+        );
+    }
+
     const firebaseConfig = {
         apiKey: "AIzaSyCha28N_EYVSNtYlSjYtY8IPCbK3PMo5EU",
         authDomain: "glambank.firebaseapp.com",
@@ -422,7 +436,7 @@
     let currentUser = null; 
     let authMode = 'login'; 
     let currentSection = 'overview'; 
-    let activeCatalogFilter = 'all'; // Фильтр каталога
+    let activeCatalogFilter = 'all'; 
     let isDraftDirty = false; 
     let currentDraftId = null; 
     let draftRelease = { coverFile: null, tracks: [] }; 
@@ -700,7 +714,7 @@
         document.getElementById('dashboardStats').innerHTML = `<div class="stat-card"><div class="stat-num" style="color: var(--warning);">${mod}</div><div class="stat-label">На модерации</div></div><div class="stat-card"><div class="stat-num" style="color: var(--success);">${ok}</div><div class="stat-label">Принятых</div></div><div class="stat-card"><div class="stat-num" style="color: var(--danger);">${rej}</div><div class="stat-label">Отклонённых</div></div>`;
     }
 
-    // ЧАТЫ
+    // ЧАТЫ И УВЕДОМЛЕНИЯ EMAILJS (2. ОТПРАВКА СООБЩЕНИЯ В ПОДДЕРЖКУ)
     function getChat(email) { return appState.chats[email.replace(/\./g, '_')] || []; }
 
     function renderUserChat() {
@@ -715,6 +729,12 @@
         const msgs = getChat(currentUser.email); msgs.push(msg); input.value = ''; notifyTyping(false, 'admin'); 
         renderUserChat(); 
         saveChatDB(currentUser.email, msgs);
+        
+        // --- ТРИГГЕР EMAILJS ПРИ ОТПРАВКЕ СООБЩЕНИЯ АРТИСТОМ ---
+        sendEmailNotification(
+            "Новое сообщение в поддержку AetherLab", 
+            `Артист ${currentUser.login} (${currentUser.email}) написал вам:\n\n"${msgText}"`
+        );
     }
 
     function renderAdminChatList() {
@@ -792,7 +812,6 @@
         const u = appState.users.find(x => x.id === id);
         if(u.email === ADMIN_EMAIL) return UI.alert("Ошибка", "Нельзя заблокировать главного администратора.");
         
-        // Запрещаем обычным админам банить других админов
         if (u.role === 'Administrator' && currentUser.email !== ADMIN_EMAIL) {
             return UI.alert("Ошибка", "Только главный администратор может блокировать других администраторов.");
         }
@@ -826,7 +845,7 @@
         });
     }
 
-    // НОВЫЙ РЕЛИЗ, СОХРАНЕНИЕ И ТРЕКЛИСТ
+    // НОВЫЙ РЕЛИЗ И 3. УВЕДОМЛЕНИЕ О РЕЛИЗЕ EMAILJS
     function saveDraftAsIs(showSuccess = false) {
         const releaseData = { id: currentDraftId || Date.now().toString(), userId: currentUser.id, userEmail: currentUser.email, type: document.getElementById('r_type').value, title: document.getElementById('r_title').value || 'Без названия', artist: document.getElementById('r_artist').value || currentUser.login, genre: document.getElementById('r_genre').value, year: document.getElementById('r_year').value, releaseDate: document.getElementById('r_releaseDate').value, upc: document.getElementById('r_upc').value, comment: document.getElementById('r_comment').value, status: 'Черновик', date: new Date().toLocaleDateString(), coverFile: draftRelease.coverFile, tracks: draftRelease.tracks, isDeleted: false, adminIsrc: '' };
         const existingIdx = appState.releases.findIndex(r => r.id === releaseData.id); if(existingIdx >= 0) appState.releases[existingIdx] = releaseData; else appState.releases.push(releaseData); 
@@ -923,7 +942,19 @@
         const releaseData = { id: currentDraftId || Date.now().toString(), userId: (existingRelease && isAdmin) ? existingRelease.userId : currentUser.id, userEmail: (existingRelease && isAdmin) ? existingRelease.userEmail : currentUser.email, type, title: document.getElementById('r_title').value, artist: document.getElementById('r_artist').value, genre: document.getElementById('r_genre').value, year: document.getElementById('r_year').value, releaseDate: document.getElementById('r_releaseDate').value, comment: document.getElementById('r_comment').value, status: (existingRelease && isAdmin) ? existingRelease.status : 'Модерация', date: existingRelease ? existingRelease.date : new Date().toLocaleDateString(), coverFile: draftRelease.coverFile, tracks: draftRelease.tracks, isDeleted: false, upc: document.getElementById('r_upc').value, adminIsrc: existingRelease ? existingRelease.adminIsrc : '' };
         const existingIdx = appState.releases.findIndex(r => r.id === releaseData.id); if(existingIdx >= 0) appState.releases[existingIdx] = releaseData; else appState.releases.push(releaseData);
         saveReleaseDB(releaseData); isDraftDirty = false; 
-        if(!isAdmin) { UI.alert("Успешно!", "Релиз отправлен на модерацию."); navCatalog('all'); } else { UI.alert("Сохранено!", "Изменения применены."); nav('adminReleases', true); }
+        
+        if(!isAdmin) { 
+            UI.alert("Успешно!", "Релиз отправлен на модерацию."); 
+            navCatalog('all'); 
+            // --- ТРИГГЕР EMAILJS ПРИ ОТПРАВКЕ РЕЛИЗА НА МОДЕРАЦИЮ ---
+            sendEmailNotification(
+                "Новый релиз на модерации", 
+                `Артист ${currentUser.login} (${currentUser.email}) отправил релиз "${releaseData.title}" (${releaseData.type}) на проверку.\n\nЗайдите в панель управления, чтобы проверить.`
+            );
+        } else { 
+            UI.alert("Сохранено!", "Изменения применены."); 
+            nav('adminReleases', true); 
+        }
     }
 
     function renderCard(r, isAdmin) {
