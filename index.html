@@ -227,10 +227,12 @@
                         <input type="file" id="addAudioFile" accept=".mp3,.wav" class="hidden" multiple onchange="addTracks(this)">
                     </div>
                     <div id="draftTracksList"></div>
+                    
                     <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
-                        <button class="btn-outline" id="saveDraftChangesBtn" style="flex: 1; min-width: 200px; padding: 16px; font-size: 15px;" onclick="saveDraftAsIs(true)">Сохранить как черновик</button>
-                        <button class="btn-primary" id="submitReleaseBtn" style="flex: 2; min-width: 250px; padding: 16px; font-size: 15px;" onclick="submitFinalRelease()">Отправить на модерацию</button>
+                        <button class="btn-outline hidden" id="saveDraftChangesBtn" style="flex: 1; min-width: 200px; padding: 16px; font-size: 15px;" onclick="saveDraftAsIs(true)">Сохранить изменения</button>
+                        <button class="btn-primary" id="submitReleaseBtn" style="flex: 2; min-width: 250px; padding: 16px; font-size: 15px;" onclick="submitFinalRelease()">Отправить релиз на модерацию</button>
                     </div>
+
                 </div>
             </div>
 
@@ -533,7 +535,34 @@
     function addMultiField(wrapId, inputClass, placeholder) { const wrap = document.getElementById(wrapId); const div = document.createElement('div'); div.className = "multi-input-row"; div.innerHTML = `<input type="text" class="${inputClass}" placeholder="${placeholder}" oninput="isDraftDirty=true;"><button class="btn-danger" style="width: 44px; height: 44px; padding: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;" onclick="this.parentElement.remove(); isDraftDirty=true;">✗</button>`; wrap.appendChild(div); isDraftDirty = true; }
     function getMultiValues(inputClass) { return Array.from(document.querySelectorAll('.' + inputClass)).map(i => i.value.trim()).filter(v => v).join(', '); }
 
-    function saveDraftAsIs(showSuccess = false) { const releaseData = { id: currentDraftId || Date.now().toString(), userId: currentUser.id, userEmail: currentUser.email, type: document.getElementById('r_type').value, title: document.getElementById('r_title').value || 'Без названия', artist: getMultiValues('multi-r-artist') || currentUser.login, genre: document.getElementById('r_genre').value, year: document.getElementById('r_year').value, releaseDate: document.getElementById('r_releaseDate').value, upc: document.getElementById('r_upc').value, comment: document.getElementById('r_comment').value, status: 'Черновик', date: new Date().toLocaleDateString(), coverFile: draftRelease.coverFile, tracks: draftRelease.tracks, isDeleted: false, adminIsrc: '' }; const existingIdx = appState.releases.findIndex(r => r.id === releaseData.id); if(existingIdx >= 0) appState.releases[existingIdx] = releaseData; else appState.releases.push(releaseData); currentDraftId = releaseData.id; saveReleaseDB(releaseData); isDraftDirty = false; if(showSuccess) UI.alert("Успешно", "Черновик сохранён."); }
+    function saveDraftAsIs(showSuccess = false) { 
+        const releaseData = { 
+            id: currentDraftId || Date.now().toString(), 
+            userId: currentUser.id, 
+            userEmail: currentUser.email, 
+            type: document.getElementById('r_type').value, 
+            title: document.getElementById('r_title').value || 'Без названия', 
+            artist: getMultiValues('multi-r-artist') || currentUser.login, 
+            genre: document.getElementById('r_genre').value, 
+            year: document.getElementById('r_year').value, 
+            releaseDate: document.getElementById('r_releaseDate').value, 
+            upc: document.getElementById('r_upc').value, 
+            comment: document.getElementById('r_comment').value, 
+            status: 'Черновик', 
+            date: new Date().toLocaleDateString(), 
+            coverFile: draftRelease.coverFile, 
+            tracks: draftRelease.tracks, 
+            isDeleted: false, 
+            adminIsrc: '' 
+        }; 
+        const existingIdx = appState.releases.findIndex(r => r.id === releaseData.id); 
+        if(existingIdx >= 0) appState.releases[existingIdx] = releaseData; 
+        else appState.releases.push(releaseData); 
+        currentDraftId = releaseData.id; 
+        saveReleaseDB(releaseData); 
+        isDraftDirty = false; 
+        if(showSuccess) UI.alert("Успешно", "Черновик сохранён."); 
+    }
 
     function startNewRelease() {
         draftRelease = { coverFile: null, tracks: [] }; currentDraftId = null; isDraftDirty = false; document.querySelectorAll('.error-field').forEach(el => el.classList.remove('error-field'));
@@ -541,9 +570,8 @@
         renderMultiFields('r_artist_wrap', 'multi-r-artist', 'Артист', currentUser.login);
         document.getElementById('coverPreview').src = ''; document.getElementById('coverPreview').classList.add('hidden'); document.getElementById('coverHint').classList.remove('hidden'); 
         
-        document.getElementById('saveDraftChangesBtn').innerText = "Сохранить как черновик";
-        document.getElementById('saveDraftChangesBtn').classList.remove('hidden');
-        document.getElementById('submitReleaseBtn').innerText = "Отправить на модерацию";
+        document.getElementById('submitReleaseBtn').innerText = "Отправить релиз на модерацию";
+        document.getElementById('saveDraftChangesBtn').classList.add('hidden');
         
         renderDraftTracks(); toggleReleaseType(); nav('newRelease', true);
     }
@@ -555,9 +583,13 @@
         renderMultiFields('r_artist_wrap', 'multi-r-artist', 'Артист', r.artist);
         if(r.coverFile) { document.getElementById('coverPreview').src = r.coverFile; document.getElementById('coverPreview').classList.remove('hidden'); document.getElementById('coverHint').classList.add('hidden'); } else { document.getElementById('coverPreview').classList.add('hidden'); document.getElementById('coverHint').classList.remove('hidden'); }
         
-        document.getElementById('saveDraftChangesBtn').classList.remove('hidden');
-        document.getElementById('saveDraftChangesBtn').innerText = r.status === 'Черновик' ? "Сохранить изменения" : "Сохранить правки";
-        document.getElementById('submitReleaseBtn').innerText = r.status === 'Черновик' ? "Отправить на модерацию" : "Отправить на модерацию повторно";
+        document.getElementById('submitReleaseBtn').innerText = "Отправить релиз на модерацию";
+        
+        if (r.status === 'Черновик') {
+            document.getElementById('saveDraftChangesBtn').classList.remove('hidden'); 
+        } else {
+            document.getElementById('saveDraftChangesBtn').classList.add('hidden');
+        }
         
         renderDraftTracks(); toggleReleaseType(); nav('newRelease', true);
     }
@@ -586,23 +618,50 @@
 
     function saveTrackEdit() {
         const reqFields = ['t_title', 't_lang']; let hasErr = false; reqFields.forEach(id => { const el = document.getElementById(id); if(!el.value) { el.classList.add('error-field'); hasErr = true; } });
+        
         const tArtist = getMultiValues('multi-t-artist'), tAuthor = getMultiValues('multi-t-author'), tComp = getMultiValues('multi-t-comp');
-        if(!tArtist) { document.querySelectorAll('.multi-t-artist')[0].classList.add('error-field'); hasErr = true; } if(!tAuthor) { document.querySelectorAll('.multi-t-author')[0].classList.add('error-field'); hasErr = true; } if(!tComp) { document.querySelectorAll('.multi-t-comp')[0].classList.add('error-field'); hasErr = true; }
+        
+        const arrArtist = document.querySelectorAll('.multi-t-artist');
+        if(!tArtist && arrArtist.length) { arrArtist[0].classList.add('error-field'); hasErr = true; } 
+        
+        const arrAuthor = document.querySelectorAll('.multi-t-author');
+        if(!tAuthor && arrAuthor.length) { arrAuthor[0].classList.add('error-field'); hasErr = true; } 
+        
+        const arrComp = document.querySelectorAll('.multi-t-comp');
+        if(!tComp && arrComp.length) { arrComp[0].classList.add('error-field'); hasErr = true; }
+        
         if(hasErr) return UI.alert("Ошибка", "Заполните все обязательные поля.");
+        
         const t = draftRelease.tracks.find(x => x.id === editTrackId);
-        ['title','version','type','lang','lyrics','explicit','isrc'].forEach(k => t[k] = document.getElementById('t_'+k).value); t.artist = tArtist; t.author = tAuthor; t.comp = tComp; t.isFilled = true; isDraftDirty = true;
+        ['title','version','type','lang','lyrics','explicit','isrc'].forEach(k => t[k] = document.getElementById('t_'+k).value); 
+        t.artist = tArtist; t.author = tAuthor; t.comp = tComp; t.isFilled = true; isDraftDirty = true;
+        
         cancelTrackEdit(); renderDraftTracks();
     }
+    
     function cancelTrackEdit() { document.getElementById('sec-trackEdit').classList.add('hidden'); document.getElementById('sec-newRelease').classList.remove('hidden'); editTrackId = null; }
 
     function submitFinalRelease() {
         document.querySelectorAll('.error-field').forEach(el => el.classList.remove('error-field')); let hasError = false;
         ['r_type', 'r_title', 'r_genre', 'r_year', 'r_releaseDate'].forEach(id => { const el = document.getElementById(id); if(!el.value) { el.classList.add('error-field'); hasError = true; }});
-        const rArtistVal = getMultiValues('multi-r-artist'); if(!rArtistVal) { document.querySelectorAll('.multi-r-artist')[0].classList.add('error-field'); hasError = true; }
+        
+        const rArtistVal = getMultiValues('multi-r-artist'); 
+        if(!rArtistVal) { 
+            const arrArtist = document.querySelectorAll('.multi-r-artist');
+            if(arrArtist.length) arrArtist[0].classList.add('error-field'); 
+            hasError = true; 
+        }
+        
         if(!draftRelease.coverFile) { document.getElementById('r_cover_box').classList.add('error-field'); hasError = true; }
+        
         if(hasError) return UI.alert("Ошибка", "Заполните обязательные поля релиза.");
-        const type = document.getElementById('r_type').value; if(draftRelease.tracks.length === 0) return UI.alert("Ошибка", "Добавьте трек");
-        for(let i=0; i < draftRelease.tracks.length; i++) { if(!draftRelease.tracks[i].isFilled) return UI.alert("Ошибка", `Заполните инфо о треке №${i+1}`); }
+        
+        const type = document.getElementById('r_type').value; 
+        if(draftRelease.tracks.length === 0) return UI.alert("Ошибка", "Добавьте трек");
+        
+        for(let i=0; i < draftRelease.tracks.length; i++) { 
+            if(!draftRelease.tracks[i].isFilled) return UI.alert("Ошибка", `Заполните инфо о треке №${i+1}`); 
+        }
         
         const existingRelease = appState.releases.find(r => r.id === currentDraftId);
         const isAdmin = currentUser.role === 'Administrator';
@@ -611,17 +670,34 @@
             id: currentDraftId || Date.now().toString(), 
             userId: (existingRelease && isAdmin && existingRelease.userId !== currentUser.id) ? existingRelease.userId : currentUser.id, 
             userEmail: (existingRelease && isAdmin && existingRelease.userEmail !== currentUser.email) ? existingRelease.userEmail : currentUser.email, 
-            type, title: document.getElementById('r_title').value, artist: rArtistVal, genre: document.getElementById('r_genre').value, year: document.getElementById('r_year').value, releaseDate: document.getElementById('r_releaseDate').value, comment: document.getElementById('r_comment').value, 
+            type, 
+            title: document.getElementById('r_title').value, 
+            artist: rArtistVal, 
+            genre: document.getElementById('r_genre').value, 
+            year: document.getElementById('r_year').value, 
+            releaseDate: document.getElementById('r_releaseDate').value, 
+            comment: document.getElementById('r_comment').value, 
             status: 'Модерация', 
             date: existingRelease ? existingRelease.date : new Date().toLocaleDateString(), 
-            coverFile: draftRelease.coverFile, tracks: draftRelease.tracks, isDeleted: false, upc: document.getElementById('r_upc').value, adminIsrc: existingRelease ? existingRelease.adminIsrc : '' 
+            coverFile: draftRelease.coverFile, 
+            tracks: draftRelease.tracks, 
+            isDeleted: false, 
+            upc: document.getElementById('r_upc').value, 
+            adminIsrc: existingRelease ? existingRelease.adminIsrc : '' 
         };
-        const existingIdx = appState.releases.findIndex(r => r.id === releaseData.id); if(existingIdx >= 0) appState.releases[existingIdx] = releaseData; else appState.releases.push(releaseData);
+        
+        const existingIdx = appState.releases.findIndex(r => r.id === releaseData.id); 
+        if(existingIdx >= 0) appState.releases[existingIdx] = releaseData; else appState.releases.push(releaseData);
         saveReleaseDB(releaseData); isDraftDirty = false; 
         
         UI.alert("Успешно!", "Релиз отправлен на модерацию."); 
-        if(!isAdmin) { navCatalog('all'); sendEmailNotification("Новый релиз на модерации", `Артист ${currentUser.login} (${currentUser.email}) отправил релиз "${releaseData.title}" (${releaseData.type}) на проверку.`); } 
-        else { nav('adminReleases', true); }
+        
+        if(!isAdmin) { 
+            navCatalog('all'); 
+            sendEmailNotification("Новый релиз на модерации", `Артист ${currentUser.login} (${currentUser.email}) отправил релиз "${releaseData.title}" (${releaseData.type}) на проверку.\n\nЗайдите в панель управления, чтобы проверить.`); 
+        } else { 
+            nav('adminReleases', true); 
+        }
     }
 
     function renderCard(r, isAdmin) {
