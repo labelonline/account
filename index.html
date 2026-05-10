@@ -192,6 +192,22 @@
         </div>
     </div>
 
+    <div id="uiTransferRelease" class="overlay hidden" style="z-index: 10001;">
+        <div class="dialog" style="max-width: 450px;">
+            <h3>Передача релиза</h3>
+            <p class="text-sm" style="color: #ccc; margin-bottom: 16px;">Выберите кабинет, в который будет перенесен этот релиз после одобрения.</p>
+            <div id="transferRelInfo" style="display: flex; align-items: center; margin-bottom: 20px; gap: 16px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid var(--border);"></div>
+            <div class="form-group">
+                <label>Кабинет получателя</label>
+                <select id="transferTargetUser"></select>
+            </div>
+            <div class="dialog-actions">
+                <button class="btn-outline" onclick="document.getElementById('uiTransferRelease').classList.add('hidden')">Отмена</button>
+                <button class="btn-primary" id="transferConfirmBtn">Отправить в кабинет</button>
+            </div>
+        </div>
+    </div>
+
     <div id="adminReleaseModal" class="overlay hidden" style="align-items: flex-start; padding: 40px; overflow-y: auto; z-index: 10000;">
         <div class="dialog" style="max-width: 750px; width: 100%; margin: auto;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;"><h2>Детали релиза</h2><button class="btn-outline" style="padding: 6px 12px;" onclick="document.getElementById('adminReleaseModal').classList.add('hidden')">Закрыть</button></div>
@@ -1039,7 +1055,36 @@
         document.getElementById(showDeleted ? 'adminDeletedList' : 'adminReleasesList').innerHTML = list.length ? list.map(r => renderCard(r, true)).reverse().join('') : '<p class="text-sm">Список пуст</p>';
     }
 
-    function admApprove(id) { UI.prompt("Принять релиз", [{id:'upc', placeholder:'UPC'}, {id:'isrc', placeholder:'ISRC'}], (res) => { const r = appState.releases.find(x => x.id === id); r.status = 'Одобрен'; if(res.upc) r.upc = res.upc; if(res.isrc) r.adminIsrc = res.isrc; saveReleaseDB(r); pushNotification(r.userEmail, `✅ Ваш релиз "${r.title}" был одобрен модератором.`); renderAdminReleases(false); }); }
+    function admApprove(id) { 
+        UI.prompt("Принять релиз", [{id:'upc', placeholder:'UPC'}, {id:'isrc', placeholder:'ISRC'}], (res) => { 
+            const r = appState.releases.find(x => x.id === id); 
+            r.status = 'Одобрен'; 
+            if(res.upc) r.upc = res.upc; 
+            if(res.isrc) r.adminIsrc = res.isrc; 
+
+            if (currentUser.email === ADMIN_EMAIL && r.userEmail === ADMIN_EMAIL) {
+                const modal = document.getElementById('uiTransferRelease');
+                document.getElementById('transferRelInfo').innerHTML = `<img src="${r.coverFile}" style="width: 60px; height: 60px; border-radius: 6px; object-fit: cover; background: #222;"><div><div style="font-weight:bold; font-size: 16px; margin-bottom: 4px;">${r.title}</div><div class="text-sm">${r.artist}</div></div>`;
+                const select = document.getElementById('transferTargetUser');
+                select.innerHTML = appState.users.filter(u => !u.isDeletedCabinet).map(u => `<option value="${u.email}">${u.login} (${u.email})</option>`).join('');
+                
+                modal.classList.remove('hidden');
+                document.getElementById('transferConfirmBtn').onclick = () => {
+                    const targetUser = appState.users.find(u => u.email === select.value);
+                    if (targetUser) { r.userId = targetUser.id; r.userEmail = targetUser.email; }
+                    modal.classList.add('hidden');
+                    saveReleaseDB(r); 
+                    pushNotification(r.userEmail, `✅ Ваш релиз "${r.title}" был одобрен модератором.`); 
+                    renderAdminReleases(false);
+                };
+            } else {
+                saveReleaseDB(r); 
+                pushNotification(r.userEmail, `✅ Ваш релиз "${r.title}" был одобрен модератором.`); 
+                renderAdminReleases(false); 
+            }
+        }); 
+    }
+
     function admReject(id) { UI.prompt("Отклонить релиз", [{id:'reason', placeholder:'Причина'}], (res) => { const r = appState.releases.find(x => x.id === id); r.status = 'Отклонён'; r.rejectReason = res.reason || 'Не соответствует требованиям'; saveReleaseDB(r); pushNotification(r.userEmail, `❌ Ваш релиз "${r.title}" был отклонен. Причина: ${r.rejectReason}`); renderAdminReleases(false); }); }
     function admDelete(id) { UI.confirm("Перенести в удаленные?", () => { const r = appState.releases.find(x => x.id === id); r.isDeleted = true; saveReleaseDB(r); renderAdminReleases(false); }); }
     function admRestore(id) { const r = appState.releases.find(x => x.id === id); r.isDeleted = false; saveReleaseDB(r); renderAdminReleases(true); }
