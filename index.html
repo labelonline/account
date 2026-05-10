@@ -228,8 +228,8 @@
                     </div>
                     <div id="draftTracksList"></div>
                     <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
-                        <button class="btn-outline hidden" id="saveDraftChangesBtn" style="flex: 1; min-width: 200px; padding: 16px; font-size: 15px;" onclick="saveDraftAsIs(true)">Сохранить изменения</button>
-                        <button class="btn-primary" id="submitReleaseBtn" style="flex: 2; min-width: 250px; padding: 16px; font-size: 15px;" onclick="submitFinalRelease()">Отправить релиз на модерацию</button>
+                        <button class="btn-outline" id="saveDraftChangesBtn" style="flex: 1; min-width: 200px; padding: 16px; font-size: 15px;" onclick="saveDraftAsIs(true)">Сохранить как черновик</button>
+                        <button class="btn-primary" id="submitReleaseBtn" style="flex: 2; min-width: 250px; padding: 16px; font-size: 15px;" onclick="submitFinalRelease()">Отправить на модерацию</button>
                     </div>
                 </div>
             </div>
@@ -540,8 +540,11 @@
         ['r_type','r_title','r_genre','r_upc','r_releaseDate','r_comment'].forEach(id => document.getElementById(id).value = '');
         renderMultiFields('r_artist_wrap', 'multi-r-artist', 'Артист', currentUser.login);
         document.getElementById('coverPreview').src = ''; document.getElementById('coverPreview').classList.add('hidden'); document.getElementById('coverHint').classList.remove('hidden'); 
-        document.getElementById('submitReleaseBtn').innerText = "Отправить релиз на модерацию";
-        document.getElementById('saveDraftChangesBtn').classList.add('hidden');
+        
+        document.getElementById('saveDraftChangesBtn').innerText = "Сохранить как черновик";
+        document.getElementById('saveDraftChangesBtn').classList.remove('hidden');
+        document.getElementById('submitReleaseBtn').innerText = "Отправить на модерацию";
+        
         renderDraftTracks(); toggleReleaseType(); nav('newRelease', true);
     }
 
@@ -551,8 +554,11 @@
         ['type','title','genre','year','upc','releaseDate','comment'].forEach(key => { document.getElementById('r_'+key).value = (key==='title' && r.title==='Без названия') ? '' : (r[key] || ''); });
         renderMultiFields('r_artist_wrap', 'multi-r-artist', 'Артист', r.artist);
         if(r.coverFile) { document.getElementById('coverPreview').src = r.coverFile; document.getElementById('coverPreview').classList.remove('hidden'); document.getElementById('coverHint').classList.add('hidden'); } else { document.getElementById('coverPreview').classList.add('hidden'); document.getElementById('coverHint').classList.remove('hidden'); }
-        document.getElementById('submitReleaseBtn').innerText = "Отправить релиз на модерацию";
-        if (r.status === 'Черновик') document.getElementById('saveDraftChangesBtn').classList.remove('hidden'); else document.getElementById('saveDraftChangesBtn').classList.add('hidden');
+        
+        document.getElementById('saveDraftChangesBtn').classList.remove('hidden');
+        document.getElementById('saveDraftChangesBtn').innerText = r.status === 'Черновик' ? "Сохранить изменения" : "Сохранить правки";
+        document.getElementById('submitReleaseBtn').innerText = r.status === 'Черновик' ? "Отправить на модерацию" : "Отправить на модерацию повторно";
+        
         renderDraftTracks(); toggleReleaseType(); nav('newRelease', true);
     }
 
