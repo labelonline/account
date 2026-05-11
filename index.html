@@ -61,11 +61,6 @@
         input:focus, select:focus, textarea:focus { border-color: #555; outline: none; }
         .error-field { border-color: var(--danger) !important; box-shadow: 0 0 0 1px var(--danger); }
 
-        /* Кнопки множественного добавления (желто-оранжевый квадрат) */
-        .btn-add-field { background: var(--warning); color: #fff; border: none; border-radius: 8px; width: 44px; height: 44px; font-size: 24px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.2s; }
-        .btn-add-field:hover { opacity: 0.8; }
-        .multi-input-row { display: flex; gap: 8px; width: 100%; margin-bottom: 8px; }
-
         button { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-size: 14px; }
         button:disabled { opacity: 0.5; cursor: not-allowed; }
         button:active:not(:disabled) { transform: scale(0.96); } 
@@ -197,28 +192,11 @@
         </div>
     </div>
 
-    <div id="uiTransferRelease" class="overlay hidden" style="z-index: 10001;">
-        <div class="dialog" style="max-width: 450px;">
-            <h3>Передача релиза</h3>
-            <p class="text-sm" style="color: #ccc; margin-bottom: 16px;">Выберите кабинет, в который будет перенесен этот релиз после одобрения.</p>
-            <div id="transferRelInfo" style="display: flex; align-items: center; margin-bottom: 20px; gap: 16px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid var(--border);"></div>
-            <div class="form-group">
-                <label>Кабинет получателя</label>
-                <select id="transferTargetUser"></select>
-            </div>
-            <div class="dialog-actions">
-                <button class="btn-outline" onclick="document.getElementById('uiTransferRelease').classList.add('hidden')">Отмена</button>
-                <button class="btn-primary" id="transferConfirmBtn">Отправить в кабинет</button>
-            </div>
-        </div>
-    </div>
-
     <div id="adminReleaseModal" class="overlay hidden" style="align-items: flex-start; padding: 40px; overflow-y: auto; z-index: 10000;">
         <div class="dialog" style="max-width: 750px; width: 100%; margin: auto;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;"><h2>Детали релиза</h2><button class="btn-outline" style="padding: 6px 12px;" onclick="document.getElementById('adminReleaseModal').classList.add('hidden')">Закрыть</button></div>
             <div style="display: flex; gap: 24px; margin-bottom: 32px; flex-wrap: wrap;"><div style="width: 250px; max-width: 100%;"><img id="admRelCover" style="width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);"><button class="btn-outline" style="width: 100%; font-size: 12px;" id="admCoverDl">Скачать обложку</button></div><div style="flex: 1; min-width: 250px;" id="admRelInfo"></div></div>
-            <h3 style="font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px;">Медиафайлы и информация</h3>
-            <div id="admRelTracks" style="display: flex; flex-direction: column; gap: 12px;"></div>
+            <h3 style="font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px;">Медиафайлы и информация</h3><div id="admRelTracks" style="display: flex; flex-direction: column; gap: 12px;"></div>
         </div>
     </div>
 
@@ -231,7 +209,7 @@
             <div class="form-group"><input type="email" id="authEmail" placeholder="Почта" onkeypress="if(event.key === 'Enter') processAuth()"></div>
             <div class="form-group"><input type="password" id="authPassword" placeholder="Пароль" onkeypress="if(event.key === 'Enter') processAuth()"></div>
             
-            <button class="btn-primary" id="mainAuthBtn" style="width: 100%; margin-top: 8px;" onclick="processAuth()">Синхронизация...</button>
+            <button class="btn-primary" id="mainAuthBtn" style="width: 100%; margin-top: 8px;" onclick="processAuth()" disabled>Подключение...</button>
             <button class="btn-outline" style="width: 100%; margin-top: 12px; border: none;" onclick="toggleAuthMode()" id="switchAuthBtn">Создать кабинет</button>
         </div>
     </div>
@@ -353,7 +331,7 @@
                         
                         <div class="form-group">
                             <label>Основной артист <span class="req-star">*</span></label>
-                            <div id="r_artist_wrap" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                            <div id="r_artist_wrap"></div>
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;"><div class="form-group"><label>Жанр <span class="req-star">*</span></label><select id="r_genre" onchange="isDraftDirty=true;"><option value="">Выберите жанр</option><option value="Pop">Pop</option><option value="Hip Hop/Rap">Hip Hop/Rap</option><option value="Rock">Rock</option><option value="Electronic">Electronic</option><option value="R&B">R&B</option><option value="Alternative">Alternative</option></select></div><div class="form-group"><label>Год <span class="req-star">*</span></label><select id="r_year" onchange="isDraftDirty=true;"></select></div></div>
@@ -381,22 +359,22 @@
                 
                 <div class="form-group">
                     <label>Артисты трека <span class="req-star">*</span></label>
-                    <div id="t_artist_wrap" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                    <div id="t_artist_wrap"></div>
                 </div>
-                
+
                 <div class="form-group"><label>Версия (необязательно)</label><input type="text" id="t_version" placeholder="Acoustic, Remix и т.д."></div>
                 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                     <div class="form-group">
                         <label>Автор слов <span class="req-star">*</span></label>
-                        <div id="t_author_wrap" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                        <div id="t_author_wrap"></div>
                     </div>
                     <div class="form-group">
                         <label>Композитор <span class="req-star">*</span></label>
-                        <div id="t_comp_wrap" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                        <div id="t_comp_wrap"></div>
                     </div>
                 </div>
-
+                
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;"><div class="form-group"><label>Тип трека <span class="req-star">*</span></label><select id="t_type"><option value="Original">Original</option><option value="Cover">Cover</option><option value="Remix">Remix</option><option value="Karaoke">Karaoke</option></select></div><div class="form-group"><label>Язык релиза <span class="req-star">*</span></label><input type="text" id="t_lang" list="langList" placeholder="Поиск языка..."><datalist id="langList">
                     <option value="Русский"><option value="Английский"><option value="Украинский"><option value="Белорусский"><option value="Казахский"><option value="Испанский"><option value="Французский"><option value="Немецкий"><option value="Итальянский"><option value="Китайский"><option value="Японский"><option value="Корейский"><option value="Арабский"><option value="Хинди"><option value="Португальский"><option value="Турецкий"><option value="Польский">
                 </datalist></div></div>
@@ -433,8 +411,12 @@
         emailjs.init("R-MbAs_m2hjNl4p7W");
     })();
 
+    // УНИВЕРСАЛЬНАЯ ФУНКЦИЯ ОТПРАВКИ ПИСЬМА
     function sendEmailNotification(subject, text) {
-        emailjs.send("service_z6is65e", "template_51w35gn", { subject: subject, message: text }).then(
+        emailjs.send("service_z6is65e", "template_51w35gn", {
+            subject: subject,
+            message: text
+        }).then(
             (res) => console.log('Уведомление успешно отправлено!', res.status),
             (err) => console.error('Ошибка отправки уведомления:', err)
         );
@@ -497,10 +479,10 @@
 
     db.ref('/').on('value', (snapshot) => {
         isDBLoaded = true;
-        const btnAuth = document.getElementById('mainAuthBtn');
-        if(btnAuth.innerText === "Синхронизация...") {
-            btnAuth.innerText = authMode === 'login' ? 'Войти в кабинет' : 'Создать кабинет';
-            btnAuth.disabled = false;
+        const authBtn = document.getElementById('mainAuthBtn');
+        if(authBtn && authBtn.disabled) {
+            authBtn.disabled = false;
+            authBtn.innerText = authMode === 'login' ? 'Войти в кабинет' : 'Создать кабинет';
         }
 
         if (!snapshot.exists()) return;
@@ -510,7 +492,7 @@
         appState.chats = {};
         if (data.chats) Object.keys(data.chats).forEach(k => { appState.chats[k] = data.chats[k]; });
 
-        // АВТОВХОД
+        // АВТОМАТИЧЕСКИЙ ВХОД (СИНХРОНИЗАЦИЯ)
         let savedAuth = localStorage.getItem('glambank_auth');
         if(savedAuth && !currentUser && !autoLoginTriggered) {
             autoLoginTriggered = true;
@@ -518,8 +500,8 @@
                 const creds = JSON.parse(savedAuth);
                 document.getElementById('authEmail').value = creds.email;
                 document.getElementById('authPassword').value = creds.pass;
-                processAuth(true); // silent flag
-            } catch(e) { console.error("Auto login failed"); }
+                processAuth(true); // передаем параметр silent=true, чтобы не выскакивали ошибки при загрузке
+            } catch(e) {}
         }
 
         if(currentUser) { 
@@ -580,15 +562,20 @@
     function toggleAuthMode() { 
         authMode = authMode === 'login' ? 'reg' : 'login'; 
         document.getElementById('regFields').classList.toggle('hidden', authMode === 'login'); 
-        if(isDBLoaded) document.getElementById('mainAuthBtn').innerText = authMode === 'login' ? 'Войти в кабинет' : 'Создать кабинет'; 
+        
+        const authBtn = document.getElementById('mainAuthBtn');
+        if (!authBtn.disabled) {
+            authBtn.innerText = authMode === 'login' ? 'Войти в кабинет' : 'Создать кабинет'; 
+        }
         document.getElementById('switchAuthBtn').innerText = authMode === 'login' ? 'Создать кабинет' : 'Уже есть аккаунт'; 
     }
     
     function processAuth(silent = false) {
         if (!isDBLoaded) {
-            if(!silent) UI.alert("Ожидание", "Синхронизация с базой данных...");
+            if(!silent) UI.alert("Ожидание", "База загружается...");
             return;
         }
+
         const email = document.getElementById('authEmail').value.toLowerCase().trim(); 
         const pass = document.getElementById('authPassword').value; 
         const login = document.getElementById('regLogin').value;
@@ -605,18 +592,20 @@
                         u = { id: 'admin_root', email: ADMIN_EMAIL, login: 'Денис', pass: pass, role: 'Administrator', passwordHistory: [{pass: pass, date: new Date().toLocaleString()}], isBanned: false, notifications: [], isDeletedCabinet: false };
                         saveUserDB(u);
                     }
-                    u.role = 'Administrator'; currentUser = u;
+                    u.role = 'Administrator'; 
+                    currentUser = u;
                     localStorage.setItem('glambank_auth', JSON.stringify({email, pass}));
                     recordDevice(currentUser); startApp(); return;
                 }
             }
+
             const u = appState.users.find(x => x.email === email && x.pass === pass); 
             if(u) { 
                 currentUser = u; 
                 localStorage.setItem('glambank_auth', JSON.stringify({email, pass}));
                 recordDevice(currentUser); startApp(); 
             } 
-            else if (!silent) UI.alert("Ошибка", "Неверная почта или пароль. Либо кабинет удален."); 
+            else if(!silent) UI.alert("Ошибка", "Неверная почта или пароль. Либо кабинет удален."); 
         } else { 
             if(!login) return UI.alert("Ошибка", "Укажите логин"); 
             if(appState.users.find(x => x.email === email)) return UI.alert("Ошибка", "Почта занята"); 
@@ -631,6 +620,7 @@
 
     function startApp() {
         if (currentUser.email === ADMIN_EMAIL) currentUser.role = 'Administrator';
+
         if(currentUser.isBanned) { 
             document.getElementById('banView').classList.remove('hidden'); 
             if(currentUser.isDeletedCabinet) document.getElementById('banTitleText').innerText = "Ваш кабинет удален";
@@ -659,17 +649,22 @@
     }
 
     function openSettings() {
-        UI.prompt("Настройки профиля", [{id: 'l', label: 'Изменить логин', placeholder: currentUser.login, value: currentUser.login}, {id: 'p', label: 'Изменить пароль', placeholder: 'Новый пароль (пусто = без изменений)', type: 'password'}], (data) => {
+        UI.prompt("Настройки профиля", [
+            {id: 'l', label: 'Изменить логин', placeholder: currentUser.login, value: currentUser.login}, 
+            {id: 'p', label: 'Изменить пароль', placeholder: 'Новый пароль (пусто = без изменений)', type: 'password'}
+        ], (data) => {
             let changed = false;
             if(data.l && data.l !== currentUser.login) { currentUser.login = data.l; changed = true; }
             if(data.p && data.p !== currentUser.pass) { 
                 currentUser.pass = data.p; 
                 if(!currentUser.passwordHistory) currentUser.passwordHistory = [];
-                currentUser.passwordHistory.push({pass: data.p, date: new Date().toLocaleString()}); changed = true; 
-                // update local storage
+                currentUser.passwordHistory.push({pass: data.p, date: new Date().toLocaleString()});
+                changed = true; 
                 localStorage.setItem('glambank_auth', JSON.stringify({email: currentUser.email, pass: data.p}));
             }
-            if(changed) { saveUserDB(currentUser); document.getElementById('userNameDisplay').innerText = currentUser.login; UI.alert("Успешно", "Данные обновлены"); }
+            if(changed) {
+                saveUserDB(currentUser); document.getElementById('userNameDisplay').innerText = currentUser.login; UI.alert("Успешно", "Данные обновлены");
+            }
         });
     }
 
@@ -696,8 +691,13 @@
         const bellIcons = document.querySelectorAll('.bell-icon');
         const bellDots = document.querySelectorAll('.unread-dot:not(#chatUnreadDot)');
         
-        if (unreadCount > 0) { bellIcons.forEach(b => b.classList.add('shake')); bellDots.forEach(d => d.classList.remove('hidden')); } 
-        else { bellIcons.forEach(b => b.classList.remove('shake')); bellDots.forEach(d => d.classList.add('hidden')); }
+        if (unreadCount > 0) {
+            bellIcons.forEach(b => b.classList.add('shake'));
+            bellDots.forEach(d => d.classList.remove('hidden'));
+        } else {
+            bellIcons.forEach(b => b.classList.remove('shake'));
+            bellDots.forEach(d => d.classList.add('hidden'));
+        }
 
         if (currentUser.unreadAdminMsg) document.getElementById('chatUnreadDot').classList.remove('hidden');
         else document.getElementById('chatUnreadDot').classList.add('hidden');
@@ -707,12 +707,20 @@
         if (!currentUser) return;
         const notifs = currentUser.notifications || [];
         const listHtml = notifs.slice().reverse().map(n => `<div style="padding: 12px; border-bottom: 1px solid var(--border); ${n.read?'opacity:0.6':''}"><div style="font-size: 13px;">${n.text}</div><div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">${n.date}</div></div>`).join('');
+        
         UI.alert("Уведомления", listHtml ? listHtml : 'Нет новых уведомлений');
         
-        if (notifs.some(n => !n.read)) { currentUser.notifications.forEach(n => n.read = true); saveUserDB(currentUser); checkNotifications(); }
+        if (notifs.some(n => !n.read)) {
+            currentUser.notifications.forEach(n => n.read = true);
+            saveUserDB(currentUser);
+            checkNotifications();
+        }
     }
 
-    function toggleNavMenu(menuId) { document.getElementById('nav-menu-' + menuId).classList.toggle('hidden'); event.currentTarget.classList.toggle('open'); }
+    function toggleNavMenu(menuId) {
+        document.getElementById('nav-menu-' + menuId).classList.toggle('hidden');
+        event.currentTarget.classList.toggle('open');
+    }
 
     function navCatalog(filterMode) {
         activeCatalogFilter = filterMode; nav('catalog');
@@ -731,7 +739,9 @@
             return;
         }
 
-        if(section === 'userChat' && currentUser.unreadAdminMsg) { currentUser.unreadAdminMsg = false; saveUserDB(currentUser); }
+        if(section === 'userChat' && currentUser.unreadAdminMsg) {
+            currentUser.unreadAdminMsg = false; saveUserDB(currentUser);
+        }
 
         currentSection = section; 
         document.querySelectorAll('.view-section').forEach(s => { s.classList.add('hidden'); s.classList.remove('fade-in'); }); 
@@ -759,12 +769,17 @@
 
     function renderOverview() {
         let list = appState.releases; 
-        if (currentUser.role !== 'Administrator') { list = list.filter(r => r.userEmail === currentUser.email); document.getElementById('overviewDesc').innerText = "Статистика по вашим релизам"; } 
-        else { document.getElementById('overviewDesc').innerText = "Глобальная статистика"; }
+        if (currentUser.role !== 'Administrator') { 
+            list = list.filter(r => r.userEmail === currentUser.email); 
+            document.getElementById('overviewDesc').innerText = "Статистика по вашим релизам"; 
+        } else { 
+            document.getElementById('overviewDesc').innerText = "Глобальная статистика"; 
+        }
         list = list.filter(r => !r.isDeleted && r.status !== 'Черновик'); 
         const mod = list.filter(r => r.status === 'Модерация').length; 
         const ok = list.filter(r => r.status === 'Одобрен').length; 
         const rej = list.filter(r => r.status === 'Отклонён').length;
+        
         document.getElementById('dashboardStats').innerHTML = `<div class="stat-card"><div class="stat-num" style="color: var(--warning);">${mod}</div><div class="stat-label">На модерации</div></div><div class="stat-card"><div class="stat-num" style="color: var(--success);">${ok}</div><div class="stat-label">Принятых</div></div><div class="stat-card"><div class="stat-num" style="color: var(--danger);">${rej}</div><div class="stat-label">Отклонённых</div></div>`;
     }
 
@@ -787,6 +802,7 @@
     function renderAdminChatList() {
         const list = document.getElementById('adminChatUserList'); 
         const searchVal = document.getElementById('adminChatSearch').value.toLowerCase();
+        
         let usersToChat = appState.users.filter(u => u.id !== currentUser.id && !u.isDeletedCabinet);
         if (searchVal) usersToChat = usersToChat.filter(u => u.login.toLowerCase().includes(searchVal) || u.email.toLowerCase().includes(searchVal));
         
@@ -809,6 +825,7 @@
         const msg = { from: 'admin', text: input.value.trim(), time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
         const msgs = getChat(activeAdminChatUser); msgs.push(msg); input.value = ''; notifyTyping(false, activeAdminChatUser); 
         renderAdminChatList(); saveChatDB(activeAdminChatUser, msgs);
+        
         const u = appState.users.find(x => x.email === activeAdminChatUser);
         if(u) { u.unreadAdminMsg = true; saveUserDB(u); }
     }
@@ -854,7 +871,11 @@
     function toggleBan(id) {
         const u = appState.users.find(x => x.id === id);
         if(u.email === ADMIN_EMAIL) return UI.alert("Ошибка", "Нельзя заблокировать главного администратора.");
-        if (u.role === 'Administrator' && currentUser.email !== ADMIN_EMAIL) return UI.alert("Ошибка", "Только главный администратор может блокировать других администраторов.");
+        
+        if (u.role === 'Administrator' && currentUser.email !== ADMIN_EMAIL) {
+            return UI.alert("Ошибка", "Только главный администратор может блокировать других администраторов.");
+        }
+
         if(u.isBanned) { u.isBanned = false; u.banReason = ''; saveUserDB(u); renderAdminUsers(); } 
         else { UI.prompt("Блокировка", [{id: 'r', placeholder: 'Причина закрытия'}], (res) => { u.isBanned = true; u.banReason = res.r || 'Нарушение правил'; saveUserDB(u); renderAdminUsers(); }); }
     }
@@ -874,13 +895,17 @@
         if(currentUser.email !== ADMIN_EMAIL) return;
         UI.confirm("ВНИМАНИЕ! Вы уверены, что хотите УДАЛИТЬ ВСЕ АККАУНТЫ кроме вашего?", () => {
             appState.users.forEach(u => {
-                if(u.email !== ADMIN_EMAIL) { db.ref('users/' + u.id).remove(); db.ref('chats/' + u.email.replace(/\./g, '_')).remove(); }
+                if(u.email !== ADMIN_EMAIL) {
+                    db.ref('users/' + u.id).remove();
+                    db.ref('chats/' + u.email.replace(/\./g, '_')).remove();
+                }
             });
-            UI.alert("Успешно", "Все сторонние аккаунты удалены из базы."); renderAdminUsers();
+            UI.alert("Успешно", "Все сторонние аккаунты удалены из базы.");
+            renderAdminUsers();
         });
     }
 
-    // ЛОГИКА МНОЖЕСТВЕННЫХ ПОЛЕЙ
+    // МНОЖЕСТВЕННЫЕ ПОЛЯ: ОТРИСОВКА И ЛОГИКА
     function renderMultiFields(wrapId, inputClass, placeholder, valueStr) {
         const wrap = document.getElementById(wrapId);
         wrap.innerHTML = '';
@@ -890,10 +915,13 @@
         values.forEach((v, idx) => {
             const div = document.createElement('div');
             div.className = "multi-input-row";
+            div.style.display = "flex";
+            div.style.gap = "8px";
+            div.style.marginBottom = "8px";
             
             let btn = '';
             if (idx === 0) {
-                btn = `<button class="btn-add-field" style="display:flex;" onclick="addMultiField('${wrapId}', '${inputClass}', '${placeholder}')">+</button>`;
+                btn = `<button class="btn-add-field" style="background: var(--warning); color: #fff; border: none; border-radius: 8px; width: 44px; height: 44px; font-size: 24px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;" onclick="addMultiField('${wrapId}', '${inputClass}', '${placeholder}')">+</button>`;
             } else {
                 btn = `<button class="btn-danger" style="width: 44px; height: 44px; padding: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px;" onclick="this.parentElement.remove(); isDraftDirty=true;">×</button>`;
             }
@@ -906,6 +934,9 @@
         const wrap = document.getElementById(wrapId);
         const div = document.createElement('div');
         div.className = "multi-input-row";
+        div.style.display = "flex";
+        div.style.gap = "8px";
+        div.style.marginBottom = "8px";
         div.innerHTML = `<input type="text" class="${inputClass}" placeholder="${placeholder}" oninput="isDraftDirty=true;"><button class="btn-danger" style="width: 44px; height: 44px; padding: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px;" onclick="this.parentElement.remove(); isDraftDirty=true;">×</button>`;
         wrap.appendChild(div);
         isDraftDirty = true;
@@ -925,8 +956,9 @@
     function startNewRelease() {
         draftRelease = { coverFile: null, tracks: [] }; currentDraftId = null; isDraftDirty = false; document.querySelectorAll('.error-field').forEach(el => el.classList.remove('error-field'));
         ['r_type','r_title','r_genre','r_upc','r_releaseDate','r_comment'].forEach(id => document.getElementById(id).value = '');
-        renderMultiFields('r_artist_wrap', 'multi-r-artist', 'Артист', currentUser.login);
         
+        renderMultiFields('r_artist_wrap', 'multi-r-artist', 'Артист', currentUser.login);
+
         document.getElementById('coverPreview').src = ''; document.getElementById('coverPreview').classList.add('hidden'); document.getElementById('coverHint').classList.remove('hidden'); document.getElementById('submitReleaseBtn').innerText = "Отправить релиз на модерацию";
         document.getElementById('saveDraftChangesBtn').classList.add('hidden');
         renderDraftTracks(); toggleReleaseType(); nav('newRelease', true);
@@ -936,12 +968,14 @@
         const r = appState.releases.find(x => x.id === id); currentDraftId = id; isDraftDirty = false; document.querySelectorAll('.error-field').forEach(el => el.classList.remove('error-field'));
         draftRelease.coverFile = r.coverFile; draftRelease.tracks = r.tracks || [];
         ['type','title','genre','year','upc','releaseDate','comment'].forEach(key => { document.getElementById('r_'+key).value = (key==='title' && r.title==='Без названия') ? '' : (r[key] || ''); });
-        renderMultiFields('r_artist_wrap', 'multi-r-artist', 'Артист', r.artist);
         
+        renderMultiFields('r_artist_wrap', 'multi-r-artist', 'Артист', r.artist);
+
         if(r.coverFile) { document.getElementById('coverPreview').src = r.coverFile; document.getElementById('coverPreview').classList.remove('hidden'); document.getElementById('coverHint').classList.add('hidden'); } else { document.getElementById('coverPreview').classList.add('hidden'); document.getElementById('coverHint').classList.remove('hidden'); }
         
-        document.getElementById('submitReleaseBtn').innerText = currentUser.role === 'Administrator' ? "Сохранить для админа" : "Отправить релиз на модерацию";
-        if (r.status === 'Черновик' || r.status === 'Отклонён') document.getElementById('saveDraftChangesBtn').classList.remove('hidden'); else document.getElementById('saveDraftChangesBtn').classList.add('hidden');
+        document.getElementById('submitReleaseBtn').innerText = "Отправить релиз на модерацию";
+        if (r.status === 'Черновик') document.getElementById('saveDraftChangesBtn').classList.remove('hidden'); else document.getElementById('saveDraftChangesBtn').classList.add('hidden');
+
         renderDraftTracks(); toggleReleaseType(); nav('newRelease', true);
     }
 
@@ -991,7 +1025,7 @@
         renderMultiFields('t_artist_wrap', 'multi-t-artist', 'Артисты трека', t.artist);
         renderMultiFields('t_author_wrap', 'multi-t-author', 'Имя Фамилия', t.author);
         renderMultiFields('t_comp_wrap', 'multi-t-comp', 'Имя Фамилия', t.comp);
-        
+
         document.getElementById('te_filename').innerText = t.filename;
         document.getElementById('sec-newRelease').classList.add('hidden'); document.getElementById('sec-trackEdit').classList.remove('hidden');
     }
@@ -1004,6 +1038,7 @@
         const tArtist = getMultiValues('multi-t-artist');
         const tAuthor = getMultiValues('multi-t-author');
         const tComp = getMultiValues('multi-t-comp');
+        
         if(!tArtist) { document.querySelectorAll('.multi-t-artist')[0].classList.add('error-field'); hasErr = true; }
         if(!tAuthor) { document.querySelectorAll('.multi-t-author')[0].classList.add('error-field'); hasErr = true; }
         if(!tComp) { document.querySelectorAll('.multi-t-comp')[0].classList.add('error-field'); hasErr = true; }
@@ -1012,8 +1047,11 @@
         
         const t = draftRelease.tracks.find(x => x.id === editTrackId);
         ['title','version','type','lang','lyrics','explicit','isrc'].forEach(k => t[k] = document.getElementById('t_'+k).value); 
-        t.artist = tArtist; t.author = tAuthor; t.comp = tComp;
+        t.artist = tArtist;
+        t.author = tAuthor;
+        t.comp = tComp;
         t.isFilled = true; isDraftDirty = true;
+        
         cancelTrackEdit(); renderDraftTracks();
     }
     
@@ -1033,45 +1071,25 @@
         
         const existingRelease = appState.releases.find(r => r.id === currentDraftId);
         const isAdmin = currentUser.role === 'Administrator';
-        const releaseData = { 
-            id: currentDraftId || Date.now().toString(), 
-            userId: (existingRelease && isAdmin && existingRelease.userId !== currentUser.id) ? existingRelease.userId : currentUser.id, 
-            userEmail: (existingRelease && isAdmin && existingRelease.userEmail !== currentUser.email) ? existingRelease.userEmail : currentUser.email, 
-            type, 
-            title: document.getElementById('r_title').value, 
-            artist: rArtistVal, 
-            genre: document.getElementById('r_genre').value, 
-            year: document.getElementById('r_year').value, 
-            releaseDate: document.getElementById('r_releaseDate').value, 
-            comment: document.getElementById('r_comment').value, 
-            status: (existingRelease && isAdmin && existingRelease.status !== 'Черновик') ? existingRelease.status : 'Модерация', 
-            date: existingRelease ? existingRelease.date : new Date().toLocaleDateString(), 
-            coverFile: draftRelease.coverFile, 
-            tracks: draftRelease.tracks, 
-            isDeleted: false, 
-            upc: document.getElementById('r_upc').value, 
-            adminIsrc: existingRelease ? existingRelease.adminIsrc : '' 
-        };
+        
+        // Админ отправляет на модерацию
+        const newStatus = (existingRelease && isAdmin && existingRelease.status !== 'Черновик') ? existingRelease.status : 'Модерация';
+
+        const releaseData = { id: currentDraftId || Date.now().toString(), userId: (existingRelease && isAdmin) ? existingRelease.userId : currentUser.id, userEmail: (existingRelease && isAdmin) ? existingRelease.userEmail : currentUser.email, type, title: document.getElementById('r_title').value, artist: rArtistVal, genre: document.getElementById('r_genre').value, year: document.getElementById('r_year').value, releaseDate: document.getElementById('r_releaseDate').value, comment: document.getElementById('r_comment').value, status: newStatus, date: existingRelease ? existingRelease.date : new Date().toLocaleDateString(), coverFile: draftRelease.coverFile, tracks: draftRelease.tracks, isDeleted: false, upc: document.getElementById('r_upc').value, adminIsrc: existingRelease ? existingRelease.adminIsrc : '' };
         const existingIdx = appState.releases.findIndex(r => r.id === releaseData.id); if(existingIdx >= 0) appState.releases[existingIdx] = releaseData; else appState.releases.push(releaseData);
         saveReleaseDB(releaseData); isDraftDirty = false; 
         
         if(!isAdmin) { 
             UI.alert("Успешно!", "Релиз отправлен на модерацию."); 
             navCatalog('all'); 
-            sendEmailNotification("Новый релиз на модерации", `Артист ${currentUser.login} (${currentUser.email}) отправил релиз "${releaseData.title}" (${releaseData.type}) на проверку.\n\nЗайдите в панель управления, чтобы проверить.`);
+            sendEmailNotification(
+                "Новый релиз на модерации", 
+                `Артист ${currentUser.login} (${currentUser.email}) отправил релиз "${releaseData.title}" (${releaseData.type}) на проверку.\n\nЗайдите в панель управления, чтобы проверить.`
+            );
         } else { 
-            UI.alert("Сохранено!", "Изменения применены."); 
+            UI.alert("Успешно!", "Релиз отправлен на модерацию."); 
             nav('adminReleases', true); 
         }
-    }
-
-    function admSendToMod(id) {
-        const r = appState.releases.find(x => x.id === id);
-        if (!r.tracks || r.tracks.length === 0) return UI.alert("Ошибка", "В релизе нет треков.");
-        r.status = 'Модерация';
-        saveReleaseDB(r);
-        renderAdminReleases(false);
-        UI.alert("Успешно", "Черновик отправлен на модерацию.");
     }
 
     function renderCard(r, isAdmin) {
@@ -1081,9 +1099,6 @@
 
         if(isAdmin && !r.isDeleted && isModOrAdmin) { 
             actions = `<button class="btn-outline" style="padding: 6px 10px; font-size: 12px; margin-right: 8px;" onclick="viewReleaseAdmin('${r.id}')">Подробнее</button><button class="btn-outline" style="padding: 6px 10px; font-size: 12px; margin-right: 8px;" onclick="editDraft('${r.id}')">Изменить</button>`;
-            if(r.status === 'Черновик') {
-                actions += `<button class="btn-primary" style="padding: 6px 10px; font-size: 12px; margin-right: 8px;" onclick="admSendToMod('${r.id}')">На модерацию</button>`;
-            }
             if(r.status !== 'Черновик') actions += `<button class="btn-outline" style="padding: 6px 10px; font-size: 12px; border-color: var(--warning); color: var(--warning); margin-right: 8px;" onclick="admRevoke('${r.id}')">Отозвать</button>`;
             if(r.status === 'Модерация') actions += `<button class="btn-outline" style="padding: 6px; border-color: var(--success); color: var(--success); margin-right: 4px;" onclick="admApprove('${r.id}')">✓</button><button class="btn-outline" style="padding: 6px; border-color: var(--danger); color: var(--danger);" onclick="admReject('${r.id}')">✗</button>`;
             actions += `<button class="btn-danger" style="padding: 6px 10px; font-size: 12px; margin-left: 8px;" onclick="admDelete('${r.id}')">Удалить</button>`; 
@@ -1091,12 +1106,7 @@
         else if (isAdmin && r.isDeleted && isModOrAdmin) { actions = `<button class="btn-outline" style="padding: 6px 10px; font-size: 12px; margin-right: 8px;" onclick="viewReleaseAdmin('${r.id}')">Просмотр</button><button class="btn-success" style="padding: 6px 10px; font-size: 12px;" onclick="admRestore('${r.id}')">Восстановить</button>`; } 
         else if (!isAdmin) { 
             actions = `<button class="btn-outline" style="padding: 6px 10px; font-size: 12px; margin-right: 8px;" onclick="viewReleaseAdmin('${r.id}')">Информация</button>`; 
-            if (r.status === 'Черновик' || r.status === 'Отклонён') { 
-                actions += `<button class="btn-outline" style="padding: 6px 10px; font-size: 12px; margin-right: 8px;" onclick="editDraft('${r.id}')">Изменить</button>`; 
-            }
-            if (r.status === 'Черновик') {
-                actions += `<button class="btn-danger" style="padding: 6px 10px; font-size: 12px;" onclick="deleteDraft('${r.id}')">Удалить</button>`;
-            }
+            if (r.status === 'Черновик') { actions += `<button class="btn-outline" style="padding: 6px 10px; font-size: 12px; margin-right: 8px;" onclick="editDraft('${r.id}')">Изменить</button><button class="btn-danger" style="padding: 6px 10px; font-size: 12px;" onclick="deleteDraft('${r.id}')">Удалить</button>`; } 
         }
         return `<div class="card"><div style="display: flex; align-items: center; flex: 1;"><img src="${coverSrc}" class="card-cover"><div><div class="card-title">${r.title} <span style="font-weight: normal; color: var(--text-muted); font-size: 15px;">— ${r.type || 'Не выбран'}</span></div><div class="card-artist">${r.artist} • ${r.tracks ? r.tracks.length : 0} трек(ов) ${isAdmin ? `• От: ${r.userEmail}` : ''}</div>${r.upc ? `<div class="text-sm" style="color: var(--success); margin-top: 4px;">UPC: ${r.upc}</div>` : ''}</div></div><div style="display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">${status}${actions ? `<div style="margin-left: 10px; padding-left: 10px; border-left: 1px solid var(--border); display:flex; flex-wrap: wrap; gap: 4px;">${actions}</div>` : ''}</div></div>`;
     }
@@ -1104,6 +1114,7 @@
     function renderCatalog() {
         const searchQuery = document.getElementById('searchReleases').value.toLowerCase();
         let list = appState.releases.filter(r => r.userEmail === currentUser.email && !r.isDeleted);
+        
         list = list.filter(r => {
             if (activeCatalogFilter === 'drafts') return r.status === 'Черновик';
             if (activeCatalogFilter === 'mod') return r.status === 'Модерация';
@@ -1111,11 +1122,17 @@
             if (activeCatalogFilter === 'all') return r.status === 'Одобрен' || r.status === 'Отклонён';
             return true;
         });
-        if (searchQuery) list = list.filter(r => `${r.title} ${r.artist} ${r.upc || ''}`.toLowerCase().includes(searchQuery));
+
+        if (searchQuery) {
+            list = list.filter(r => `${r.title} ${r.artist} ${r.upc || ''}`.toLowerCase().includes(searchQuery));
+        }
 
         const container = document.getElementById('userReleasesList');
-        if (list.length === 0 && !searchQuery) { container.innerHTML = `<div class="empty-state"><h2>Нет релизов</h2><button class="btn-primary" style="padding: 16px 24px; font-size: 16px; margin-top: 20px;" onclick="startNewRelease()">Создать релиз</button></div>`; } 
-        else { container.innerHTML = list.map(r => renderCard(r, false)).reverse().join(''); }
+        if (list.length === 0 && !searchQuery) { 
+            container.innerHTML = `<div class="empty-state"><h2>Нет релизов</h2><button class="btn-primary" style="padding: 16px 24px; font-size: 16px; margin-top: 20px;" onclick="startNewRelease()">Создать релиз</button></div>`; 
+        } else { 
+            container.innerHTML = list.map(r => renderCard(r, false)).reverse().join(''); 
+        }
     }
 
     function renderAdminReleases(showDeleted) {
@@ -1135,30 +1152,12 @@
             r.status = 'Одобрен'; 
             if(res.upc) r.upc = res.upc; 
             if(res.isrc) r.adminIsrc = res.isrc; 
-
-            if (currentUser.email === ADMIN_EMAIL && r.userEmail === ADMIN_EMAIL) {
-                const modal = document.getElementById('uiTransferRelease');
-                document.getElementById('transferRelInfo').innerHTML = `<img src="${r.coverFile}" style="width: 60px; height: 60px; border-radius: 6px; object-fit: cover; background: #222;"><div><div style="font-weight:bold; font-size: 16px; margin-bottom: 4px;">${r.title}</div><div class="text-sm">${r.artist}</div></div>`;
-                const select = document.getElementById('transferTargetUser');
-                select.innerHTML = appState.users.filter(u => !u.isDeletedCabinet).map(u => `<option value="${u.email}">${u.login} (${u.email})</option>`).join('');
-                
-                modal.classList.remove('hidden');
-                document.getElementById('transferConfirmBtn').onclick = () => {
-                    const targetUser = appState.users.find(u => u.email === select.value);
-                    if (targetUser) { r.userId = targetUser.id; r.userEmail = targetUser.email; }
-                    modal.classList.add('hidden');
-                    saveReleaseDB(r); 
-                    pushNotification(r.userEmail, `✅ Ваш релиз "${r.title}" был одобрен модератором.`); 
-                    renderAdminReleases(false);
-                };
-            } else {
-                saveReleaseDB(r); 
-                pushNotification(r.userEmail, `✅ Ваш релиз "${r.title}" был одобрен модератором.`); 
-                renderAdminReleases(false); 
-            }
+            saveReleaseDB(r); 
+            pushNotification(r.userEmail, `✅ Ваш релиз "${r.title}" был одобрен модератором.`); 
+            renderAdminReleases(false); 
         }); 
     }
-
+    
     function admReject(id) { UI.prompt("Отклонить релиз", [{id:'reason', placeholder:'Причина'}], (res) => { const r = appState.releases.find(x => x.id === id); r.status = 'Отклонён'; r.rejectReason = res.reason || 'Не соответствует требованиям'; saveReleaseDB(r); pushNotification(r.userEmail, `❌ Ваш релиз "${r.title}" был отклонен. Причина: ${r.rejectReason}`); renderAdminReleases(false); }); }
     function admDelete(id) { UI.confirm("Перенести в удаленные?", () => { const r = appState.releases.find(x => x.id === id); r.isDeleted = true; saveReleaseDB(r); renderAdminReleases(false); }); }
     function admRestore(id) { const r = appState.releases.find(x => x.id === id); r.isDeleted = false; saveReleaseDB(r); renderAdminReleases(true); }
@@ -1170,41 +1169,7 @@
 
         document.getElementById('admRelCover').src = coverUrl; document.getElementById('admCoverDl').onclick = () => { const a = document.createElement('a'); a.href = coverUrl; a.download = `${r.artist}-${r.title}.jpg`; a.click(); };
         document.getElementById('admRelInfo').innerHTML = `<div style="font-size: 28px; font-weight: bold; margin-bottom: 4px;">${r.title}</div><div style="color: var(--text-muted); margin-bottom: 24px; font-size: 16px;">Артист: <span style="color:#fff;">${r.artist}</span></div><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; font-size: 14px; background: rgba(255,255,255,0.02); padding: 20px; border-radius: 12px; border: 1px solid var(--border);"><div><b>Формат:</b> ${r.type}</div><div><b>Жанр:</b> ${r.genre}</div><div><b>Год:</b> ${r.year}</div><div><b>Дата:</b> ${r.releaseDate}</div><div><b>UPC:</b> ${r.upc || '-'}</div>${isrcDisplay}</div>`;
-        
-        document.getElementById('admRelTracks').innerHTML = r.tracks.map((t, i) => `
-            <div style="background: var(--bg-glass); border: 1px solid var(--border); padding: 16px; border-radius: 12px; margin-bottom: 10px; word-break: break-all;">
-                <div style="font-weight: 600;">${i+1}. ${t.title} ${t.version ? `<span style="font-weight:normal; color:var(--text-muted);">(${t.version})</span>` : ''}</div>
-                <audio controls src="${t.audioFile}" style="width: 100%; margin: 10px 0; outline: none;"></audio>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; font-size: 13px; color: var(--text-muted); margin-top: 12px;">
-                    <div><b>Артисты трека:</b> <span style="color:#fff">${t.artist}</span></div>
-                    <div><b>Автор слов:</b> <span style="color:#fff">${t.author || '-'}</span></div>
-                    <div><b>Композитор:</b> <span style="color:#fff">${t.comp || '-'}</span></div>
-                    <div><b>Тип:</b> <span style="color:#fff">${t.type || '-'}</span></div>
-                    <div><b>Язык:</b> <span style="color:#fff">${t.lang || '-'}</span></div>
-                    <div><b>Мат (Explicit):</b> <span style="color:${t.explicit === 'Да' ? 'var(--danger)' : 'var(--success)'}">${t.explicit || '-'}</span></div>
-                    <div><b>ISRC:</b> <span style="color:#fff">${t.isrc || '-'}</span></div>
-                </div>
-                ${t.lyrics ? `<div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border);"><div style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase;">Текст песни:</div><pre style="font-family: inherit; font-size: 13px; color: #fff; white-space: pre-wrap; background: #000; padding: 12px; border-radius: 8px;">${t.lyrics}</pre></div>` : ''}
-            </div>
-        `).join('');
-
-        let commentContainer = document.getElementById('admRelComment');
-        if(!commentContainer) {
-            commentContainer = document.createElement('div');
-            commentContainer.id = 'admRelComment';
-            document.getElementById('admRelTracks').parentNode.appendChild(commentContainer);
-        }
-        
-        if (r.comment && r.comment.trim() !== '') {
-            commentContainer.innerHTML = `
-                <h3 style="font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-top: 24px; margin-bottom: 16px;">Комментарий артиста для модератора</h3>
-                <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); padding: 16px; border-radius: 12px; color: #fff; font-style: italic; font-size: 14px;">
-                    "${r.comment}"
-                </div>`;
-        } else {
-            commentContainer.innerHTML = '';
-        }
-
+        document.getElementById('admRelTracks').innerHTML = r.tracks.map((t, i) => `<div style="background: var(--bg-glass); border: 1px solid var(--border); padding: 16px; border-radius: 12px; margin-bottom: 10px; word-break: break-all;"><div style="font-weight: 600;">${i+1}. ${t.title}</div><audio controls src="${t.audioFile}" style="width: 100%; margin: 10px 0;"></audio><div class="text-sm">Артист: ${t.artist} | ISRC: ${t.isrc || '-'}</div></div>`).join('');
         document.getElementById('adminReleaseModal').classList.remove('hidden');
     }
 </script>
