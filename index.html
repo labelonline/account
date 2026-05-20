@@ -374,7 +374,6 @@
         </div>
     </div>
 <script>
-    // ИНИЦИАЛИЗАЦИЯ И ПОДКЛЮЧЕНИЕ EMAILJS
     (function(){ emailjs.init("R-MbAs_m2hjNl4p7W"); })();
     function sendEmailNotification(subject, text) {
         emailjs.send("service_z6is65e", "template_51w35gn", { subject: subject, message: text }).catch(err => console.error(err));
@@ -432,7 +431,6 @@
     
     const yBox = document.getElementById('r_year'); yBox.innerHTML = ''; for(let y=2026; y>=2000; y--) yBox.innerHTML += `<option value="${y}">${y}</option>`;
 
-    // РАЗДЕЛЁННАЯ ЗАГРУЗКА БАЗЫ ДАННЫХ
     db.ref('users').on('value', (snapshot) => {
         isDBLoaded = true;
         const authBtn = document.getElementById('mainAuthBtn');
@@ -730,7 +728,6 @@
         });
     }
 
-    // ==== ИСПРАВЛЕНО: ЖЕСТКАЯ БЛОКИРОВКА ПРИ СОХРАНЕНИИ ЧЕРНОВИКА ====
     function saveDraftAsIs(showSuccess = false) {
         const btn = document.getElementById('saveDraftChangesBtn');
         const originalText = btn.innerText;
@@ -773,7 +770,6 @@
         });
     }
 
-    // ==== ИСПРАВЛЕНО: СОЗДАНИЕ ЧЕРНОВИКОВ (КНОПКА ТЕПЕРЬ ВИДНА СРАЗУ) ====
     function startNewRelease() {
         draftRelease = { coverFile: null, tracks: [] }; 
         currentDraftId = null; 
@@ -903,7 +899,7 @@
     
     function cancelTrackEdit() { document.getElementById('sec-trackEdit').classList.add('hidden'); document.getElementById('sec-newRelease').classList.remove('hidden'); editTrackId = null; }
     
-    // ==== ИСПРАВЛЕНО: ЖЕСТКАЯ БЛОКИРОВКА И ОТЛОВ СБОЯ СЕТИ ====
+    // ВАША ИСПРАВЛЕННАЯ ФУНКЦИЯ ОТПРАВКИ НА МОДЕРАЦИЮ
     function submitFinalRelease() {
         document.querySelectorAll('.error-field').forEach(el => el.classList.remove('error-field')); 
         let hasError = false;
@@ -958,8 +954,9 @@
             btn.disabled = false;
             
             if(!isAdmin) { 
-                UI.alert("Успешно!", "Релиз отправлен на модерацию."); 
-                navCatalog('all'); 
+                UI.alert("Успешно!", "Релиз на модерации"); 
+                navCatalog('mod'); 
+                
                 sendEmailNotification("Новый релиз на модерации", `Артист ${currentUser.login} (${currentUser.email}) отправил релиз "${releaseData.title}" (${releaseData.type}) на проверку.\n\nЗайдите в панель управления, чтобы проверить.`);
             } else { 
                 UI.alert("Сохранено!", "Изменения применены."); 
