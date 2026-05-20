@@ -455,9 +455,8 @@
     
     const yBox = document.getElementById('r_year'); yBox.innerHTML = ''; for(let y=2026; y>=2000; y--) yBox.innerHTML += `<option value="${y}">${y}</option>`;
 
-    // --- ИСПРАВЛЕНИЕ ЗАГРУЗКИ (РАЗДЕЛЕНИЕ СЛУШАТЕЛЕЙ) ---
-    // 1. ЗАГРУЖАЕМ ТОЛЬКО ПОЛЬЗОВАТЕЛЕЙ ДЛЯ БЫСТРОГО ВХОДА (Весит несколько килобайт, загружается мгновенно)
-    db.ref('users').on('value', (snapshot) => {
+    db.ref('/').on('value', (snapshot) => {
+        // Разблокировка кнопки после загрузки базы
         isDBLoaded = true;
         const authBtn = document.getElementById('mainAuthBtn');
         if(authBtn && authBtn.disabled) {
@@ -465,8 +464,12 @@
             authBtn.innerText = authMode === 'login' ? 'Войти в кабинет' : 'Создать кабинет';
         }
 
-        const data = snapshot.val() || {};
-        appState.users = Object.values(data);
+        if (!snapshot.exists()) return;
+        const data = snapshot.val();
+        appState.users = data.users ? Object.values(data.users) : [];
+        appState.releases = data.releases ? Object.values(data.releases) : [];
+        appState.chats = {};
+        if (data.chats) Object.keys(data.chats).forEach(k => { appState.chats[k] = data.chats[k]; });
 
         if(currentUser) { 
             const updatedUser = appState.users.find(u => u.id === currentUser.id);
@@ -492,24 +495,6 @@
             checkNotifications();
         }
     });
-
-    // 2. РЕЛИЗЫ ЗАГРУЖАЮТСЯ ОТДЕЛЬНО В ФОНЕ (Тяжелые аудиофайлы не мешают входу)
-    db.ref('releases').on('value', (snapshot) => {
-        const data = snapshot.val() || {};
-        appState.releases = Object.values(data);
-        if(currentUser) refreshUI();
-    });
-
-    // 3. ЧАТЫ ТАКЖЕ ЗАГРУЖАЮТСЯ ОТДЕЛЬНО
-    db.ref('chats').on('value', (snapshot) => {
-        const data = snapshot.val() || {};
-        appState.chats = {};
-        Object.keys(data).forEach(k => { appState.chats[k] = data[k]; });
-        if(currentUser) {
-            if (currentSection === 'userChat' || currentSection === 'adminChats') refreshUI();
-        }
-    });
-    // --------------------------------------------------------
 
     let typingTimeout;
     function notifyTyping(isTyping, targetEmail) { 
@@ -1079,6 +1064,5 @@
         document.getElementById('adminReleaseModal').classList.remove('hidden');
     }
 </script>
-
 </body>
 </html>
