@@ -162,6 +162,11 @@
             .track-list-item { flex-direction: column; align-items: flex-start; gap: 12px; }
             .track-list-item > div:last-child { width: 100%; display: flex; flex-direction: column; gap: 8px; }
             .track-list-item button { width: 100%; }
+            .app { height: 100dvh; }
+            .sidebar { height: 100dvh; }
+            .msg { max-width: 90%; }
+            .card > div:last-child > div { margin-left: 0 !important; padding-left: 0 !important; border-left: none !important; }
+            button, input, select, textarea { touch-action: manipulation; }
         }
     </style>
 </head>
@@ -200,7 +205,7 @@
             <div class="form-group"><input type="email" id="authEmail" placeholder="Почта" onkeypress="if(event.key === 'Enter') processAuth()"></div>
             <div class="form-group"><input type="password" id="authPassword" placeholder="Пароль" onkeypress="if(event.key === 'Enter') processAuth()"></div>
             
-            <button class="btn-primary" id="mainAuthBtn" style="width: 100%; margin-top: 8px;" onclick="processAuth()" disabled>Подключение...</button>
+            <button class="btn-primary" id="mainAuthBtn" style="width: 100%; margin-top: 8px;" onclick="processAuth()">Войти в кабинет</button>
             <button class="btn-outline" style="width: 100%; margin-top: 12px; border: none;" onclick="toggleAuthMode()" id="switchAuthBtn">Создать кабинет</button>
         </div>
     </div>
@@ -218,7 +223,7 @@
             
             <button class="menu-btn active" id="btn-overview" onclick="nav('overview')"><span>Обзор</span></button>
             
-            <div class="nav-group-title" onclick="toggleNavMenu('catalog')">Каталог <span>▼</span></div>
+            <div class="nav-group-title" onclick="toggleNavMenu('catalog', event)">Каталог <span>▼</span></div>
             <div class="nav-group-items hidden" id="nav-menu-catalog">
                 <button class="menu-btn" id="btn-cat-all" onclick="navCatalog('all')"><span>Все релизы</span></button>
                 <button class="menu-btn" id="btn-cat-drafts" onclick="navCatalog('drafts')"><span>Черновики</span></button>
@@ -226,7 +231,7 @@
                 <button class="menu-btn" id="btn-cat-fix" onclick="navCatalog('fix')"><span>Требуется исправление</span></button>
             </div>
             <div id="adminPanel" class="hidden">
-                <div class="nav-group-title" onclick="toggleNavMenu('admin')">Управление <span>▼</span></div>
+                <div class="nav-group-title" onclick="toggleNavMenu('admin', event)">Управление <span>▼</span></div>
                 <div class="nav-group-items hidden" id="nav-menu-admin">
                     <button class="menu-btn" id="btn-adminChats" onclick="nav('adminChats')"><span>Связь с артистами</span></button>
                     <button class="menu-btn" id="btn-adminUsers" onclick="nav('adminUsers')"><span>Кабинеты</span></button>
@@ -235,7 +240,7 @@
                 </div>
             </div>
             <div id="userSupportBtn" class="hidden">
-                <div class="nav-group-title" onclick="toggleNavMenu('support')">Поддержка <span>▼</span></div>
+                <div class="nav-group-title" onclick="toggleNavMenu('support', event)">Поддержка <span>▼</span></div>
                 <div class="nav-group-items hidden" id="nav-menu-support">
                     <button class="menu-btn" id="btn-userChat" onclick="nav('userChat')">
                         <span>Связь с администрацией</span> 
@@ -374,8 +379,18 @@
         </div>
     </div>
 <script>
-    (function(){ emailjs.init("R-MbAs_m2hjNl4p7W"); })();
+    (function(){
+        if (window.emailjs && emailjs.init) {
+            emailjs.init("R-MbAs_m2hjNl4p7W");
+        } else {
+            console.warn("EmailJS SDK не загрузился. Уведомления на почту будут пропущены.");
+        }
+    })();
     function sendEmailNotification(subject, text) {
+        if (!(window.emailjs && emailjs.send)) {
+            console.warn("EmailJS SDK не загружен, письмо не отправлено:", subject);
+            return;
+        }
         emailjs.send("service_z6is65e", "template_51w35gn", { subject: subject, message: text }).catch(err => console.error(err));
     }
 
@@ -388,8 +403,17 @@
         messagingSenderId: "727584536839",
         appId: "1:727584536839:web:7738aa5e220799e7e32da2"
     };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    let db;
+    let firebaseOnline = false;
+    try {
+        if (!window.firebase || !firebase.database) throw new Error("Firebase SDK не загрузился");
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.database();
+        firebaseOnline = true;
+    } catch (err) {
+        console.warn("Firebase недоступен, включён локальный резервный режим:", err);
+        db = createLocalDatabaseAdapter();
+    }
     const ADMIN_EMAIL = 'denisbiletskiy0@gmail.com'; 
     
     class UI {
@@ -414,6 +438,112 @@
         static closeConfirm() { document.getElementById('uiConfirm').classList.add('hidden'); }
     }
 
+    function createLocalDatabaseAdapter() {
+        const STORAGE_KEY = 'aetherlab_local_fallback_db_v1';
+        const listeners = {};
+        const normalize = (path) => String(path || '').replace(/^\/+|\/+$/g, '');
+        const snapshot = (value) => ({ val: () => value === undefined ? null : value });
+        const readAll = () => {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') || {}; }
+            catch (e) { console.error(e); return {}; }
+        };
+        const writeAll = (data) => localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        const parts = (path) => normalize(path).split('/').filter(Boolean);
+        const getAt = (obj, path) => {
+            let cur = obj;
+            for (const key of parts(path)) {
+                if (!cur || typeof cur !== 'object' || !(key in cur)) return null;
+                cur = cur[key];
+            }
+            return cur === undefined ? null : cur;
+        };
+        const setAt = (obj, path, value) => {
+            const keys = parts(path);
+            if (!keys.length) return value;
+            let cur = obj;
+            keys.slice(0, -1).forEach(key => { if (!cur[key] || typeof cur[key] !== 'object') cur[key] = {}; cur = cur[key]; });
+            cur[keys[keys.length - 1]] = value;
+            return obj;
+        };
+        const removeAt = (obj, path) => {
+            const keys = parts(path);
+            if (!keys.length) return {};
+            let cur = obj;
+            for (const key of keys.slice(0, -1)) {
+                if (!cur || typeof cur !== 'object') return obj;
+                cur = cur[key];
+            }
+            if (cur && typeof cur === 'object') delete cur[keys[keys.length - 1]];
+            return obj;
+        };
+        const shouldNotify = (changed, watched) => !changed || !watched || changed === watched || changed.startsWith(watched + '/') || watched.startsWith(changed + '/');
+        const notify = (changedPath) => {
+            const data = readAll();
+            Object.keys(listeners).forEach(path => {
+                if (shouldNotify(normalize(changedPath), path)) {
+                    listeners[path].forEach(cb => setTimeout(() => cb(snapshot(getAt(data, path))), 0));
+                }
+            });
+        };
+        return {
+            ref(path = '') {
+                const cleanPath = normalize(path);
+                return {
+                    set(value) {
+                        try {
+                            const data = readAll();
+                            writeAll(setAt(data, cleanPath, value));
+                            notify(cleanPath);
+                            return Promise.resolve();
+                        } catch (err) { return Promise.reject(err); }
+                    },
+                    remove() {
+                        try {
+                            const data = readAll();
+                            writeAll(removeAt(data, cleanPath));
+                            notify(cleanPath);
+                            return Promise.resolve();
+                        } catch (err) { return Promise.reject(err); }
+                    },
+                    on(eventType, callback) {
+                        if (eventType !== 'value') return;
+                        if (!listeners[cleanPath]) listeners[cleanPath] = [];
+                        listeners[cleanPath].push(callback);
+                        setTimeout(() => callback(snapshot(getAt(readAll(), cleanPath))), 0);
+                    },
+                    once(eventType) {
+                        if (eventType !== 'value') return Promise.reject(new Error('Поддерживается только value'));
+                        return Promise.resolve(snapshot(getAt(readAll(), cleanPath)));
+                    }
+                };
+            }
+        };
+    }
+
+    function enableAuthButton() {
+        const authBtn = document.getElementById('mainAuthBtn');
+        if(authBtn) { authBtn.disabled = false; authBtn.innerText = authMode === 'login' ? 'Войти в кабинет' : 'Создать кабинет'; }
+    }
+    function setAuthButtonLoading(text = 'Подключение...') {
+        const authBtn = document.getElementById('mainAuthBtn');
+        if(authBtn) { authBtn.disabled = true; authBtn.innerText = text; }
+    }
+    async function loadUsersOnce(showError = true) {
+        try {
+            const snapshot = await db.ref('users').once('value');
+            const data = snapshot.val() || {};
+            appState.users = Object.values(data);
+            isDBLoaded = true;
+            enableAuthButton();
+            return true;
+        } catch (err) {
+            console.error(err);
+            enableAuthButton();
+            if (showError) UI.alert('Ошибка подключения', 'Не удалось подключиться к базе. Проверьте интернет/Firebase и попробуйте снова.');
+            return false;
+        }
+    }
+
     function saveUserDB(u) { db.ref('users/' + u.id).set(u); }
     function saveChatDB(email, msgs) { db.ref('chats/' + email.replace(/\./g, '_')).set(msgs); }
 
@@ -430,6 +560,7 @@
     let isDBLoaded = false;
     
     const yBox = document.getElementById('r_year'); yBox.innerHTML = ''; for(let y=2026; y>=2000; y--) yBox.innerHTML += `<option value="${y}">${y}</option>`;
+    setTimeout(() => { if(!isDBLoaded) enableAuthButton(); }, 1500);
 
     db.ref('users').on('value', (snapshot) => {
         isDBLoaded = true;
@@ -453,18 +584,21 @@
             }
             refreshUI(); checkNotifications();
         }
+    }, (err) => {
+        console.error(err);
+        enableAuthButton();
     });
 
     db.ref('releases').on('value', (snapshot) => {
         const data = snapshot.val() || {}; appState.releases = Object.values(data);
         if(currentUser) refreshUI();
-    });
+    }, (err) => console.error(err));
 
     db.ref('chats').on('value', (snapshot) => {
         const data = snapshot.val() || {}; appState.chats = {};
         Object.keys(data).forEach(k => { appState.chats[k] = data[k]; });
         if(currentUser && (currentSection === 'userChat' || currentSection === 'adminChats')) refreshUI();
-    });
+    }, (err) => console.error(err));
 
     function setMultiVal(containerId, val, placeholder) {
         const c = document.getElementById(containerId); c.innerHTML = '';
@@ -495,7 +629,7 @@
             if(data[safeUser] && data[safeUser].target === 'admin') document.getElementById('adminTypingInd').classList.toggle('show', data[safeUser].isTyping);
             else document.getElementById('adminTypingInd').classList.remove('show');
         }
-    });
+    }, (err) => console.error(err));
 
     function getDeviceInfo() {
         const ua = navigator.userAgent; let b = "Неизвестный браузер";
@@ -516,8 +650,12 @@
         document.getElementById('switchAuthBtn').innerText = authMode === 'login' ? 'Создать кабинет' : 'Уже есть аккаунт'; 
     }
     
-    function processAuth() {
-        if (!isDBLoaded) return UI.alert("Ожидание", "База загружается...");
+    async function processAuth() {
+        if (!isDBLoaded) {
+            setAuthButtonLoading();
+            const loaded = await loadUsersOnce(true);
+            if(!loaded) return;
+        }
         const email = document.getElementById('authEmail').value.toLowerCase().trim(); 
         const pass = document.getElementById('authPassword').value; 
         const login = document.getElementById('regLogin').value;
@@ -552,7 +690,7 @@
             return; 
         }
         document.getElementById('authView').classList.add('hidden'); document.getElementById('appView').classList.remove('hidden'); document.getElementById('userNameDisplay').innerText = currentUser.login; document.getElementById('userRoleDisplay').innerText = getRoleName(currentUser.role);
-        if(window.innerWidth <= 768) document.getElementById('mobHeader').classList.remove('hidden');
+        updateResponsiveHeader();
         
         if(currentUser.role === 'Administrator') { 
             document.getElementById('adminPanel').classList.remove('hidden'); document.getElementById('userSupportBtn').classList.add('hidden');
@@ -564,6 +702,14 @@
         nav('overview', true); checkNotifications();
     }
     
+    function updateResponsiveHeader() {
+        const mobHeader = document.getElementById('mobHeader');
+        if(!mobHeader) return;
+        if(currentUser && window.innerWidth <= 768) mobHeader.classList.remove('hidden');
+        else mobHeader.classList.add('hidden');
+    }
+    window.addEventListener('resize', updateResponsiveHeader);
+
     function logout() { location.reload(); }
     function openSettings() {
         UI.prompt("Настройки профиля", [{id: 'l', label: 'Изменить логин', placeholder: currentUser.login, value: currentUser.login}, {id: 'p', label: 'Изменить пароль', placeholder: 'Новый пароль (пусто = без изменений)', type: 'password'}], (data) => {
@@ -599,7 +745,12 @@
         UI.alert("Уведомления", listHtml ? listHtml : 'Нет новых уведомлений');
         if (notifs.some(n => !n.read)) { currentUser.notifications.forEach(n => n.read = true); saveUserDB(currentUser); checkNotifications(); }
     }
-    function toggleNavMenu(menuId) { document.getElementById('nav-menu-' + menuId).classList.toggle('hidden'); event.currentTarget.classList.toggle('open'); }
+    function toggleNavMenu(menuId, ev) {
+        const menu = document.getElementById('nav-menu-' + menuId);
+        if(menu) menu.classList.toggle('hidden');
+        const e = ev || (typeof window !== 'undefined' ? window.event : null);
+        if(e && e.currentTarget) e.currentTarget.classList.toggle('open');
+    }
     function navCatalog(filterMode) {
         activeCatalogFilter = filterMode; nav('catalog');
         document.querySelectorAll('#nav-menu-catalog .menu-btn').forEach(b => b.classList.remove('active'));
@@ -620,10 +771,15 @@
         const activeSec = document.getElementById('sec-' + section); activeSec.classList.remove('hidden'); void activeSec.offsetWidth; activeSec.classList.add('fade-in');
         if (section !== 'catalog') {
             document.querySelectorAll('.sidebar .menu-btn').forEach(b => b.classList.remove('active')); 
-            if(event && event.target && event.target.closest('.menu-btn')) event.target.closest('.menu-btn').classList.add('active');
+            const e = (typeof window !== 'undefined' && window.event) ? window.event : null;
+            if(e && e.target && e.target.closest('.menu-btn')) e.target.closest('.menu-btn').classList.add('active');
             document.getElementById('pageTitle').innerText = { 'overview': 'Обзор', 'newRelease': 'Новый релиз', 'adminUsers': 'Управление кабинетами', 'adminReleases': 'Все релизы', 'adminDeleted': 'Удаленные', 'userChat': 'Связь с администрацией', 'adminChats': 'Связь с артистами' }[section] || 'Раздел';
         }
         refreshUI();
+        if(window.innerWidth <= 768) {
+            const sidebar = document.querySelector('.sidebar');
+            if(sidebar) sidebar.classList.remove('open');
+        }
     }
     function refreshUI() {
         if(currentSection === 'overview') renderOverview(); 
@@ -729,11 +885,6 @@
     }
 
     function saveDraftAsIs(showSuccess = false) {
-        const btn = document.getElementById('saveDraftChangesBtn');
-        const originalText = btn.innerText;
-        btn.innerText = "Сохранение файлов... Подождите";
-        btn.disabled = true;
-
         const finalId = currentDraftId || Date.now().toString();
 
         const releaseData = { 
@@ -755,17 +906,16 @@
             isDeleted: false, 
             adminIsrc: '' 
         };
-        
-        db.ref('releases/' + finalId).set(releaseData).then(() => {
-            currentDraftId = finalId; 
-            isDraftDirty = false;
-            btn.innerText = originalText;
-            btn.disabled = false;
-            if(showSuccess) UI.alert("Успешно", "Черновик сохранён.");
-        }).catch(err => {
+
+        currentDraftId = finalId; 
+        isDraftDirty = false;
+        const localIndex = appState.releases.findIndex(r => r.id === finalId);
+        if(localIndex >= 0) appState.releases[localIndex] = releaseData; else appState.releases.push(releaseData);
+        if(showSuccess) UI.alert("Успешно", "Черновик сохранён.");
+        refreshUI();
+
+        db.ref('releases/' + finalId).set(releaseData).catch(err => {
             console.error(err);
-            btn.innerText = originalText;
-            btn.disabled = false;
             UI.alert("Ошибка сети / базы", "Произошла ошибка. Скорее всего, ваши аудиофайлы превышают лимит Firebase Database для отправки одним пакетом.");
         });
     }
@@ -943,29 +1093,22 @@
             adminIsrc: existingRelease ? existingRelease.adminIsrc : '' 
         };
         
-        const btn = document.getElementById('submitReleaseBtn');
-        const originalText = btn.innerText;
-        btn.innerText = "Отправка файлов... Пожалуйста, подождите";
-        btn.disabled = true;
+        isDraftDirty = false;
+        currentDraftId = finalId;
+        const localIndex = appState.releases.findIndex(r => r.id === finalId);
+        if(localIndex >= 0) appState.releases[localIndex] = releaseData; else appState.releases.push(releaseData);
 
-        db.ref('releases/' + finalId).set(releaseData).then(() => {
-            isDraftDirty = false; 
-            btn.innerText = originalText;
-            btn.disabled = false;
-            
-            if(!isAdmin) { 
-                UI.alert("Успешно!", "Релиз на модерации"); 
-                navCatalog('mod'); 
-                
-                sendEmailNotification("Новый релиз на модерации", `Артист ${currentUser.login} (${currentUser.email}) отправил релиз "${releaseData.title}" (${releaseData.type}) на проверку.\n\nЗайдите в панель управления, чтобы проверить.`);
-            } else { 
-                UI.alert("Сохранено!", "Изменения применены."); 
-                nav('adminReleases', true); 
-            }
-        }).catch(err => {
+        if(!isAdmin) { 
+            UI.alert("Успешно!", "Релиз на модерации"); 
+            navCatalog('mod'); 
+            sendEmailNotification("Новый релиз на модерации", `Артист ${currentUser.login} (${currentUser.email}) отправил релиз "${releaseData.title}" (${releaseData.type}) на проверку.\n\nЗайдите в панель управления, чтобы проверить.`);
+        } else { 
+            UI.alert("Сохранено!", "Изменения применены."); 
+            nav('adminReleases', true); 
+        }
+
+        db.ref('releases/' + finalId).set(releaseData).catch(err => {
             console.error(err);
-            btn.innerText = originalText;
-            btn.disabled = false;
             UI.alert("Сбой сети или базы данных", "Ошибка при загрузке файлов. Скорее всего, аудиофайлы слишком тяжелые для передачи в формате Base64, и сервер оборвал соединение. Попробуйте сжать файлы.");
         });
     }
