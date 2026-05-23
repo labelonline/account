@@ -571,6 +571,85 @@
         }
         .content-text-line{white-space:pre-wrap;}
 
+        .custom-file-wrap{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            flex-wrap:wrap;
+            padding:10px;
+            border-radius:18px;
+            background:rgba(255,255,255,.04);
+            border:1px solid var(--border);
+        }
+        .custom-file-input{
+            position:absolute!important;
+            opacity:0!important;
+            width:1px!important;
+            height:1px!important;
+            pointer-events:none!important;
+        }
+        .custom-file-btn{
+            border-radius:999px;
+            padding:12px 18px;
+            background:linear-gradient(135deg,var(--accent),#9f76ff);
+            color:#fff;
+            font-weight:700;
+            box-shadow:0 12px 26px rgba(123,97,255,.22);
+        }
+        .custom-file-name{
+            color:var(--text-muted);
+            font-size:13px;
+            min-width:0;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
+            max-width:240px;
+        }
+        .content-media-grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(140px,max-content));
+            gap:10px;
+            padding:10px;
+            align-items:start;
+        }
+        .content-media-tile{
+            position:relative;
+            width:fit-content;
+            max-width:100%;
+            border-radius:16px;
+            overflow:hidden;
+            background:#0f131b;
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .content-media-tile img,
+        .content-media-tile video{
+            width:auto!important;
+            max-width:min(100%,220px)!important;
+            height:auto!important;
+            max-height:180px!important;
+            display:block;
+            object-fit:contain!important;
+            background:#0f131b;
+        }
+        .content-media-full-btn{
+            position:absolute;
+            right:8px;
+            bottom:8px;
+            padding:7px 10px;
+            border-radius:999px;
+            background:rgba(15,19,27,.82);
+            border:1px solid rgba(255,255,255,.18);
+            color:#fff;
+            font-size:12px;
+            box-shadow:none;
+            backdrop-filter:blur(8px);
+        }
+        .content-media-count{
+            padding:10px 14px 0;
+            color:var(--text-muted);
+            font-size:12px;
+        }
+
     </style>
 </head>
 <body>
@@ -891,19 +970,31 @@
                     return `<div class="form-group"><label>${esc(f.label || '')}</label><textarea id="prompt_${f.id}" placeholder="${esc(f.placeholder || '')}" rows="${f.rows || 5}">${esc(f.value || '')}</textarea></div>`;
                 }
                 if(f.type === 'file') {
-                    return `<div class="form-group"><label>${esc(f.label || '')}</label><input type="file" id="prompt_${f.id}" accept="${esc(f.accept || '')}"></div>`;
+                    const multipleAttr = f.multiple ? 'multiple' : '';
+                    const btnText = f.multiple ? 'Выбрать файлы' : 'Выбрать файл';
+                    return `<div class="form-group"><label>${esc(f.label || '')}</label><div class="custom-file-wrap"><input class="custom-file-input" type="file" id="prompt_${f.id}" accept="${esc(f.accept || '')}" ${multipleAttr} onchange="updateCustomFileName('prompt_${f.id}')"><button type="button" class="custom-file-btn" onclick="document.getElementById('prompt_${f.id}').click()">${btnText}</button><span class="custom-file-name" id="prompt_${f.id}_name">Файл не выбран</span></div></div>`;
                 }
                 return `<div class="form-group"><label>${esc(f.label || '')}</label><input type="${f.type||'text'}" id="prompt_${f.id}" placeholder="${esc(f.placeholder||'')}" value="${esc(f.value||'')}"></div>`;
             }).join(''); 
             document.getElementById('uiPrompt').classList.remove('hidden'); 
             document.getElementById('uiPromptConfirm').onclick = () => { 
-                const results = {}; fields.forEach(f => { const el = document.getElementById(`prompt_${f.id}`); results[f.id] = f.type === 'file' ? (el.files && el.files[0] ? el.files[0] : null) : el.value; }); 
+                const results = {}; fields.forEach(f => { const el = document.getElementById(`prompt_${f.id}`); results[f.id] = f.type === 'file' ? (f.multiple ? Array.from(el.files || []) : (el.files && el.files[0] ? el.files[0] : null)) : el.value; }); 
                 this.closePrompt(); onConfirm(results); 
             }; 
         }
         static closePrompt() { document.getElementById('uiPrompt').classList.add('hidden'); }
         static confirm(title, onConfirm) { document.getElementById('uiConfirmTitle').innerText = title; document.getElementById('uiConfirm').classList.remove('hidden'); document.getElementById('uiConfirmBtn').onclick = () => { this.closeConfirm(); onConfirm(); }; }
         static closeConfirm() { document.getElementById('uiConfirm').classList.add('hidden'); }
+    }
+
+    function updateCustomFileName(inputId) {
+        const input = document.getElementById(inputId);
+        const label = document.getElementById(inputId + '_name');
+        if(!input || !label) return;
+        const files = Array.from(input.files || []);
+        if(!files.length) label.textContent = 'Файл не выбран';
+        else if(files.length === 1) label.textContent = files[0].name;
+        else label.textContent = `Выбрано файлов: ${files.length}`;
     }
 
     function createLocalDatabaseAdapter() {
