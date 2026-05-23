@@ -650,6 +650,143 @@
             font-size:12px;
         }
 
+    
+        /* ===== AetherLab custom date picker ===== */
+        .aether-native-date-hidden{
+            position:absolute!important;
+            opacity:0!important;
+            pointer-events:none!important;
+            width:0!important;
+            height:0!important;
+            padding:0!important;
+            margin:0!important;
+            border:0!important;
+        }
+        .aether-date-display{
+            width:100%;
+            padding:14px 48px 14px 16px;
+            background:rgba(255,255,255,.05);
+            border:1px solid rgba(255,255,255,.12);
+            color:#fff;
+            border-radius:22px;
+            font-size:14px;
+            outline:none;
+            box-shadow:inset 0 0 0 1px rgba(255,255,255,.02);
+            transition:.18s;
+            cursor:pointer;
+        }
+        .aether-date-display:focus{
+            border-color:rgba(123,97,255,.75);
+            box-shadow:0 0 0 4px rgba(123,97,255,.16), inset 0 0 0 1px rgba(255,255,255,.04);
+        }
+        .aether-date-field{position:relative;width:100%;}
+        .aether-date-field::after{
+            content:"";
+            position:absolute;
+            right:16px;
+            top:50%;
+            width:18px;
+            height:18px;
+            transform:translateY(-50%);
+            pointer-events:none;
+            opacity:.85;
+            background:
+                linear-gradient(currentColor,currentColor) 4px 6px/10px 1.8px no-repeat,
+                linear-gradient(currentColor,currentColor) 4px 11px/10px 1.8px no-repeat,
+                linear-gradient(currentColor,currentColor) 5px 1px/1.8px 4px no-repeat,
+                linear-gradient(currentColor,currentColor) 11px 1px/1.8px 4px no-repeat;
+            border:1.8px solid currentColor;
+            border-radius:5px;
+            color:#d7deee;
+        }
+        .aether-date-popover{
+            position:fixed;
+            z-index:20000;
+            width:min(340px,calc(100vw - 28px));
+            padding:16px;
+            border-radius:26px;
+            background:linear-gradient(180deg,rgba(23,28,39,.98),rgba(15,19,26,.98));
+            border:1px solid rgba(255,255,255,.12);
+            box-shadow:0 24px 70px rgba(0,0,0,.58),0 0 0 1px rgba(123,97,255,.08),0 0 34px rgba(123,97,255,.16);
+            backdrop-filter:blur(18px);
+            color:#f5f7fb;
+        }
+        .aether-date-head{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:10px;
+            margin-bottom:12px;
+        }
+        .aether-date-title{
+            font-weight:800;
+            letter-spacing:-.02em;
+            font-size:16px;
+            padding:8px 10px;
+            border-radius:14px;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.08);
+        }
+        .aether-date-nav{display:flex;gap:8px;}
+        .aether-date-nav button,
+        .aether-date-actions button{
+            border:1px solid rgba(255,255,255,.12);
+            background:rgba(255,255,255,.055);
+            color:#fff;
+            border-radius:14px;
+            padding:9px 12px;
+            box-shadow:none;
+        }
+        .aether-date-nav button:hover,
+        .aether-date-actions button:hover{background:rgba(123,97,255,.18);border-color:rgba(123,97,255,.36);}
+        .aether-date-week,
+        .aether-date-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+        .aether-date-week span{
+            text-align:center;
+            color:#aab0c0;
+            font-size:12px;
+            font-weight:700;
+            padding:8px 0;
+        }
+        .aether-date-day{
+            height:38px;
+            display:grid;
+            place-items:center;
+            border-radius:14px;
+            border:1px solid transparent;
+            background:transparent;
+            color:#eef2fb;
+            cursor:pointer;
+            font-weight:600;
+            transition:.16s;
+        }
+        .aether-date-day:hover{
+            background:rgba(123,97,255,.18);
+            border-color:rgba(123,97,255,.34);
+            transform:translateY(-1px);
+        }
+        .aether-date-day.other{color:rgba(170,176,192,.42);}
+        .aether-date-day.today{border-color:rgba(54,194,255,.42);box-shadow:inset 0 0 0 1px rgba(54,194,255,.12);}
+        .aether-date-day.selected{
+            background:linear-gradient(135deg,var(--accent),#9f76ff);
+            color:#fff;
+            border-color:rgba(255,255,255,.22);
+            box-shadow:0 10px 26px rgba(123,97,255,.34);
+        }
+        .aether-date-actions{
+            display:flex;
+            justify-content:space-between;
+            gap:10px;
+            margin-top:14px;
+            padding-top:12px;
+            border-top:1px solid rgba(255,255,255,.08);
+        }
+        .aether-date-actions .danger-lite{color:#ffb1b1;background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.18);}
+        @media(max-width:768px){
+            .aether-date-popover{left:14px!important;right:14px!important;top:auto!important;bottom:14px!important;width:auto;}
+            .aether-date-day{height:42px;}
+        }
+
     </style>
 </head>
 <body>
@@ -2395,6 +2532,161 @@
         document.getElementById('admRelTracks').innerHTML = r.tracks.map((t, i) => `<div style="background: var(--bg-glass); border: 1px solid var(--border); padding: 16px; border-radius: 12px; margin-bottom: 10px; word-break: break-all;"><div style="font-weight: 600;">${i+1}. ${t.title}</div><audio controls src="${t.audioFile}" style="width: 100%; margin: 10px 0;"></audio><div class="text-sm">Артист: ${t.artist} | Авторы: ${t.author} | Композиторы: ${t.comp} | ISRC: <span style="color:var(--success); font-weight:bold;">${t.isrc || '-'}</span></div></div>`).join('');
         document.getElementById('adminReleaseModal').classList.remove('hidden');
     }
+
+    /* ===== AetherLab custom date picker ===== */
+    (function(){
+        const monthNames = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+        const weekNames = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+        let active = null;
+        let popover = null;
+        let viewDate = new Date();
+        let originalValueDescriptor = null;
+
+        function pad(n){ return String(n).padStart(2,'0'); }
+        function toIso(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+        function parseIso(v){
+            const m = String(v || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if(!m) return null;
+            const d = new Date(+m[1], +m[2]-1, +m[3]);
+            return Number.isNaN(d.getTime()) ? null : d;
+        }
+        function formatDate(v){
+            const d = parseIso(v);
+            return d ? `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}` : '';
+        }
+        function sameDay(a,b){ return a && b && a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+
+        function getNativeValue(input){
+            if(originalValueDescriptor && originalValueDescriptor.get) return originalValueDescriptor.get.call(input);
+            return input.getAttribute('value') || '';
+        }
+        function setNativeValue(input, value){
+            if(originalValueDescriptor && originalValueDescriptor.set) originalValueDescriptor.set.call(input, value || '');
+            else input.setAttribute('value', value || '');
+            if(input.__aetherDateDisplay) input.__aetherDateDisplay.value = formatDate(value);
+        }
+
+        function ensurePopover(){
+            if(popover) return popover;
+            popover = document.createElement('div');
+            popover.className = 'aether-date-popover hidden';
+            document.body.appendChild(popover);
+            popover.addEventListener('mousedown', e => e.preventDefault());
+            return popover;
+        }
+
+        function openPicker(input){
+            active = input;
+            const selected = parseIso(getNativeValue(input));
+            viewDate = selected ? new Date(selected.getFullYear(), selected.getMonth(), 1) : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+            renderPicker();
+            const rect = input.__aetherDateDisplay.getBoundingClientRect();
+            const p = ensurePopover();
+            p.classList.remove('hidden');
+            const width = Math.min(340, window.innerWidth - 28);
+            let left = Math.min(Math.max(14, rect.left), window.innerWidth - width - 14);
+            let top = rect.bottom + 10;
+            if(top + 390 > window.innerHeight) top = Math.max(14, rect.top - 390);
+            p.style.left = left + 'px';
+            p.style.top = top + 'px';
+        }
+        function closePicker(){ if(popover) popover.classList.add('hidden'); active = null; }
+
+        function renderPicker(){
+            const p = ensurePopover();
+            const selected = active ? parseIso(getNativeValue(active)) : null;
+            const today = new Date();
+            const year = viewDate.getFullYear();
+            const month = viewDate.getMonth();
+            const first = new Date(year, month, 1);
+            const start = new Date(first);
+            const mondayOffset = (first.getDay() + 6) % 7;
+            start.setDate(first.getDate() - mondayOffset);
+            let days = '';
+            for(let i=0;i<42;i++){
+                const d = new Date(start);
+                d.setDate(start.getDate()+i);
+                const cls = ['aether-date-day'];
+                if(d.getMonth() !== month) cls.push('other');
+                if(sameDay(d, today)) cls.push('today');
+                if(selected && sameDay(d, selected)) cls.push('selected');
+                days += `<button type="button" class="${cls.join(' ')}" data-date="${toIso(d)}">${d.getDate()}</button>`;
+            }
+            p.innerHTML = `
+                <div class="aether-date-head">
+                    <div class="aether-date-title">${monthNames[month]} ${year}</div>
+                    <div class="aether-date-nav">
+                        <button type="button" data-action="prev" title="Предыдущий месяц">↑</button>
+                        <button type="button" data-action="next" title="Следующий месяц">↓</button>
+                    </div>
+                </div>
+                <div class="aether-date-week">${weekNames.map(w=>`<span>${w}</span>`).join('')}</div>
+                <div class="aether-date-grid">${days}</div>
+                <div class="aether-date-actions">
+                    <button type="button" class="danger-lite" data-action="clear">Удалить</button>
+                    <button type="button" data-action="today">Сегодня</button>
+                </div>`;
+            p.querySelector('[data-action="prev"]').onclick = () => { viewDate.setMonth(viewDate.getMonth()-1); renderPicker(); };
+            p.querySelector('[data-action="next"]').onclick = () => { viewDate.setMonth(viewDate.getMonth()+1); renderPicker(); };
+            p.querySelector('[data-action="clear"]').onclick = () => selectDate('');
+            p.querySelector('[data-action="today"]').onclick = () => selectDate(toIso(new Date()));
+            p.querySelectorAll('[data-date]').forEach(btn => btn.onclick = () => selectDate(btn.dataset.date));
+        }
+
+        function selectDate(value){
+            if(!active) return;
+            setNativeValue(active, value);
+            active.dispatchEvent(new Event('input', { bubbles:true }));
+            active.dispatchEvent(new Event('change', { bubbles:true }));
+            closePicker();
+        }
+
+        function initDateInput(input){
+            if(input.__aetherDateReady) return;
+            input.__aetherDateReady = true;
+            if(!originalValueDescriptor) originalValueDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+            const wrapper = document.createElement('div');
+            wrapper.className = 'aether-date-field';
+            const display = document.createElement('input');
+            display.type = 'text';
+            display.className = 'aether-date-display';
+            display.placeholder = 'дд.мм.гггг';
+            display.readOnly = true;
+            display.value = formatDate(input.value);
+            input.parentNode.insertBefore(wrapper, input);
+            wrapper.appendChild(input);
+            wrapper.appendChild(display);
+            input.classList.add('aether-native-date-hidden');
+            input.__aetherDateDisplay = display;
+            try{
+                Object.defineProperty(input, 'value', {
+                    configurable:true,
+                    get(){ return getNativeValue(input); },
+                    set(v){ setNativeValue(input, v); }
+                });
+            }catch(e){}
+            display.addEventListener('focus', () => openPicker(input));
+            display.addEventListener('click', () => openPicker(input));
+            display.addEventListener('keydown', (e) => {
+                if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openPicker(input); }
+                if(e.key === 'Escape') closePicker();
+            });
+            input.addEventListener('change', () => { display.value = formatDate(getNativeValue(input)); });
+        }
+
+        function initAll(){ document.querySelectorAll('input[type="date"]').forEach(initDateInput); }
+        document.addEventListener('DOMContentLoaded', initAll);
+        window.addEventListener('load', initAll);
+        document.addEventListener('click', (e) => {
+            if(!popover || popover.classList.contains('hidden')) return;
+            const isInsidePopover = popover.contains(e.target);
+            const isDisplay = e.target && e.target.classList && e.target.classList.contains('aether-date-display');
+            if(!isInsidePopover && !isDisplay) closePicker();
+        });
+        window.addEventListener('resize', () => { if(active) openPicker(active); });
+        window.AetherLabDatePickerInit = initAll;
+    })();
+
 </script>
 </body>
 </html>
