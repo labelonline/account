@@ -823,22 +823,59 @@
             sentAt: Date.now()
         };
     }
-    function appendChatMessage(email, msg) {
-        const safe = safeChatKey(email);
-        const msgs = normalizeChat(appState.chats[safe]);
-        msgs.push(msg);
-        appState.chats[safe] = msgs;
-        db.ref('chats/' + safe + '/' + msg.id).set(msg).catch(err => {
-            console.error(err);
-            UI.alert('Ошибка отправки', 'Сообщение не удалось сохранить в базе. Проверьте подключение или правила Firebase.');
+    function chatArrayToObject(msgs) {
+        const obj = {};
+        normalizeChat(msgs).forEach((m, i) => {
+            const id = m.id || ('m_' + (m.sentAt || Date.now()) + '_' + i);
+            obj[id] = Object.assign({}, m, { id });
         });
-        return msgs;
+        return obj;
+    }
+    function appendChatMessage(email, msg, onDone) {
+        const safe = safeChatKey(email);
+        const message = Object.assign({}, msg);
+        if(!message.id) message.id = 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        if(!message.sentAt) message.sentAt = Date.now();
+        if(!message.time) message.time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+
+        const current = normalizeChat(appState.chats[safe]);
+        const exists = current.some(m => m.id === message.id);
+        const optimistic = exists ? current.map(m => m.id === message.id ? message : m) : current.concat(message);
+        appState.chats[safe] = optimistic;
+
+        const persist = () => {
+            const latest = normalizeChat(appState.chats[safe]);
+            return db.ref('chats/' + safe).set(chatArrayToObject(latest));
+        };
+
+        try {
+            db.ref('chats/' + safe).once('value').then(snapshot => {
+                const serverMsgs = normalizeChat(snapshot.val());
+                const merged = serverMsgs.some(m => m.id === message.id) ? serverMsgs : serverMsgs.concat(message);
+                appState.chats[safe] = normalizeChat(merged);
+                return db.ref('chats/' + safe).set(chatArrayToObject(appState.chats[safe]));
+            }).then(() => { if(typeof onDone === 'function') onDone(true); })
+            .catch(err => {
+                console.error(err);
+                persist().then(() => { if(typeof onDone === 'function') onDone(true); })
+                    .catch(e => {
+                        console.error(e);
+                        if(typeof onDone === 'function') onDone(false);
+                        UI.alert('Ошибка отправки', 'Сообщение показано в чате, но не сохранилось в базе. Проверьте подключение или правила Firebase.');
+                    });
+            });
+        } catch(err) {
+            console.error(err);
+            if(typeof onDone === 'function') onDone(false);
+            UI.alert('Ошибка отправки', 'Сообщение показано в чате, но не сохранилось в базе. Проверьте подключение или правила Firebase.');
+        }
+        return appState.chats[safe];
     }
     function saveChatDB(email, msgs) {
         const safe = safeChatKey(email);
-        const normalized = normalizeChat(msgs);
+        const normalized = normalizeChat(msgs).map((m, i) => Object.assign({}, m, { id: m.id || ('m_' + (m.sentAt || Date.now()) + '_' + i), sentAt: m.sentAt || Date.now() + i }));
         appState.chats[safe] = normalized;
-        return db.ref('chats/' + safe).set(normalized).catch(err => console.error(err));
+        return db.ref('chats/' + safe).set(chatArrayToObject(normalized)).catch(err => console.error(err));
     }
 
     let appState = { users: [], releases: [], chats: {}, content: { news: [], guide: [] } }; 
@@ -1394,9 +1431,16 @@
         if(box.scrollHeight > 0) box.scrollTop = box.scrollHeight;
     }
     function sendMessageAsUser() {
-        const input = document.getElementById('userChatInput'); if(!input.value.trim()) return; 
-        const msgText = input.value.trim(); const msg = { from: 'user', text: msgText, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
-        const msgs = getChat(currentUser.email); msgs.push(msg); input.value = ''; notifyTyping(false, 'admin'); renderUserChat(); saveChatDB(currentUser.email, msgs); markAdminsUnreadForChat(currentUser.email);
+        const input = document.getElementById('userChatInput');
+        if(!input || !input.value.trim()) return;
+        const msgText = input.value.trim();
+        const msg = makeChatMessage('user', msgText);
+        input.value = '';
+        notifyTyping(false, 'admin');
+        appendChatMessage(currentUser.email, msg);
+        renderUserChat();
+        markAdminsUnreadForChat(currentUser.email);
+        checkNotifications();
         sendEmailNotification("Новое сообщение в поддержку AetherLab", `Артист ${currentUser.login} (${currentUser.email}) написал вам:\n\n"${msgText}"`);
     }
     function renderAdminChatList() {
@@ -1422,14 +1466,18 @@
         if(!activeAdminChatUser) return;
         const input = document.getElementById('adminChatInput');
         if(!input || !input.value.trim()) return;
+        const targetEmail = activeAdminChatUser;
         const msgText = input.value.trim();
         const msg = makeChatMessage('admin', msgText);
         input.value = '';
-        notifyTyping(false, activeAdminChatUser);
-        appendChatMessage(activeAdminChatUser, msg);
+        notifyTyping(false, targetEmail);
+        appendChatMessage(targetEmail, msg);
         renderAdminChatList();
-        const u = appState.users.find(x => x.email === activeAdminChatUser);
-        if(u) { u.unreadAdminMsg = true; saveUserDB(u); }
+        const u = appState.users.find(x => x.email === targetEmail);
+        if(u) {
+            u.unreadAdminMsg = true;
+            saveUserDB(u);
+        }
         checkNotifications();
     }
     function showCreateCabinetDialog() {
