@@ -808,7 +808,38 @@
     }
 
     function saveUserDB(u) { db.ref('users/' + u.id).set(u); }
-    function saveChatDB(email, msgs) { db.ref('chats/' + email.replace(/\./g, '_')).set(msgs); }
+    function safeChatKey(email) { return String(email || '').replace(/\./g, '_'); }
+    function normalizeChat(raw) {
+        if(!raw) return [];
+        const arr = Array.isArray(raw) ? raw.filter(Boolean) : Object.values(raw).filter(Boolean);
+        return arr.sort((a, b) => Number(a.sentAt || 0) - Number(b.sentAt || 0));
+    }
+    function makeChatMessage(from, text) {
+        return {
+            id: 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+            from,
+            text,
+            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            sentAt: Date.now()
+        };
+    }
+    function appendChatMessage(email, msg) {
+        const safe = safeChatKey(email);
+        const msgs = normalizeChat(appState.chats[safe]);
+        msgs.push(msg);
+        appState.chats[safe] = msgs;
+        db.ref('chats/' + safe + '/' + msg.id).set(msg).catch(err => {
+            console.error(err);
+            UI.alert('Ошибка отправки', 'Сообщение не удалось сохранить в базе. Проверьте подключение или правила Firebase.');
+        });
+        return msgs;
+    }
+    function saveChatDB(email, msgs) {
+        const safe = safeChatKey(email);
+        const normalized = normalizeChat(msgs);
+        appState.chats[safe] = normalized;
+        return db.ref('chats/' + safe).set(normalized).catch(err => console.error(err));
+    }
 
     let appState = { users: [], releases: [], chats: {}, content: { news: [], guide: [] } }; 
     let currentUser = null; 
@@ -861,7 +892,7 @@
 
     db.ref('chats').on('value', (snapshot) => {
         const data = snapshot.val() || {}; appState.chats = {};
-        Object.keys(data).forEach(k => { appState.chats[k] = data[k]; });
+        Object.keys(data).forEach(k => { appState.chats[k] = normalizeChat(data[k]); });
         if(currentUser) {
             if(currentUser.role === 'Administrator' && currentSection === 'adminChats' && activeAdminChatUser) clearArtistChatUnread(activeAdminChatUser, true);
             if(currentUser.role !== 'Administrator' && currentSection === 'userChat' && currentUser.unreadAdminMsg) { currentUser.unreadAdminMsg = false; saveUserDB(currentUser); }
@@ -1269,9 +1300,11 @@
         if(el) el.classList.toggle('hidden', !show);
     }
     function updateSidebarCounts() {
-        const rels = currentUser && currentUser.role === 'Administrator' ? appState.releases.filter(r => !r.isDeleted) : appState.releases.filter(r => currentUser && r.userEmail === currentUser.email && !r.isDeleted);
-        const setBadge = (id, value) => { const el = document.getElementById(id); if(el) el.textContent = value; };
-        setBadge('badge-cat-all', rels.filter(r => r.status === 'Одобрен' || r.status === 'Отклонён').length);
+        const rels = currentUser && currentUser.role === 'Administrator'
+            ? appState.releases.filter(r => !r.isDeleted)
+            : appState.releases.filter(r => currentUser && r.userEmail === currentUser.email && !r.isDeleted);
+        const setBadge = (id, value) => { const el = document.getElementById(id); if(el) el.textContent = String(value); };
+        setBadge('badge-cat-all', rels.length);
         setBadge('badge-cat-drafts', rels.filter(r => r.status === 'Черновик').length);
         setBadge('badge-cat-mod', rels.filter(r => r.status === 'Модерация').length);
         setBadge('badge-cat-fix', rels.filter(r => r.status === 'Отклонён').length);
@@ -1353,7 +1386,7 @@
         const mod = list.filter(r => r.status === 'Модерация').length; const ok = list.filter(r => r.status === 'Одобрен').length; const rej = list.filter(r => r.status === 'Отклонён').length;
         document.getElementById('dashboardStats').innerHTML = `<div class="stat-card"><div class="stat-num" style="color: var(--warning);">${mod}</div><div class="stat-label">На модерации</div></div><div class="stat-card"><div class="stat-num" style="color: var(--success);">${ok}</div><div class="stat-label">Принятых</div></div><div class="stat-card"><div class="stat-num" style="color: var(--danger);">${rej}</div><div class="stat-label">Отклонённых</div></div>`;
     }
-    function getChat(email) { return appState.chats[email.replace(/\./g, '_')] || []; }
+    function getChat(email) { return normalizeChat(appState.chats[safeChatKey(email)]); }
     function renderUserChat() {
         if(currentUser.unreadAdminMsg) { currentUser.unreadAdminMsg = false; saveUserDB(currentUser); }
         const box = document.getElementById('userChatBox'); const msgs = getChat(currentUser.email);
@@ -1386,10 +1419,18 @@
     }
     function selectAdminChat(email) { activeAdminChatUser = email; document.getElementById('adminChatInputArea').classList.remove('hidden'); clearArtistChatUnread(email, true); renderAdminChatList(); checkNotifications(); }
     function sendMessageAsAdmin() {
-        if(!activeAdminChatUser) return; const input = document.getElementById('adminChatInput'); if(!input.value.trim()) return; 
-        const msg = { from: 'admin', text: input.value.trim(), time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
-        const msgs = getChat(activeAdminChatUser); msgs.push(msg); input.value = ''; notifyTyping(false, activeAdminChatUser); renderAdminChatList(); saveChatDB(activeAdminChatUser, msgs);
-        const u = appState.users.find(x => x.email === activeAdminChatUser); if(u) { u.unreadAdminMsg = true; saveUserDB(u); }
+        if(!activeAdminChatUser) return;
+        const input = document.getElementById('adminChatInput');
+        if(!input || !input.value.trim()) return;
+        const msgText = input.value.trim();
+        const msg = makeChatMessage('admin', msgText);
+        input.value = '';
+        notifyTyping(false, activeAdminChatUser);
+        appendChatMessage(activeAdminChatUser, msg);
+        renderAdminChatList();
+        const u = appState.users.find(x => x.email === activeAdminChatUser);
+        if(u) { u.unreadAdminMsg = true; saveUserDB(u); }
+        checkNotifications();
     }
     function showCreateCabinetDialog() {
         const roles = [{v: 'Administrator', t: 'Администратор'}, {v: 'Artist', t: 'Артист'}];
@@ -1697,7 +1738,7 @@
             if (activeCatalogFilter === 'drafts') return r.status === 'Черновик';
             if (activeCatalogFilter === 'mod') return r.status === 'Модерация';
             if (activeCatalogFilter === 'fix') return r.status === 'Отклонён';
-            if (activeCatalogFilter === 'all') return r.status === 'Одобрен' || r.status === 'Отклонён';
+            if (activeCatalogFilter === 'all') return true;
             return true;
         });
         if (searchQuery) list = list.filter(r => `${r.title} ${r.artist} ${r.upc || ''}`.toLowerCase().includes(searchQuery));
