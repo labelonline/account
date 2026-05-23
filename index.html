@@ -413,6 +413,124 @@
         }
         .support-unavailable .telegram-btn:hover{transform:translateY(-1px);}
 
+
+        /* ===== Select dropdown design fix + content media blocks ===== */
+        select option{
+            background:#171c27!important;
+            color:#f5f7fb!important;
+        }
+        select option:checked{
+            background:#7b61ff!important;
+            color:#fff!important;
+        }
+        .custom-select-source{
+            position:absolute!important;
+            opacity:0!important;
+            pointer-events:none!important;
+            width:1px!important;
+            height:1px!important;
+        }
+        .custom-select{
+            position:relative;
+            width:100%;
+        }
+        .custom-select-btn{
+            width:100%;
+            min-height:58px;
+            padding:14px 44px 14px 16px;
+            border-radius:22px;
+            border:1px solid rgba(123,97,255,.65);
+            background:rgba(255,255,255,.05);
+            color:#fff;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            text-align:left;
+            box-shadow:0 0 0 3px rgba(123,97,255,.12);
+            cursor:pointer;
+            font-weight:600;
+        }
+        .custom-select-btn::after{
+            content:"⌄";
+            position:absolute;
+            right:18px;
+            top:50%;
+            transform:translateY(-50%);
+            color:#fff;
+            font-size:20px;
+            line-height:1;
+            opacity:.9;
+        }
+        .custom-select.open .custom-select-btn{
+            border-color:rgba(159,118,255,.95);
+            box-shadow:0 0 0 4px rgba(123,97,255,.18);
+        }
+        .custom-select-list{
+            position:absolute;
+            left:0;
+            right:0;
+            top:calc(100% + 8px);
+            z-index:99999;
+            max-height:260px;
+            overflow:auto;
+            padding:8px;
+            border-radius:22px;
+            background:#171c27;
+            border:1px solid rgba(255,255,255,.12);
+            box-shadow:0 22px 50px rgba(0,0,0,.55);
+            display:none;
+        }
+        .custom-select.open .custom-select-list{display:block;}
+        .custom-select-option{
+            padding:13px 14px;
+            border-radius:16px;
+            color:#eef2fb;
+            cursor:pointer;
+            font-weight:600;
+            line-height:1.2;
+        }
+        .custom-select-option:hover,
+        .custom-select-option.active{
+            background:linear-gradient(135deg,var(--accent),#9f76ff);
+            color:#fff;
+        }
+        .custom-select-option.disabled{
+            color:#7d8598;
+            cursor:default;
+            background:transparent!important;
+        }
+        .portal-brand small{display:none!important;}
+        .content-media-block{
+            margin:14px 0;
+            border:1px solid var(--border);
+            border-radius:20px;
+            overflow:hidden;
+            background:rgba(255,255,255,.04);
+        }
+        .content-media-block img,
+        .content-media-block video{
+            width:100%;
+            max-height:420px;
+            display:block;
+            object-fit:cover;
+            background:#0f131b;
+        }
+        .content-media-caption{
+            padding:12px 14px;
+            color:#d7deee;
+            font-size:13px;
+            line-height:1.5;
+            border-top:1px solid var(--border);
+            white-space:pre-wrap;
+        }
+        .media-admin-tools{
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+            padding:12px;
+            border-top:1px solid var(--border);
+        }
+
     </style>
 </head>
 <body>
@@ -474,7 +592,7 @@
                 <div class="logo-mark">AL</div>
                 <div style="min-width:0; flex:1;">
                     <div class="portal-brand-title">AetherLab</div>
-                    <small>Artist Portal</small>
+                    
                 </div>
                 <div class="bell-wrap hidden" id="bellWrapDesktop" onclick="showNotifications()" title="Уведомления">
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="bell-icon"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
@@ -726,11 +844,14 @@
                 if(f.type === 'textarea') {
                     return `<div class="form-group"><label>${esc(f.label || '')}</label><textarea id="prompt_${f.id}" placeholder="${esc(f.placeholder || '')}" rows="${f.rows || 5}">${esc(f.value || '')}</textarea></div>`;
                 }
+                if(f.type === 'file') {
+                    return `<div class="form-group"><label>${esc(f.label || '')}</label><input type="file" id="prompt_${f.id}" accept="${esc(f.accept || '')}"></div>`;
+                }
                 return `<div class="form-group"><label>${esc(f.label || '')}</label><input type="${f.type||'text'}" id="prompt_${f.id}" placeholder="${esc(f.placeholder||'')}" value="${esc(f.value||'')}"></div>`;
             }).join(''); 
             document.getElementById('uiPrompt').classList.remove('hidden'); 
             document.getElementById('uiPromptConfirm').onclick = () => { 
-                const results = {}; fields.forEach(f => results[f.id] = document.getElementById(`prompt_${f.id}`).value); 
+                const results = {}; fields.forEach(f => { const el = document.getElementById(`prompt_${f.id}`); results[f.id] = f.type === 'file' ? (el.files && el.files[0] ? el.files[0] : null) : el.value; }); 
                 this.closePrompt(); onConfirm(results); 
             }; 
         }
@@ -1324,6 +1445,37 @@
     function escapeHTML(value) {
         return String(value ?? '').replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
     }
+    function fileToDataURL(file) {
+        return new Promise((resolve, reject) => {
+            if(!file) return resolve(null);
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+    function getMediaTypeFromData(src) {
+        if(String(src || '').startsWith('data:video')) return 'video';
+        return 'image';
+    }
+    function renderMediaBlock(item, admin = false, kind = '') {
+        if(!item || !item.media || !item.media.src) return '';
+        const type = item.media.type || getMediaTypeFromData(item.media.src);
+        const mediaHtml = type === 'video'
+            ? `<video src="${item.media.src}" controls></video>`
+            : `<img src="${item.media.src}" alt="${escapeHTML(item.media.caption || item.title || '')}">`;
+        const caption = item.media.caption ? `<div class="content-media-caption">${escapeHTML(item.media.caption)}</div>` : '';
+        const tools = admin ? `<div class="media-admin-tools"><button class="btn-outline" onclick="toggleContentMediaPosition('${kind}','${item.id}')">Переместить ${item.media.position === 'before' ? 'вниз' : 'вверх'}</button><button class="btn-outline" onclick="editContentMedia('${kind}','${item.id}')">Изменить медиа</button><button class="btn-danger" onclick="removeContentMedia('${kind}','${item.id}')">Удалить медиа</button></div>` : '';
+        return `<div class="content-media-block">${mediaHtml}${caption}${tools}</div>`;
+    }
+    function renderContentArticle(item, admin = false, kind = '') {
+        const media = renderMediaBlock(item, admin, kind);
+        const mediaBefore = item.media && item.media.position === 'before' ? media : '';
+        const mediaAfter = !item.media || item.media.position !== 'before' ? media : '';
+        const adminActions = admin ? `<div class="admin-content-actions"><button class="btn-outline" onclick="editContentItem('${kind}','${item.id}')">Изменить</button><button class="btn-outline" onclick="editContentMedia('${kind}','${item.id}')">${item.media && item.media.src ? 'Заменить фото/видео' : '+ Фото/видео'}</button><button class="btn-danger" onclick="deleteContentItem('${kind}','${item.id}')">Удалить</button></div>` : '';
+        return `<article class="content-item"><h3>${escapeHTML(item.title)}</h3><div class="date">${escapeHTML(item.date || '')}</div>${mediaBefore}<p>${escapeHTML(item.text)}</p>${mediaAfter}${adminActions}</article>`;
+    }
+
     function normalizeContentItems(raw) {
         if(Array.isArray(raw)) return raw.filter(Boolean).sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
         if(raw && typeof raw === 'object') return Object.values(raw).filter(Boolean).sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
@@ -1395,7 +1547,7 @@
             target.innerHTML = `<div class="empty-panel">${escapeHTML(emptyText)}</div>`;
             return;
         }
-        target.innerHTML = items.map(item => `<article class="content-item"><h3>${escapeHTML(item.title)}</h3><div class="date">${escapeHTML(item.date || '')}</div><p>${escapeHTML(item.text)}</p></article>`).join('');
+        target.innerHTML = items.map(item => renderContentArticle(item, false, kind)).join('');
     }
     function renderNews() { renderContentList('news', 'newsList', 'Пока нет новостей от администрации.'); }
     function renderGuide() { renderContentList('guide', 'guideList', 'Пока нет инструкций. Администратор сможет добавить их в отдельном разделе.'); }
@@ -1404,7 +1556,7 @@
         if(!target) return;
         const items = normalizeContentItems(appState.content[kind]);
         if(!items.length) { target.innerHTML = `<div class="empty-panel">Ничего не добавлено.</div>`; return; }
-        target.innerHTML = items.map(item => `<article class="content-item"><h3>${escapeHTML(item.title)}</h3><div class="date">${escapeHTML(item.date || '')}</div><p>${escapeHTML(item.text)}</p><div class="admin-content-actions"><button class="btn-outline" onclick="editContentItem('${kind}','${item.id}')">Изменить</button><button class="btn-danger" onclick="deleteContentItem('${kind}','${item.id}')">Удалить</button></div></article>`).join('');
+        target.innerHTML = items.map(item => renderContentArticle(item, true, kind)).join('');
     }
     function renderAdminContent() {
         if(currentUser.role !== 'Administrator') { nav('overview', true); return; }
@@ -1415,14 +1567,21 @@
         appState.content[kind] = normalizeContentItems(appState.content[kind]);
         db.ref('content/' + kind).set(appState.content[kind]);
     }
-    function addContentItem(kind) {
+    async function addContentItem(kind) {
         const isNews = kind === 'news';
         UI.prompt(isNews ? 'Добавить новость' : 'Добавить инструкцию', [
             {id:'title', label:'Заголовок', placeholder:isNews ? 'Например: Обновление правил модерации' : 'Например: Как отправить релиз'},
-            {id:'text', label:'Текст', type:'textarea', rows:7, placeholder:'Введите текст...'}
-        ], (res) => {
+            {id:'text', label:'Текст', type:'textarea', rows:7, placeholder:'Введите текст...'},
+            {id:'media', label:'Фото или видео (необязательно)', type:'file', accept:'image/*,video/*'},
+            {id:'caption', label:'Подпись к фото/видео (необязательно)', placeholder:'Текст под медиа'},
+            {id:'position', label:'Положение медиа', type:'select', value:'after', options:[{v:'after', t:'После текста'}, {v:'before', t:'Перед текстом'}]}
+        ], async (res) => {
             if(!res.title || !res.text) return UI.alert('Ошибка', 'Заполните заголовок и текст.');
             const item = { id: Date.now().toString(), title: res.title.trim(), text: res.text.trim(), date: new Date().toLocaleString(), createdAt: Date.now() };
+            if(res.media) {
+                const src = await fileToDataURL(res.media);
+                item.media = { src, type: res.media.type && res.media.type.startsWith('video') ? 'video' : 'image', caption: (res.caption || '').trim(), position: res.position || 'after' };
+            }
             appState.content[kind].unshift(item);
             saveContentKind(kind);
             renderAdminContent();
@@ -1443,6 +1602,43 @@
             renderAdminContent();
         });
     }
+    function editContentMedia(kind, id) {
+        const item = appState.content[kind].find(x => x.id === id);
+        if(!item) return;
+        UI.prompt('Фото/видео блок', [
+            {id:'media', label:'Выберите фото или видео', type:'file', accept:'image/*,video/*'},
+            {id:'caption', label:'Подпись к фото/видео', value:item.media ? item.media.caption : '', placeholder:'Текст под медиа'},
+            {id:'position', label:'Положение медиа', type:'select', value:item.media ? (item.media.position || 'after') : 'after', options:[{v:'after', t:'После текста'}, {v:'before', t:'Перед текстом'}]}
+        ], async (res) => {
+            if(!item.media) item.media = {};
+            if(res.media) {
+                item.media.src = await fileToDataURL(res.media);
+                item.media.type = res.media.type && res.media.type.startsWith('video') ? 'video' : 'image';
+            }
+            if(!item.media.src) return UI.alert('Ошибка', 'Сначала выберите фото или видео.');
+            item.media.caption = (res.caption || '').trim();
+            item.media.position = res.position || 'after';
+            item.date = new Date().toLocaleString();
+            saveContentKind(kind);
+            renderAdminContent();
+        });
+    }
+    function toggleContentMediaPosition(kind, id) {
+        const item = appState.content[kind].find(x => x.id === id);
+        if(!item || !item.media) return;
+        item.media.position = item.media.position === 'before' ? 'after' : 'before';
+        saveContentKind(kind);
+        renderAdminContent();
+    }
+    function removeContentMedia(kind, id) {
+        const item = appState.content[kind].find(x => x.id === id);
+        if(!item || !item.media) return;
+        UI.confirm('Удалить фото/видео из этой записи?', () => {
+            delete item.media;
+            saveContentKind(kind);
+            renderAdminContent();
+        });
+    }
     function deleteContentItem(kind, id) {
         UI.confirm('Удалить эту запись?', () => {
             appState.content[kind] = appState.content[kind].filter(x => x.id !== id);
@@ -1452,6 +1648,63 @@
     }
     function addNewsItem() { addContentItem('news'); }
     function addGuideItem() { addContentItem('guide'); }
+
+
+    function buildCustomSelect(select) {
+        if(!select || select.dataset.customSelectReady === '1') return;
+        select.dataset.customSelectReady = '1';
+        select.classList.add('custom-select-source');
+        const wrap = document.createElement('div');
+        wrap.className = 'custom-select';
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'custom-select-btn';
+        const list = document.createElement('div');
+        list.className = 'custom-select-list';
+        wrap.appendChild(btn);
+        wrap.appendChild(list);
+        select.parentNode.insertBefore(wrap, select.nextSibling);
+        function syncLabel() {
+            const selected = select.options[select.selectedIndex];
+            btn.textContent = selected ? selected.textContent : 'Выберите';
+        }
+        function renderOptions() {
+            list.innerHTML = '';
+            Array.from(select.options).forEach(opt => {
+                const item = document.createElement('div');
+                item.className = 'custom-select-option' + (opt.disabled ? ' disabled' : '') + (opt.selected ? ' active' : '');
+                item.textContent = opt.textContent;
+                item.dataset.value = opt.value;
+                item.onclick = () => {
+                    if(opt.disabled) return;
+                    select.value = opt.value;
+                    select.dispatchEvent(new Event('change', { bubbles: true }));
+                    syncLabel();
+                    renderOptions();
+                    wrap.classList.remove('open');
+                };
+                list.appendChild(item);
+            });
+        }
+        btn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            document.querySelectorAll('.custom-select.open').forEach(x => { if(x !== wrap) x.classList.remove('open'); });
+            renderOptions();
+            wrap.classList.toggle('open');
+        };
+        select.addEventListener('change', () => { syncLabel(); renderOptions(); });
+        const observer = new MutationObserver(() => { syncLabel(); renderOptions(); });
+        observer.observe(select, { childList:true, subtree:true, attributes:true });
+        syncLabel();
+        renderOptions();
+    }
+    function initCustomSelects(root = document) {
+        root.querySelectorAll('select').forEach(buildCustomSelect);
+    }
+    document.addEventListener('click', () => document.querySelectorAll('.custom-select.open').forEach(x => x.classList.remove('open')));
+    setTimeout(() => initCustomSelects(), 0);
+    setInterval(() => initCustomSelects(), 800);
 
     function renderOverview() {
         let list = appState.releases; 
