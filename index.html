@@ -375,6 +375,44 @@
         .avatar-crop-actions{display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px;}
         .avatar-upload-row{padding:14px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid var(--border);margin-bottom:16px;}
 
+        .support-unavailable{
+            min-height:calc(100vh - 140px);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            text-align:center;
+            padding:32px;
+            border:1px solid var(--border);
+            border-radius:var(--radius);
+            background:rgba(255,255,255,.04);
+            box-shadow:var(--shadow);
+        }
+        .support-unavailable h2{
+            font-size:clamp(28px,4vw,46px);
+            line-height:1.1;
+            margin:0 0 18px;
+            font-weight:800;
+            letter-spacing:-.03em;
+        }
+        .support-unavailable p{
+            color:var(--text-muted);
+            font-size:16px;
+            margin:0 0 24px;
+        }
+        .support-unavailable .telegram-btn{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            padding:14px 24px;
+            border-radius:999px;
+            background:linear-gradient(135deg,var(--accent),#9f76ff);
+            color:#fff;
+            font-weight:700;
+            box-shadow:0 14px 32px rgba(123,97,255,.28);
+            text-decoration:none;
+        }
+        .support-unavailable .telegram-btn:hover{transform:translateY(-1px);}
+
     </style>
 </head>
 <body>
@@ -505,14 +543,17 @@
                 <div id="userReleasesList"></div>
             </div>
             <div id="sec-userChat" class="view-section hidden">
-                <p class="text-sm" style="margin-bottom: 16px;">Здесь вы можете задать вопросы администрации или обсудить ваш релиз.</p>
-                <div class="chat-wrap">
-                    <div id="userChatBox" class="chat-msgs"></div>
-                    <div id="userTypingInd" class="typing-indicator">Администратор печатает...</div>
-                    <div class="chat-input-area">
-                        <input type="text" id="userChatInput" placeholder="Напишите сообщение..." autocomplete="off" onkeypress="if(event.key === 'Enter') sendMessageAsUser()">
-                        <button class="btn-primary" onclick="sendMessageAsUser()">Отправить</button>
+                <div class="support-unavailable">
+                    <div>
+                        <h2>Временно недоступно</h2>
+                        <p>Пишите в Telegram.</p>
+                        <a class="telegram-btn" href="https://t.me/AetherLab_Online" target="_blank" rel="noopener noreferrer">Telegram</a>
                     </div>
+                </div>
+                <div class="hidden" aria-hidden="true">
+                    <div id="userChatBox"></div>
+                    <div id="userTypingInd"></div>
+                    <input type="text" id="userChatInput">
                 </div>
             </div>
 
@@ -527,23 +568,20 @@
                 <div id="guideList"></div>
             </div>
             <div id="sec-adminChats" class="view-section hidden">
-                <div class="admin-chat-layout">
-                    <div class="admin-chat-users">
-                        <div style="padding: 16px; border-bottom: 1px solid var(--border);">
-                            <input type="text" id="adminChatSearch" placeholder="Поиск пользователя..." oninput="renderAdminChatList()" style="margin-bottom: 0; padding: 10px; font-size: 13px;">
-                        </div>
-                        <div id="adminChatUserList" style="flex: 1; overflow-y: auto;"></div>
+                <div class="support-unavailable">
+                    <div>
+                        <h2>Временно недоступно</h2>
+                        <p>Пишите в Telegram.</p>
+                        <a class="telegram-btn" href="https://t.me/AetherLab_Online" target="_blank" rel="noopener noreferrer">Telegram</a>
                     </div>
-                    <div style="flex: 1; display: flex; flex-direction: column; background: #000; position: relative;">
-                        <div id="adminChatBox" class="chat-msgs" style="flex: 1;">
-                            <div class="empty-state"><h2>Выберите диалог</h2><p class="text-sm">Выберите пользователя слева для начала общения</p></div>
-                        </div>
-                        <div id="adminTypingInd" class="typing-indicator">Собеседник печатает...</div>
-                        <div class="chat-input-area hidden" id="adminChatInputArea">
-                            <input type="text" id="adminChatInput" placeholder="Ответить..." autocomplete="off" onkeypress="if(event.key === 'Enter') sendMessageAsAdmin()">
-                            <button class="btn-primary" onclick="sendMessageAsAdmin()">Отправить</button>
-                        </div>
-                    </div>
+                </div>
+                <div class="hidden" aria-hidden="true">
+                    <input type="text" id="adminChatSearch">
+                    <div id="adminChatUserList"></div>
+                    <div id="adminChatBox"></div>
+                    <div id="adminTypingInd"></div>
+                    <div id="adminChatInputArea"></div>
+                    <input type="text" id="adminChatInput">
                 </div>
             </div>
             <div id="sec-newRelease" class="view-section hidden">
