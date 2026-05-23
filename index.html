@@ -651,6 +651,83 @@
         }
 
     
+
+        /* ===== Inline media carousel spacing ===== */
+        .content-body{
+            color:#d7deee;
+            line-height:1.7;
+            white-space:normal;
+            margin:0;
+        }
+        .content-line{
+            display:block;
+            white-space:pre-wrap;
+            margin:0;
+        }
+        .content-media-block.inline-media{
+            margin:4px 0 22px;
+        }
+        .content-media-block.before-text{
+            margin:0 0 18px;
+        }
+        .content-media-block.after-text{
+            margin:14px 0 0;
+        }
+        .content-media-carousel{
+            position:relative;
+            overflow:hidden;
+            background:#0f131b;
+        }
+        .content-media-slide{
+            display:none;
+            align-items:center;
+            justify-content:center;
+            background:#0f131b;
+        }
+        .content-media-slide.active{display:flex;}
+        .content-media-slide img,
+        .content-media-slide video{
+            width:auto!important;
+            max-width:min(100%,420px)!important;
+            height:auto!important;
+            max-height:320px!important;
+            display:block;
+            object-fit:contain!important;
+            background:#0f131b;
+        }
+        .content-media-slide img{cursor:zoom-in;}
+        .content-carousel-btn{
+            position:absolute;
+            top:50%;
+            transform:translateY(-50%);
+            width:36px;
+            height:36px;
+            padding:0;
+            border-radius:50%;
+            background:rgba(15,19,27,.78);
+            border:1px solid rgba(255,255,255,.18);
+            color:#fff;
+            box-shadow:0 10px 22px rgba(0,0,0,.24);
+            backdrop-filter:blur(8px);
+            z-index:2;
+        }
+        .content-carousel-btn.prev{left:10px;}
+        .content-carousel-btn.next{right:10px;}
+        .content-carousel-meta{
+            position:absolute;
+            left:50%;
+            bottom:10px;
+            transform:translateX(-50%);
+            padding:6px 10px;
+            border-radius:999px;
+            background:rgba(15,19,27,.78);
+            border:1px solid rgba(255,255,255,.16);
+            color:#fff;
+            font-size:12px;
+            backdrop-filter:blur(8px);
+            z-index:2;
+        }
+
         /* ===== AetherLab custom date picker ===== */
         .aether-native-date-hidden{
             position:absolute!important;
@@ -1732,35 +1809,54 @@
         if(String(src || '').startsWith('data:video')) return 'video';
         return 'image';
     }
+    function getBlockFiles(block) {
+        if(!block) return [];
+        if(Array.isArray(block.files) && block.files.length) {
+            return block.files.filter(f => f && f.src).map((f, index) => ({
+                id: f.id || (block.id + '_file_' + index),
+                src: f.src,
+                type: f.type || getMediaTypeFromData(f.src)
+            }));
+        }
+        if(block.src) return [{ id: block.id + '_file_0', src: block.src, type: block.type || getMediaTypeFromData(block.src) }];
+        return [];
+    }
     function ensureContentMediaBlocks(item) {
         if(!item) return [];
         if(!Array.isArray(item.mediaBlocks)) item.mediaBlocks = [];
-        if(item.media && item.media.src && !item.mediaBlocks.some(b => b.src === item.media.src)) {
+        if(item.media && item.media.src && !item.mediaBlocks.some(b => b.src === item.media.src || (Array.isArray(b.files) && b.files.some(f => f.src === item.media.src)))) {
             item.mediaBlocks.push({
                 id: item.media.id || ('legacy_' + Date.now()),
-                src: item.media.src,
-                type: item.media.type || getMediaTypeFromData(item.media.src),
+                files: [{ id: 'legacy_file_0', src: item.media.src, type: item.media.type || getMediaTypeFromData(item.media.src) }],
                 caption: item.media.caption || '',
                 afterLine: item.media.position === 'before' ? 0 : ''
             });
             delete item.media;
         }
-        item.mediaBlocks = item.mediaBlocks.filter(b => b && b.src).map((b, index) => ({
-            id: b.id || (Date.now() + '_' + index),
-            src: b.src,
-            type: b.type || getMediaTypeFromData(b.src),
-            caption: b.caption || '',
-            afterLine: b.afterLine === 0 || b.afterLine ? b.afterLine : ''
-        }));
+        item.mediaBlocks = item.mediaBlocks.filter(b => b && (b.src || (Array.isArray(b.files) && b.files.some(f => f && f.src)))).map((b, index) => {
+            const id = b.id || (Date.now() + '_' + index);
+            const files = getBlockFiles({ ...b, id }).map((f, fileIndex) => ({
+                id: f.id || (id + '_file_' + fileIndex),
+                src: f.src,
+                type: f.type || getMediaTypeFromData(f.src)
+            }));
+            return {
+                id,
+                files,
+                caption: b.caption || '',
+                afterLine: b.afterLine === 0 || b.afterLine ? b.afterLine : ''
+            };
+        });
         return item.mediaBlocks;
     }
     function getContentMediaBlocks(item) {
         if(!item) return [];
-        if(Array.isArray(item.mediaBlocks) && item.mediaBlocks.length) return item.mediaBlocks.filter(b => b && b.src);
+        if(Array.isArray(item.mediaBlocks) && item.mediaBlocks.length) {
+            return item.mediaBlocks.filter(b => b && (b.src || (Array.isArray(b.files) && b.files.some(f => f && f.src))));
+        }
         if(item.media && item.media.src) return [{
             id: item.media.id || 'legacy',
-            src: item.media.src,
-            type: item.media.type || getMediaTypeFromData(item.media.src),
+            files: [{ id: 'legacy_file_0', src: item.media.src, type: item.media.type || getMediaTypeFromData(item.media.src) }],
             caption: item.media.caption || '',
             afterLine: item.media.position === 'before' ? 0 : ''
         }];
@@ -1772,18 +1868,46 @@
         if(!Number.isFinite(num)) return '';
         return Math.max(0, Math.floor(num));
     }
-    function renderMediaBlock(block, item, admin = false, kind = '') {
-        if(!block || !block.src) return '';
-        const type = block.type || getMediaTypeFromData(block.src);
+    function contentBlockDomId(kind, itemId, blockId) {
+        return ('media_' + kind + '_' + itemId + '_' + blockId).replace(/[^a-zA-Z0-9_-]/g, '_');
+    }
+    function renderMediaBlock(block, item, admin = false, kind = '', placementClass = 'inline-media') {
+        const files = getBlockFiles(block);
+        if(!block || !files.length) return '';
         const blockId = escapeHTML(block.id || '');
-        const mediaHtml = type === 'video'
-            ? `<video src="${block.src}" controls></video>`
-            : `<img src="${block.src}" alt="${escapeHTML(block.caption || item.title || '')}" onclick="openContentMediaFullscreen('${kind}','${item.id}','${blockId}')">`;
+        const domId = contentBlockDomId(kind, item.id, block.id || '');
+        const slides = files.map((file, index) => {
+            const type = file.type || getMediaTypeFromData(file.src);
+            const inner = type === 'video'
+                ? `<video src="${file.src}" controls></video>`
+                : `<img src="${file.src}" alt="${escapeHTML(block.caption || item.title || '')}" onclick="openContentMediaFullscreen('${kind}','${item.id}','${blockId}',${index})">`;
+            return `<div class="content-media-slide ${index === 0 ? 'active' : ''}" data-index="${index}">${inner}</div>`;
+        }).join('');
+        const carouselControls = files.length > 1
+            ? `<button class="content-carousel-btn prev" onclick="contentCarouselMove('${domId}',-1)">‹</button><button class="content-carousel-btn next" onclick="contentCarouselMove('${domId}',1)">›</button><div class="content-carousel-meta"><span class="carousel-current">1</span> / ${files.length}</div>`
+            : '';
         const caption = block.caption ? `<div class="content-media-caption">${escapeHTML(block.caption)}</div>` : '';
-        const openBtn = `<button class="content-media-open" onclick="openContentMediaFullscreen('${kind}','${item.id}','${blockId}')">Открыть на весь экран</button>`;
+        const openBtn = `<button class="content-media-open" onclick="openContentMediaFullscreen('${kind}','${item.id}','${blockId}', getContentCarouselIndex('${domId}'))">Открыть на весь экран</button>`;
         const posText = block.afterLine === 0 || block.afterLine === '0' ? 'перед текстом' : (block.afterLine ? `после строки ${escapeHTML(block.afterLine)}` : 'после всего текста');
-        const tools = admin ? `<div class="media-admin-tools"><span class="text-sm" style="align-self:center;">Позиция: ${posText}</span><button class="btn-outline" onclick="editContentMedia('${kind}','${item.id}','${blockId}')">Изменить блок</button><button class="btn-danger" onclick="removeContentMedia('${kind}','${item.id}','${blockId}')">Удалить блок</button></div>` : '';
-        return `<div class="content-media-block">${mediaHtml}${caption}${openBtn}${tools}</div>`;
+        const fileText = files.length > 1 ? ` • файлов: ${files.length}` : '';
+        const tools = admin ? `<div class="media-admin-tools"><span class="text-sm" style="align-self:center;">Позиция: ${posText}${fileText}</span><button class="btn-outline" onclick="editContentMedia('${kind}','${item.id}','${blockId}')">Изменить блок</button><button class="btn-danger" onclick="removeContentMedia('${kind}','${item.id}','${blockId}')">Удалить блок</button></div>` : '';
+        return `<div class="content-media-block ${placementClass}" id="${domId}" data-current="0"><div class="content-media-carousel">${slides}${carouselControls}</div>${caption}${openBtn}${tools}</div>`;
+    }
+    function getContentCarouselIndex(domId) {
+        const el = document.getElementById(domId);
+        return el ? Number(el.dataset.current || 0) : 0;
+    }
+    function contentCarouselMove(domId, dir) {
+        const root = document.getElementById(domId);
+        if(!root) return;
+        const slides = Array.from(root.querySelectorAll('.content-media-slide'));
+        if(slides.length <= 1) return;
+        let current = Number(root.dataset.current || 0);
+        current = (current + dir + slides.length) % slides.length;
+        root.dataset.current = String(current);
+        slides.forEach((slide, index) => slide.classList.toggle('active', index === current));
+        const label = root.querySelector('.carousel-current');
+        if(label) label.textContent = String(current + 1);
     }
     function renderTextWithMedia(item, admin = false, kind = '') {
         const text = String(item.text || '');
@@ -1801,30 +1925,32 @@
             }
         });
         const html = [];
-        if(byLine[0]) byLine[0].forEach(block => html.push(renderMediaBlock(block, item, admin, kind)));
+        if(byLine[0]) byLine[0].forEach(block => html.push(renderMediaBlock(block, item, admin, kind, 'before-text')));
         lines.forEach((line, index) => {
-            html.push(`<span class="content-text-line">${escapeHTML(line)}</span>${index < lines.length - 1 ? '<br>' : ''}`);
+            html.push(`<span class="content-line">${escapeHTML(line) || '&nbsp;'}</span>`);
             const lineNumber = index + 1;
-            if(byLine[lineNumber]) byLine[lineNumber].forEach(block => html.push(renderMediaBlock(block, item, admin, kind)));
+            if(byLine[lineNumber]) byLine[lineNumber].forEach(block => html.push(renderMediaBlock(block, item, admin, kind, 'inline-media')));
         });
-        afterAll.forEach(block => html.push(renderMediaBlock(block, item, admin, kind)));
+        afterAll.forEach(block => html.push(renderMediaBlock(block, item, admin, kind, 'after-text')));
         return html.join('');
     }
     function renderContentArticle(item, admin = false, kind = '') {
         const adminActions = admin ? `<div class="admin-content-actions"><button class="btn-outline" onclick="editContentItem('${kind}','${item.id}')">Изменить текст</button><button class="btn-outline" onclick="editContentMedia('${kind}','${item.id}')">+ Фото/видео блок</button><button class="btn-danger" onclick="deleteContentItem('${kind}','${item.id}')">Удалить запись</button></div>` : '';
-        return `<article class="content-item"><h3>${escapeHTML(item.title)}</h3><div class="date">${escapeHTML(item.date || '')}</div><p>${renderTextWithMedia(item, admin, kind)}</p>${adminActions}</article>`;
+        return `<article class="content-item"><h3>${escapeHTML(item.title)}</h3><div class="date">${escapeHTML(item.date || '')}</div><div class="content-body">${renderTextWithMedia(item, admin, kind)}</div>${adminActions}</article>`;
     }
-    function openContentMediaFullscreen(kind, itemId, blockId) {
+    function openContentMediaFullscreen(kind, itemId, blockId, fileIndex = 0) {
         const items = appState.content && appState.content[kind] ? normalizeContentItems(appState.content[kind]) : [];
         const item = items.find(x => x.id === itemId);
         const block = item ? getContentMediaBlocks(item).find(b => String(b.id) === String(blockId)) : null;
-        if(!block || !block.src) return;
-        const type = block.type || getMediaTypeFromData(block.src);
+        const files = getBlockFiles(block);
+        const file = files[Math.max(0, Math.min(Number(fileIndex) || 0, files.length - 1))];
+        if(!file || !file.src) return;
+        const type = file.type || getMediaTypeFromData(file.src);
         const box = document.getElementById('mediaViewerBox');
         if(!box) return;
         box.innerHTML = type === 'video'
-            ? `<video src="${block.src}" controls autoplay></video>`
-            : `<img src="${block.src}" alt="${escapeHTML(block.caption || '')}">`;
+            ? `<video src="${file.src}" controls autoplay></video>`
+            : `<img src="${file.src}" alt="${escapeHTML(block.caption || '')}">`;
         document.getElementById('mediaViewer').classList.remove('hidden');
     }
     function closeContentMediaFullscreen() {
@@ -1930,15 +2056,15 @@
         UI.prompt(isNews ? 'Добавить новость' : 'Добавить инструкцию', [
             {id:'title', label:'Заголовок', placeholder:isNews ? 'Например: Обновление правил модерации' : 'Например: Как отправить релиз'},
             {id:'text', label:'Текст', type:'textarea', rows:7, placeholder:'Введите текст...'},
-            {id:'media', label:'Фото или видео (необязательно)', type:'file', accept:'image/*,video/*'},
+            {id:'media', label:'Фото или видео (необязательно)', type:'file', accept:'image/*,video/*', multiple:true},
             {id:'caption', label:'Подпись к фото/видео (необязательно)', placeholder:'Текст под медиа'},
             {id:'afterLine', label:'Вставить медиа после строки', type:'number', placeholder:'Например: 4. 0 — перед текстом, пусто — после всего текста'}
         ], async (res) => {
             if(!res.title || !res.text) return UI.alert('Ошибка', 'Заполните заголовок и текст.');
             const item = { id: Date.now().toString(), title: res.title.trim(), text: res.text.trim(), date: new Date().toLocaleString(), createdAt: Date.now(), mediaBlocks: [] };
-            if(res.media) {
-                const src = await fileToDataURL(res.media);
-                item.mediaBlocks.push({ id: Date.now().toString() + '_media', src, type: res.media.type && res.media.type.startsWith('video') ? 'video' : 'image', caption: (res.caption || '').trim(), afterLine: normalizeAfterLine(res.afterLine) });
+            if(res.media && res.media.length) {
+                const files = await Promise.all(res.media.map(async (file, index) => ({ id: Date.now().toString() + '_file_' + index, src: await fileToDataURL(file), type: file.type && file.type.startsWith('video') ? 'video' : 'image' })));
+                item.mediaBlocks.push({ id: Date.now().toString() + '_media', files, caption: (res.caption || '').trim(), afterLine: normalizeAfterLine(res.afterLine) });
             }
             appState.content[kind].unshift(item);
             saveContentKind(kind);
@@ -1966,17 +2092,18 @@
         const blocks = ensureContentMediaBlocks(item);
         const block = blockId ? blocks.find(b => String(b.id) === String(blockId)) : null;
         UI.prompt(block ? 'Изменить фото/видео блок' : 'Добавить фото/видео блок', [
-            {id:'media', label:block ? 'Заменить фото или видео (необязательно)' : 'Выберите фото или видео', type:'file', accept:'image/*,video/*'},
+            {id:'media', label:block ? 'Заменить фото/видео блок (необязательно)' : 'Выберите фото/видео', type:'file', accept:'image/*,video/*', multiple:true},
             {id:'caption', label:'Подпись к фото/видео', value:block ? block.caption : '', placeholder:'Текст под медиа'},
             {id:'afterLine', label:'Вставить после строки', type:'number', value:block ? (block.afterLine ?? '') : '', placeholder:'Например: 4. 0 — перед текстом, пусто — после всего текста'}
         ], async (res) => {
             let target = block;
-            if(!target) target = { id: Date.now().toString() + '_media', src: '', type: 'image', caption: '', afterLine: '' };
-            if(res.media) {
-                target.src = await fileToDataURL(res.media);
-                target.type = res.media.type && res.media.type.startsWith('video') ? 'video' : 'image';
+            if(!target) target = { id: Date.now().toString() + '_media', files: [], caption: '', afterLine: '' };
+            if(res.media && res.media.length) {
+                target.files = await Promise.all(res.media.map(async (file, index) => ({ id: Date.now().toString() + '_file_' + index, src: await fileToDataURL(file), type: file.type && file.type.startsWith('video') ? 'video' : 'image' })));
+                delete target.src;
+                delete target.type;
             }
-            if(!target.src) return UI.alert('Ошибка', 'Сначала выберите фото или видео.');
+            if(!getBlockFiles(target).length) return UI.alert('Ошибка', 'Сначала выберите фото или видео.');
             target.caption = (res.caption || '').trim();
             target.afterLine = normalizeAfterLine(res.afterLine);
             if(!block) blocks.push(target);
