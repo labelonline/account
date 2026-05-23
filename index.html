@@ -329,6 +329,52 @@
             .content-grid{grid-template-columns:1fr;}
         }
 
+        /* ===== Unread dots, chat wallpaper, avatar cropper ===== */
+        .nav-unread-dot{
+            width:10px;height:10px;border-radius:50%;display:inline-block;
+            background:var(--accent);
+            box-shadow:0 0 0 3px rgba(123,97,255,.16),0 0 18px rgba(123,97,255,.9);
+            flex:0 0 auto;
+        }
+        .chat-unread-indicator{
+            background:var(--accent)!important;
+            box-shadow:0 0 0 3px rgba(123,97,255,.16),0 0 18px rgba(123,97,255,.9);
+        }
+        .chat-wrap,.admin-chat-layout{background:rgba(18,23,34,.88)!important;}
+        .chat-msgs{
+            background-color:rgba(16,20,30,.94);
+            background-image:
+                radial-gradient(circle at 18px 18px, rgba(123,97,255,.12) 0 2px, transparent 2.5px),
+                radial-gradient(circle at 70px 58px, rgba(54,194,255,.08) 0 1.8px, transparent 2.4px),
+                linear-gradient(135deg, rgba(255,255,255,.025) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.025) 50%, rgba(255,255,255,.025) 75%, transparent 75%, transparent);
+            background-size:92px 92px,112px 112px,38px 38px;
+        }
+        #sec-adminChats .admin-chat-layout > div[style*="background: #000"]{background:rgba(18,23,34,.88)!important;}
+        .avatar-wrap{cursor:default!important;}
+        .avatar-crop-area{
+            position:relative;width:min(360px,80vw);height:min(360px,80vw);
+            margin:16px auto;border-radius:22px;overflow:hidden;
+            background:rgba(255,255,255,.04);border:1px solid var(--border);
+            user-select:none;touch-action:none;
+        }
+        .avatar-crop-area img{position:absolute;max-width:100%;max-height:100%;left:50%;top:50%;transform:translate(-50%,-50%);}
+        .avatar-crop-square{
+            position:absolute;width:190px;height:190px;left:85px;top:85px;border:2px solid #fff;border-radius:18px;
+            box-shadow:0 0 0 999px rgba(0,0,0,.52),0 0 20px rgba(123,97,255,.7);
+            cursor:move;touch-action:none;
+        }
+        .avatar-crop-resize{
+            position:absolute;right:-11px;bottom:-11px;width:24px;height:24px;border-radius:50%;
+            background:linear-gradient(135deg,var(--accent),#9f76ff);
+            border:2px solid #fff;box-shadow:0 8px 22px rgba(123,97,255,.45);
+            cursor:nwse-resize;touch-action:none;
+        }
+        .avatar-crop-resize::before{
+            content:"";position:absolute;inset:6px;border-right:2px solid rgba(255,255,255,.9);border-bottom:2px solid rgba(255,255,255,.9);
+        }
+        .avatar-crop-actions{display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px;}
+        .avatar-upload-row{padding:14px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid var(--border);margin-bottom:16px;}
+
     </style>
 </head>
 <body>
@@ -345,6 +391,20 @@
     <div id="uiAlert" class="overlay hidden" style="z-index: 10001;"><div class="dialog"><h3 id="uiAlertTitle">Сообщение</h3><div id="uiAlertText" class="text-sm" style="color: #ccc; margin-bottom: 24px; line-height: 1.5; max-height: 50vh; overflow-y: auto;"></div><button class="btn-primary" style="width: 100%;" onclick="document.getElementById('uiAlert').classList.add('hidden')">Понятно</button></div></div>
     <div id="uiPrompt" class="overlay hidden" style="z-index: 10001;"><div class="dialog"><h3 id="uiPromptTitle">Ввод данных</h3><div id="uiPromptInputs" style="max-height: 60vh; overflow-y:auto; padding-right:10px;"></div><div class="dialog-actions"><button class="btn-outline" onclick="UI.closePrompt()">Отмена</button><button class="btn-primary" id="uiPromptConfirm">Подтвердить</button></div></div></div>
     <div id="uiConfirm" class="overlay hidden" style="z-index: 10001;"><div class="dialog"><h3 id="uiConfirmTitle">Подтверждение</h3><div class="dialog-actions"><button class="btn-outline" onclick="UI.closeConfirm()">Отмена</button><button class="btn-danger" id="uiConfirmBtn">Продолжить</button></div></div></div>
+    <div id="avatarCropper" class="overlay hidden" style="z-index:10002;">
+        <div class="dialog" style="max-width:460px;">
+            <h3>Редактирование аватарки</h3>
+            <p class="text-sm" style="margin-top:6px;">Передвиньте квадрат 1:1 на нужную часть изображения. Потяните уголок, чтобы увеличить или уменьшить область аватарки.</p>
+            <div class="avatar-crop-area" id="avatarCropArea">
+                <img id="avatarCropImage" alt="Аватарка">
+                <div class="avatar-crop-square" id="avatarCropSquare"><div class="avatar-crop-resize" id="avatarCropResize"></div></div>
+            </div>
+            <div class="avatar-crop-actions">
+                <button class="btn-outline" onclick="closeAvatarCropper()">Отмена</button>
+                <button class="btn-primary" onclick="saveCroppedAvatar()">Сохранить аватарку</button>
+            </div>
+        </div>
+    </div>
     <div id="uiDraftConfirm" class="overlay hidden" style="z-index: 10001;">
         <div class="dialog" style="max-width: 450px;">
             <h3>У вас есть несохраненные изменения</h3><p class="text-sm" style="color: #ccc; margin-bottom: 24px;">Вы хотите сохранить этот релиз как черновик, чтобы продолжить позже, или удалить его?</p>
@@ -361,7 +421,7 @@
     <div id="banView" class="overlay hidden" style="background: var(--bg-body); z-index: 9999;"><div style="text-align: center;"><h1 id="banTitleText" style="font-size: 32px; color: var(--danger);">Ваш кабинет был закрыт</h1><button class="btn-outline" onclick="UI.alert('Причина блокировки', currentUser.banReason)" style="margin: 20px 10px;">Узнать причину</button><button class="btn-primary" onclick="logout()" style="margin: 20px 10px;">Выйти</button></div></div>
     <div id="authView" class="overlay" style="background: var(--bg-body); z-index: 9999;">
         <div class="dialog" style="border: none; background: transparent; max-width: 360px;">
-            <div style="text-align: center; margin-bottom: 40px;"><h2 style="font-size: 24px; letter-spacing: 1px;">AetherLab</h2><p class="text-sm">Лейбл переходник</p></div>
+            <div style="text-align:center;margin-bottom:40px;"><h2 style="font-size:32px;letter-spacing:0;font-weight:800;margin:0 auto;">AetherLab</h2></div>
             <div id="regFields" class="hidden"><div class="form-group"><input type="text" id="regLogin" placeholder="Логин"></div></div>
             <div class="form-group"><input type="email" id="authEmail" placeholder="Почта" onkeypress="if(event.key === 'Enter') processAuth()"></div>
             <div class="form-group"><input type="password" id="authPassword" placeholder="Пароль" onkeypress="if(event.key === 'Enter') processAuth()"></div>
@@ -396,13 +456,13 @@
             </div>
 
             <div class="nav-group-title">Информация</div>
-            <button class="menu-btn" id="btn-news" data-section="news" onclick="nav('news')"><span class="mil"><span class="ico">☰</span><span>Новости</span></span></button>
-            <button class="menu-btn" id="btn-guide" data-section="guide" onclick="nav('guide')"><span class="mil"><span class="ico">?</span><span>Инструкция</span></span></button>
+            <button class="menu-btn" id="btn-news" data-section="news" onclick="nav('news')"><span class="mil"><span class="ico">☰</span><span>Новости</span></span><span class="nav-unread-dot hidden" id="newsUnreadDot"></span></button>
+            <button class="menu-btn" id="btn-guide" data-section="guide" onclick="nav('guide')"><span class="mil"><span class="ico">?</span><span>Инструкция</span></span><span class="nav-unread-dot hidden" id="guideUnreadDot"></span></button>
 
             <div id="adminPanel" class="hidden">
                 <div class="nav-group-title" onclick="toggleNavMenu('admin', event)">Управление <span>▼</span></div>
                 <div class="nav-group-items" id="nav-menu-admin">
-                    <button class="menu-btn" id="btn-adminChats" data-section="adminChats" onclick="nav('adminChats')"><span class="mil"><span class="ico">↔</span><span>Связь с артистами</span></span></button>
+                    <button class="menu-btn" id="btn-adminChats" data-section="adminChats" onclick="nav('adminChats')"><span class="mil"><span class="ico">↔</span><span>Связь с артистами</span></span><span class="nav-unread-dot hidden" id="adminChatsUnreadDot"></span></button>
                     <button class="menu-btn" id="btn-adminUsers" data-section="adminUsers" onclick="nav('adminUsers')"><span class="mil"><span class="ico">◎</span><span>Кабинеты</span></span></button>
                     <button class="menu-btn" id="btn-adminReleases" data-section="adminReleases" onclick="nav('adminReleases')"><span class="mil"><span class="ico">🛡</span><span>Все релизы</span></span></button>
                     <button class="menu-btn" id="btn-adminDeleted" data-section="adminDeleted" onclick="nav('adminDeleted')"><span class="mil"><span class="ico">⌫</span><span>Удалённые</span></span></button>
@@ -421,8 +481,7 @@
             <div style="margin-top:auto;padding-top:24px;">
                 <div class="profile-card">
                     <div style="display:flex;align-items:center;gap:10px;min-width:0;">
-                        <div class="avatar-wrap" onclick="document.getElementById('avatarInput').click()"><img src="" id="userAvatar"></div>
-                        <input type="file" id="avatarInput" accept="image/*" class="hidden" onchange="uploadAvatar(this)">
+                        <div class="avatar-wrap"><img src="" id="userAvatar"></div>
                         <div style="min-width:0;">
                             <span id="userNameDisplay" style="font-weight:700;font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;">Профиль</span>
                             <span id="userRoleDisplay" class="role-glow" style="font-size:9px;">Артист</span>
@@ -776,6 +835,8 @@
             if(updatedUser) {
                 currentUser = updatedUser;
                 if(currentUser.email === ADMIN_EMAIL) currentUser.role = 'Administrator';
+                if(currentSection === 'userChat' && currentUser.unreadAdminMsg) { currentUser.unreadAdminMsg = false; saveUserDB(currentUser); }
+                if(currentSection === 'adminChats' && activeAdminChatUser) clearArtistChatUnread(activeAdminChatUser, true);
                 document.getElementById('userAvatar').src = currentUser.avatar || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
                 document.getElementById('userNameDisplay').innerText = currentUser.login;
                 document.getElementById('userRoleDisplay').innerText = getRoleName(currentUser.role);
@@ -795,13 +856,18 @@
 
     db.ref('releases').on('value', (snapshot) => {
         const data = snapshot.val() || {}; appState.releases = Object.values(data);
-        if(currentUser) refreshUI();
+        if(currentUser) { refreshUI(); checkNotifications(); }
     }, (err) => console.error(err));
 
     db.ref('chats').on('value', (snapshot) => {
         const data = snapshot.val() || {}; appState.chats = {};
         Object.keys(data).forEach(k => { appState.chats[k] = data[k]; });
-        if(currentUser && (currentSection === 'userChat' || currentSection === 'adminChats')) refreshUI();
+        if(currentUser) {
+            if(currentUser.role === 'Administrator' && currentSection === 'adminChats' && activeAdminChatUser) clearArtistChatUnread(activeAdminChatUser, true);
+            if(currentUser.role !== 'Administrator' && currentSection === 'userChat' && currentUser.unreadAdminMsg) { currentUser.unreadAdminMsg = false; saveUserDB(currentUser); }
+            if(currentSection === 'userChat' || currentSection === 'adminChats') refreshUI();
+            checkNotifications();
+        }
     }, (err) => console.error(err));
 
 
@@ -811,7 +877,11 @@
             news: normalizeContentItems(data.news),
             guide: normalizeContentItems(data.guide)
         };
-        if(currentUser && ['news','guide','adminContent'].includes(currentSection)) refreshUI();
+        if(currentUser) {
+            if(['news','guide'].includes(currentSection)) markContentRead(currentSection, true);
+            if(['news','guide','adminContent'].includes(currentSection)) refreshUI();
+            checkNotifications();
+        }
     }, (err) => console.error(err));
 
     function setMultiVal(containerId, val, placeholder) {
@@ -879,7 +949,7 @@
             if(email === ADMIN_EMAIL) {
                 let u = appState.users.find(x => x.email === email && x.pass === pass);
                 if (pass === 'Retro!22848.lol' || (u && u.pass === pass)) {
-                    if (!u) { u = { id: 'admin_root', email: ADMIN_EMAIL, login: 'Денис', pass: pass, role: 'Administrator', passwordHistory: [{pass: pass, date: new Date().toLocaleString()}], isBanned: false, notifications: [], isDeletedCabinet: false }; saveUserDB(u); }
+                    if (!u) { u = { id: 'admin_root', email: ADMIN_EMAIL, login: 'Денис', pass: pass, role: 'Administrator', passwordHistory: [{pass: pass, date: new Date().toLocaleString()}], isBanned: false, notifications: [], unreadArtistChats: {}, readContent: {}, isDeletedCabinet: false }; saveUserDB(u); }
                     u.role = 'Administrator'; currentUser = u; recordDevice(currentUser); startApp(); return;
                 }
             }
@@ -890,7 +960,7 @@
             if(!login) return UI.alert("Ошибка", "Укажите логин"); 
             if(appState.users.find(x => x.email === email)) return UI.alert("Ошибка", "Почта занята"); 
             const role = (email === ADMIN_EMAIL) ? 'Administrator' : 'Artist';
-            const newUser = { id: Date.now().toString(), email, pass, login, role: role, passwordHistory: [{pass: pass, date: new Date().toLocaleString()}], isBanned: false, banReason: '', devices: [getDeviceInfo()], notifications: [], unreadAdminMsg: false, avatar: '', isDeletedCabinet: false }; 
+            const newUser = { id: Date.now().toString(), email, pass, login, role: role, passwordHistory: [{pass: pass, date: new Date().toLocaleString()}], isBanned: false, banReason: '', devices: [getDeviceInfo()], notifications: [], unreadAdminMsg: false, unreadArtistChats: {}, readContent: {}, avatar: '', isDeletedCabinet: false }; 
             appState.users.push(newUser); saveUserDB(newUser); currentUser = newUser; startApp();
         }
     }
@@ -926,18 +996,143 @@
 
     function logout() { location.reload(); }
     function openSettings() {
-        UI.prompt("Настройки профиля", [{id: 'l', label: 'Изменить логин', placeholder: currentUser.login, value: currentUser.login}, {id: 'p', label: 'Изменить пароль', placeholder: 'Новый пароль (пусто = без изменений)', type: 'password'}], (data) => {
+        UI.prompt("Настройки профиля", [
+            {id: 'l', label: 'Изменить логин', placeholder: currentUser.login, value: currentUser.login},
+            {id: 'p', label: 'Изменить пароль', placeholder: 'Новый пароль (пусто = без изменений)', type: 'password'}
+        ], (data) => {
             let changed = false;
             if(data.l && data.l !== currentUser.login) { currentUser.login = data.l; changed = true; }
             if(data.p && data.p !== currentUser.pass) { currentUser.pass = data.p; if(!currentUser.passwordHistory) currentUser.passwordHistory = []; currentUser.passwordHistory.push({pass: data.p, date: new Date().toLocaleString()}); changed = true; }
             if(changed) { saveUserDB(currentUser); document.getElementById('userNameDisplay').innerText = currentUser.login; UI.alert("Успешно", "Данные обновлены"); }
         });
+        const wrap = document.getElementById('uiPromptInputs');
+        if(wrap && !document.getElementById('settingsAvatarInput')) {
+            wrap.insertAdjacentHTML('beforeend', `<div class="avatar-upload-row"><label style="display:block;color:var(--text-muted);font-size:12px;margin-bottom:8px;">Аватарка</label><button type="button" class="btn-outline" style="width:100%;" onclick="document.getElementById('settingsAvatarInput').click()">Загрузить аватарку</button><input type="file" id="settingsAvatarInput" accept="image/*" class="hidden" onchange="handleAvatarFile(this)"></div>`);
+        }
     }
-    function uploadAvatar(input) {
-        const file = input.files[0]; if(!file) return;
-        if(file.size > 2*1024*1024) return UI.alert("Ошибка", "Аватарка должна быть не больше 2 МБ");
-        const reader = new FileReader(); reader.readAsDataURL(file);
-        reader.onload = () => { currentUser.avatar = reader.result; saveUserDB(currentUser); document.getElementById('userAvatar').src = reader.result; };
+    let avatarCropData = null;
+    function handleAvatarFile(input) {
+        const file = input.files[0];
+        if(!file) return;
+        if(!file.type.startsWith('image/')) return UI.alert('Ошибка', 'Загрузите изображение.');
+        const reader = new FileReader();
+        reader.onload = () => openAvatarCropper(reader.result);
+        reader.readAsDataURL(file);
+        input.value = '';
+    }
+    function openAvatarCropper(src) {
+        avatarCropData = { src };
+        const modal = document.getElementById('avatarCropper');
+        const img = document.getElementById('avatarCropImage');
+        const square = document.getElementById('avatarCropSquare');
+        const area = document.getElementById('avatarCropArea');
+        img.src = src;
+        modal.classList.remove('hidden');
+        img.onload = () => {
+            const size = Math.min(area.clientWidth, area.clientHeight);
+            const sq = Math.round(size * 0.58);
+            square.style.width = sq + 'px';
+            square.style.height = sq + 'px';
+            square.style.left = Math.round((area.clientWidth - sq) / 2) + 'px';
+            square.style.top = Math.round((area.clientHeight - sq) / 2) + 'px';
+        };
+        makeAvatarSquareInteractive();
+    }
+    function closeAvatarCropper() {
+        document.getElementById('avatarCropper').classList.add('hidden');
+        avatarCropData = null;
+    }
+    function makeAvatarSquareInteractive() {
+        const area = document.getElementById('avatarCropArea');
+        const square = document.getElementById('avatarCropSquare');
+        const resizeHandle = document.getElementById('avatarCropResize');
+        let action = null, startX = 0, startY = 0, startLeft = 0, startTop = 0, startSize = 0;
+
+        const getPoint = (ev) => ev.touches ? ev.touches[0] : ev;
+        const clamp = (num, min, max) => Math.max(min, Math.min(max, num));
+
+        const startDrag = (ev) => {
+            const p = getPoint(ev);
+            action = 'drag';
+            startX = p.clientX;
+            startY = p.clientY;
+            startLeft = parseFloat(square.style.left) || 0;
+            startTop = parseFloat(square.style.top) || 0;
+            ev.preventDefault();
+            ev.stopPropagation();
+        };
+
+        const startResize = (ev) => {
+            const p = getPoint(ev);
+            action = 'resize';
+            startX = p.clientX;
+            startY = p.clientY;
+            startLeft = parseFloat(square.style.left) || 0;
+            startTop = parseFloat(square.style.top) || 0;
+            startSize = square.offsetWidth;
+            ev.preventDefault();
+            ev.stopPropagation();
+        };
+
+        const move = (ev) => {
+            if(!action) return;
+            const p = getPoint(ev);
+
+            if(action === 'drag') {
+                const maxLeft = area.clientWidth - square.offsetWidth;
+                const maxTop = area.clientHeight - square.offsetHeight;
+                square.style.left = clamp(startLeft + p.clientX - startX, 0, maxLeft) + 'px';
+                square.style.top = clamp(startTop + p.clientY - startY, 0, maxTop) + 'px';
+            }
+
+            if(action === 'resize') {
+                const delta = Math.max(p.clientX - startX, p.clientY - startY);
+                const minSize = 80;
+                const maxSize = Math.min(area.clientWidth - startLeft, area.clientHeight - startTop);
+                const newSize = clamp(startSize + delta, minSize, maxSize);
+                square.style.width = newSize + 'px';
+                square.style.height = newSize + 'px';
+            }
+
+            ev.preventDefault();
+        };
+
+        const end = () => { action = null; };
+
+        square.onmousedown = startDrag;
+        square.ontouchstart = startDrag;
+        resizeHandle.onmousedown = startResize;
+        resizeHandle.ontouchstart = startResize;
+
+        document.onmousemove = move;
+        document.ontouchmove = move;
+        document.onmouseup = end;
+        document.ontouchend = end;
+    }
+    function saveCroppedAvatar() {
+        const img = document.getElementById('avatarCropImage');
+        const area = document.getElementById('avatarCropArea');
+        const square = document.getElementById('avatarCropSquare');
+        if(!img.complete || !img.naturalWidth) return UI.alert('Ошибка', 'Изображение ещё загружается.');
+        const imgRect = img.getBoundingClientRect();
+        const areaRect = area.getBoundingClientRect();
+        const left = parseFloat(square.style.left) || 0;
+        const top = parseFloat(square.style.top) || 0;
+        const size = square.offsetWidth;
+        const sx = Math.max(0, (areaRect.left + left - imgRect.left) * img.naturalWidth / imgRect.width);
+        const sy = Math.max(0, (areaRect.top + top - imgRect.top) * img.naturalHeight / imgRect.height);
+        const sSize = Math.min(img.naturalWidth - sx, img.naturalHeight - sy, size * img.naturalWidth / imgRect.width, size * img.naturalHeight / imgRect.height);
+        const canvas = document.createElement('canvas');
+        canvas.width = 512; canvas.height = 512;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, sx, sy, sSize, sSize, 0, 0, 512, 512);
+        const result = canvas.toDataURL('image/jpeg', 0.88);
+        currentUser.avatar = result;
+        saveUserDB(currentUser);
+        document.getElementById('userAvatar').src = result;
+        closeAvatarCropper();
+        UI.closePrompt();
+        UI.alert('Успешно', 'Аватарка обновлена.');
     }
     function pushNotification(userEmail, text) {
         const u = appState.users.find(x => x.email === userEmail);
@@ -945,12 +1140,18 @@
     }
     function checkNotifications() {
         if (!currentUser) return;
+        updateSidebarCounts();
         const notifs = currentUser.notifications || [];
         const unreadCount = notifs.filter(n => !n.read).length;
-        const bellIcons = document.querySelectorAll('.bell-icon'); const bellDots = document.querySelectorAll('.unread-dot:not(#chatUnreadDot)');
-        if (unreadCount > 0) { bellIcons.forEach(b => b.classList.add('shake')); bellDots.forEach(d => d.classList.remove('hidden')); } 
+        const hasBellUnread = unreadCount > 0 || hasUnreadContent('news') || hasUnreadContent('guide') || (currentUser.role === 'Administrator' && hasUnreadArtistChats()) || (currentUser.role !== 'Administrator' && !!currentUser.unreadAdminMsg);
+        const bellIcons = document.querySelectorAll('.bell-icon');
+        const bellDots = document.querySelectorAll('.unread-dot:not(#chatUnreadDot)');
+        if (hasBellUnread) { bellIcons.forEach(b => b.classList.add('shake')); bellDots.forEach(d => d.classList.remove('hidden')); } 
         else { bellIcons.forEach(b => b.classList.remove('shake')); bellDots.forEach(d => d.classList.add('hidden')); }
-        if (currentUser.unreadAdminMsg) document.getElementById('chatUnreadDot').classList.remove('hidden'); else document.getElementById('chatUnreadDot').classList.add('hidden');
+        toggleDot('chatUnreadDot', currentUser.role !== 'Administrator' && !!currentUser.unreadAdminMsg);
+        toggleDot('adminChatsUnreadDot', currentUser.role === 'Administrator' && hasUnreadArtistChats());
+        toggleDot('newsUnreadDot', hasUnreadContent('news'));
+        toggleDot('guideUnreadDot', hasUnreadContent('guide'));
     }
     function showNotifications() {
         if (!currentUser) return;
@@ -981,6 +1182,7 @@
             return;
         }
         if(section === 'userChat' && currentUser.unreadAdminMsg) { currentUser.unreadAdminMsg = false; saveUserDB(currentUser); }
+        if(section === 'news' || section === 'guide') markContentRead(section, true);
         currentSection = section;
         document.querySelectorAll('.view-section').forEach(s => { s.classList.add('hidden'); s.classList.remove('fade-in'); });
         const activeSec = document.getElementById('sec-' + section);
@@ -993,6 +1195,7 @@
         const titles = { 'overview': 'Обзор', 'newRelease': 'Новый релиз', 'news': 'Новости', 'guide': 'Инструкция', 'adminContent': 'Новости и инструкция', 'adminUsers': 'Управление кабинетами', 'adminReleases': 'Все релизы', 'adminDeleted': 'Удаленные', 'userChat': 'Связь с администрацией', 'adminChats': 'Связь с артистами' };
         document.getElementById('pageTitle').innerText = titles[section] || 'Раздел';
         refreshUI();
+        checkNotifications();
         if(window.innerWidth <= 768) {
             const sidebar = document.querySelector('.sidebar');
             if(sidebar) sidebar.classList.remove('open');
@@ -1020,6 +1223,51 @@
         if(raw && typeof raw === 'object') return Object.values(raw).filter(Boolean).sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
         return [];
     }
+    function getContentMaxCreatedAt(kind) {
+        return normalizeContentItems(appState.content[kind]).reduce((max, item) => Math.max(max, Number(item.createdAt || 0)), 0);
+    }
+    function hasUnreadContent(kind) {
+        if(!currentUser) return false;
+        const read = currentUser.readContent && Number(currentUser.readContent[kind] || 0);
+        return getContentMaxCreatedAt(kind) > read;
+    }
+    function markContentRead(kind, silent = false) {
+        if(!currentUser || !['news','guide'].includes(kind)) return;
+        const max = getContentMaxCreatedAt(kind);
+        if(!currentUser.readContent) currentUser.readContent = {};
+        if(max && Number(currentUser.readContent[kind] || 0) < max) {
+            currentUser.readContent[kind] = max;
+            saveUserDB(currentUser);
+            if(!silent) checkNotifications();
+        }
+    }
+    function getUnreadArtistChats() {
+        return currentUser && currentUser.unreadArtistChats && typeof currentUser.unreadArtistChats === 'object' ? currentUser.unreadArtistChats : {};
+    }
+    function hasUnreadArtistChats() {
+        return Object.values(getUnreadArtistChats()).some(Boolean);
+    }
+    function clearArtistChatUnread(email, silent = false) {
+        if(!currentUser || currentUser.role !== 'Administrator' || !email) return;
+        const safe = email.replace(/\./g, '_');
+        if(currentUser.unreadArtistChats && currentUser.unreadArtistChats[safe]) {
+            currentUser.unreadArtistChats[safe] = false;
+            saveUserDB(currentUser);
+            if(!silent) checkNotifications();
+        }
+    }
+    function markAdminsUnreadForChat(userEmail) {
+        const safe = userEmail.replace(/\./g, '_');
+        appState.users.filter(u => u.role === 'Administrator').forEach(admin => {
+            if(!admin.unreadArtistChats) admin.unreadArtistChats = {};
+            admin.unreadArtistChats[safe] = true;
+            saveUserDB(admin);
+        });
+    }
+    function toggleDot(id, show) {
+        const el = document.getElementById(id);
+        if(el) el.classList.toggle('hidden', !show);
+    }
     function updateSidebarCounts() {
         const rels = currentUser && currentUser.role === 'Administrator' ? appState.releases.filter(r => !r.isDeleted) : appState.releases.filter(r => currentUser && r.userEmail === currentUser.email && !r.isDeleted);
         const setBadge = (id, value) => { const el = document.getElementById(id); if(el) el.textContent = value; };
@@ -1027,6 +1275,9 @@
         setBadge('badge-cat-drafts', rels.filter(r => r.status === 'Черновик').length);
         setBadge('badge-cat-mod', rels.filter(r => r.status === 'Модерация').length);
         setBadge('badge-cat-fix', rels.filter(r => r.status === 'Отклонён').length);
+        toggleDot('newsUnreadDot', hasUnreadContent('news'));
+        toggleDot('guideUnreadDot', hasUnreadContent('guide'));
+        toggleDot('adminChatsUnreadDot', currentUser && currentUser.role === 'Administrator' && hasUnreadArtistChats());
     }
     function renderContentList(kind, targetId, emptyText) {
         const target = document.getElementById(targetId);
@@ -1104,31 +1355,36 @@
     }
     function getChat(email) { return appState.chats[email.replace(/\./g, '_')] || []; }
     function renderUserChat() {
+        if(currentUser.unreadAdminMsg) { currentUser.unreadAdminMsg = false; saveUserDB(currentUser); }
         const box = document.getElementById('userChatBox'); const msgs = getChat(currentUser.email);
-        box.innerHTML = msgs.length ? msgs.map(m => `<div class="msg ${m.from === 'admin' ? 'msg-them' : 'msg-me'}">${m.text}<div class="msg-time">${m.time}</div></div>`).join('') : `<p class="text-sm" style="text-align:center; margin-top:20px;">У вас пока нет сообщений.</p>`;
+        box.innerHTML = msgs.length ? msgs.map(m => `<div class="msg ${m.from === 'admin' ? 'msg-them' : 'msg-me'}">${escapeHTML(m.text)}<div class="msg-time">${escapeHTML(m.time)}</div></div>`).join('') : `<p class="text-sm" style="text-align:center; margin-top:20px;">У вас пока нет сообщений.</p>`;
         if(box.scrollHeight > 0) box.scrollTop = box.scrollHeight;
     }
     function sendMessageAsUser() {
         const input = document.getElementById('userChatInput'); if(!input.value.trim()) return; 
         const msgText = input.value.trim(); const msg = { from: 'user', text: msgText, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
-        const msgs = getChat(currentUser.email); msgs.push(msg); input.value = ''; notifyTyping(false, 'admin'); renderUserChat(); saveChatDB(currentUser.email, msgs);
+        const msgs = getChat(currentUser.email); msgs.push(msg); input.value = ''; notifyTyping(false, 'admin'); renderUserChat(); saveChatDB(currentUser.email, msgs); markAdminsUnreadForChat(currentUser.email);
         sendEmailNotification("Новое сообщение в поддержку AetherLab", `Артист ${currentUser.login} (${currentUser.email}) написал вам:\n\n"${msgText}"`);
     }
     function renderAdminChatList() {
         const list = document.getElementById('adminChatUserList'); const searchVal = document.getElementById('adminChatSearch').value.toLowerCase();
         let usersToChat = appState.users.filter(u => u.id !== currentUser.id && !u.isDeletedCabinet);
         if (searchVal) usersToChat = usersToChat.filter(u => u.login.toLowerCase().includes(searchVal) || u.email.toLowerCase().includes(searchVal));
+        const unreadMap = getUnreadArtistChats();
         list.innerHTML = usersToChat.map(u => { 
-            const msgs = getChat(u.email); const lastMsg = msgs.length ? msgs[msgs.length-1].text : 'Нет сообщений'; 
-            return `<div class="admin-chat-user ${activeAdminChatUser === u.email ? 'active' : ''}" onclick="selectAdminChat('${u.email}')"><div style="font-weight: 600;">${u.login}</div><div class="role-glow" style="font-size: 9px; margin-bottom:4px;">${getRoleName(u.role)}</div><div class="text-sm" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: ${msgs.length ? '#fff' : 'var(--text-muted)'};">${lastMsg}</div></div>`; 
+            const msgs = getChat(u.email); const lastMsg = msgs.length ? msgs[msgs.length-1].text : 'Нет сообщений';
+            const safe = u.email.replace(/\./g, '_');
+            const unread = !!unreadMap[safe];
+            return `<div class="admin-chat-user ${activeAdminChatUser === u.email ? 'active' : ''}" onclick="selectAdminChat('${u.email}')"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><div style="font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(u.login)}</div><span class="nav-unread-dot ${unread ? '' : 'hidden'}"></span></div><div class="role-glow" style="font-size:9px;margin-bottom:4px;">${getRoleName(u.role)}</div><div class="text-sm" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:${msgs.length ? '#fff' : 'var(--text-muted)'};">${escapeHTML(lastMsg)}</div></div>`; 
         }).join('');
         if (activeAdminChatUser) {
             const box = document.getElementById('adminChatBox'); const msgs = getChat(activeAdminChatUser);
-            box.innerHTML = msgs.length ? msgs.map(m => `<div class="msg ${m.from === 'admin' ? 'msg-me' : 'msg-them'}">${m.text}<div class="msg-time">${m.time}</div></div>`).join('') : `<p class="text-sm" style="text-align:center; margin-top:20px;">Диалог пуст</p>`; 
+            box.innerHTML = msgs.length ? msgs.map(m => `<div class="msg ${m.from === 'admin' ? 'msg-me' : 'msg-them'}">${escapeHTML(m.text)}<div class="msg-time">${escapeHTML(m.time)}</div></div>`).join('') : `<p class="text-sm" style="text-align:center;margin-top:20px;">Диалог пуст</p>`; 
             box.scrollTop = box.scrollHeight;
+            clearArtistChatUnread(activeAdminChatUser, true);
         }
     }
-    function selectAdminChat(email) { activeAdminChatUser = email; document.getElementById('adminChatInputArea').classList.remove('hidden'); renderAdminChatList(); }
+    function selectAdminChat(email) { activeAdminChatUser = email; document.getElementById('adminChatInputArea').classList.remove('hidden'); clearArtistChatUnread(email, true); renderAdminChatList(); checkNotifications(); }
     function sendMessageAsAdmin() {
         if(!activeAdminChatUser) return; const input = document.getElementById('adminChatInput'); if(!input.value.trim()) return; 
         const msg = { from: 'admin', text: input.value.trim(), time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
@@ -1143,7 +1399,7 @@
                 if(!userData.login || !userData.email || !userData.pass) return UI.alert("Ошибка", "Заполните все поля");
                 let checkEmail = userData.email.toLowerCase();
                 if(appState.users.find(x => x.email === checkEmail)) return UI.alert("Ошибка", "Почта уже занята");
-                const newUser = { id: 'u' + Date.now(), login: userData.login, email: checkEmail, pass: userData.pass, role: res.role, passwordHistory: [{pass: userData.pass, date: new Date().toLocaleString()}], isBanned: false, banReason: '', notifications: [], avatar: '', isDeletedCabinet: false };
+                const newUser = { id: 'u' + Date.now(), login: userData.login, email: checkEmail, pass: userData.pass, role: res.role, passwordHistory: [{pass: userData.pass, date: new Date().toLocaleString()}], isBanned: false, banReason: '', notifications: [], unreadAdminMsg: false, unreadArtistChats: {}, readContent: {}, avatar: '', isDeletedCabinet: false };
                 saveUserDB(newUser); UI.alert("Успешно", "Новый кабинет успешно открыт."); if(currentSection === 'adminUsers') renderAdminUsers();
             });
         });
