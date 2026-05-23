@@ -168,6 +168,167 @@
             .card > div:last-child > div { margin-left: 0 !important; padding-left: 0 !important; border-left: none !important; }
             button, input, select, textarea { touch-action: manipulation; }
         }
+
+
+        /* ===== New visual skin from the attached design, engine unchanged ===== */
+        :root{
+            --bg-body:#0b0d12;
+            --bg-panel:#171c27;
+            --bg-glass:rgba(255,255,255,.05);
+            --border:rgba(255,255,255,.08);
+            --text-main:#f5f7fb;
+            --text-muted:#aab0c0;
+            --accent:#7b61ff;
+            --accent-bg:#9f76ff;
+            --danger:#ef4444;
+            --success:#22c55e;
+            --warning:#f59e0b;
+            --radius:22px;
+            --shadow:0 22px 50px rgba(0,0,0,.4);
+            --side:270px;
+        }
+        html, body { height: 100%; }
+        body{
+            background:linear-gradient(180deg,#090b10,#0f131b);
+            color:var(--text-main);
+            font-family:Inter,system-ui,sans-serif;
+        }
+        .app{height:100dvh;background:linear-gradient(180deg,#090b10,#0f131b);}
+        .sidebar{
+            width:var(--side);
+            background:linear-gradient(180deg,#12161e,#0f131a);
+            border-right:1px solid var(--border);
+            padding:18px 14px;
+            box-shadow:none;
+        }
+        .content{
+            padding:24px;
+            background:linear-gradient(180deg,#090b10,#0f131b);
+        }
+        .portal-brand{
+            display:flex;align-items:center;gap:12px;
+            padding:8px 8px 18px;
+            border-bottom:1px solid var(--border);
+            margin-bottom:10px;
+        }
+        .portal-brand-title{font-weight:800;letter-spacing:.02em;}
+        .portal-brand small{display:block;color:var(--text-muted);font-size:12px;margin-top:2px;}
+        .logo-mark{
+            width:42px;height:42px;border-radius:14px;
+            display:grid;place-items:center;
+            background:linear-gradient(135deg,var(--accent),#b07cff);
+            box-shadow:0 10px 24px rgba(123,97,255,.3);
+            color:#fff;font-weight:800;
+            flex:0 0 auto;
+        }
+        #pageTitle{
+            font-size:34px;
+            line-height:1.1;
+            font-weight:800;
+            letter-spacing:-.03em;
+            margin:0 0 18px;
+        }
+        .section-kicker{
+            display:inline-flex;align-items:center;gap:8px;
+            padding:8px 14px;border-radius:999px;
+            background:rgba(255,255,255,.05);
+            border:1px solid var(--border);
+            color:var(--text-muted);
+            font-size:13px;
+            margin-bottom:8px;
+        }
+        input,select,textarea{
+            background:rgba(255,255,255,.05);
+            border:1px solid rgba(255,255,255,.12);
+            border-radius:16px;
+            color:#fff;
+        }
+        input:focus,select:focus,textarea:focus{border-color:rgba(123,97,255,.65);box-shadow:0 0 0 3px rgba(123,97,255,.14);}
+        button{border-radius:999px;}
+        .btn-primary{
+            background:linear-gradient(135deg,var(--accent),#9f76ff);
+            color:#fff;
+            box-shadow:0 12px 28px rgba(123,97,255,.18);
+        }
+        .btn-primary:hover:not(:disabled){background:linear-gradient(135deg,#8b74ff,#b08cff);box-shadow:0 16px 34px rgba(123,97,255,.28);}
+        .btn-outline{
+            background:rgba(255,255,255,.05);
+            border:1px solid rgba(255,255,255,.12);
+            color:#fff;
+        }
+        .btn-outline:hover:not(:disabled){background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);}
+        .btn-danger{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.22);color:#ffb1b1;}
+        .btn-success{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.22);color:#92f4b3;}
+        .btn-add-plus{background:linear-gradient(135deg,var(--accent),#9f76ff);border-radius:16px;}
+        .btn-add-minus{background:linear-gradient(135deg,#ef4444,#dc2626);border-radius:16px;}
+        .menu-btn{
+            width:100%;border:0;background:transparent;color:#eef2fb;
+            text-align:left;border-radius:14px;padding:12px;
+            cursor:pointer;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;
+        }
+        .menu-btn:hover,.menu-btn.active{background:rgba(255,255,255,.08);color:#fff;}
+        .menu-btn.active{border-left:0;border-radius:14px;}
+        .menu-btn.primary-nav{background:linear-gradient(135deg,var(--accent),#9f76ff);color:#fff;margin:10px 0 8px;box-shadow:0 12px 26px rgba(123,97,255,.22);}
+        .mil{display:flex;align-items:center;gap:12px;}
+        .ico{width:24px;height:24px;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,.04);color:var(--text-muted);font-size:12px;flex:0 0 auto;}
+        .menu-btn:hover .ico,.menu-btn.active .ico,.primary-nav .ico{color:#fff;background:rgba(255,255,255,.1);}
+        .menu-badge{min-width:24px;height:24px;padding:0 7px;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,.1);font-size:12px;color:#fff;}
+        .nav-group-title{
+            color:#7d8598;font-size:11px;text-transform:uppercase;letter-spacing:.12em;
+            padding:10px 12px 6px;margin:10px 0 0;font-weight:700;
+        }
+        .nav-group-items{padding-left:16px;}
+        .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:18px;}
+        .stat-card,.card,.dialog,.panel-like,.content-card{
+            background:rgba(255,255,255,.04);
+            border:1px solid var(--border);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+        }
+        .stat-card{padding:18px;text-align:left;}
+        .stat-num{font-size:31px;font-weight:800;margin:8px 0 6px;}
+        .stat-label{font-size:12px;color:var(--text-muted);text-transform:none;letter-spacing:0;font-weight:500;}
+        .card{padding:18px;cursor:default;transition:.18s;background:rgba(255,255,255,.04);}
+        .card:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.16);background:rgba(255,255,255,.055);}
+        .card-cover{width:58px;height:58px;border-radius:16px;border:0;background:linear-gradient(135deg,rgba(123,97,255,.7),rgba(54,194,255,.52));box-shadow:none;}
+        .card-title{font-size:18px;font-weight:700;}
+        .card-artist{color:var(--text-muted);line-height:1.5;}
+        .badge{border-radius:999px;padding:8px 12px;font-size:12px;border:1px solid transparent;}
+        .badge-mod,.badge-draft{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.24);color:#ffd493;}
+        .badge-ok{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.22);color:#92f4b3;}
+        .badge-err{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.22);color:#ffb1b1;}
+        .upload-box{border:1px dashed rgba(255,255,255,.18);border-radius:22px;background:rgba(255,255,255,.05);}
+        .track-list-item,.chat-wrap,.admin-chat-layout,.admin-chat-users{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:18px;}
+        .track-list-item:hover{border-color:rgba(255,255,255,.16);}
+        .chat-input-area{background:rgba(23,28,39,.94);border-top:1px solid var(--border);}
+        .msg-me{background:linear-gradient(135deg,var(--accent),#9f76ff);color:#fff;}
+        .msg-them{background:rgba(255,255,255,.05);border:1px solid var(--border);}
+        .mobile-header{background:rgba(10,12,18,.72);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+        .avatar-wrap{border-radius:14px;background:rgba(255,255,255,.05);border:1px solid var(--border);}
+        .profile-card{padding:12px;margin-bottom:12px;background:rgba(255,255,255,.04);border-radius:18px;border:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;}
+        .role-glow{color:#92f4b3;text-shadow:0 0 12px rgba(34,197,94,.28);}
+        .content-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;}
+        .content-item{padding:18px;margin-bottom:12px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow);}
+        .content-item h3{margin:0 0 8px;font-size:18px;}
+        .content-item .date{font-size:12px;color:var(--text-muted);margin-bottom:10px;}
+        .content-item p{color:#d7deee;line-height:1.7;white-space:pre-wrap;margin:0;}
+        .admin-content-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+        .empty-panel{padding:26px;border-radius:22px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--text-muted);}
+        #authView .dialog{background:rgba(18,23,34,.96)!important;border:1px solid var(--border)!important;border-radius:28px!important;box-shadow:var(--shadow);}
+        #authView h2{font-size:30px!important;font-weight:800;letter-spacing:-.02em!important;text-transform:none!important;}
+        .overlay{background:rgba(0,0,0,.72);backdrop-filter:blur(12px);}
+        @media(max-width:768px){
+            body{overflow:hidden;}
+            .app{height:calc(100dvh - 65px);}
+            .sidebar{position:fixed;top:0;left:0;bottom:0;width:280px;transform:translateX(-100%);box-shadow:24px 0 50px rgba(0,0,0,.55);}
+            .sidebar.open{transform:translateX(0);}
+            .content{padding:20px;}
+            #pageTitle{font-size:30px;}
+            .card,.card>div:first-child{gap:14px;}
+            .card-cover{width:100%;height:auto;aspect-ratio:1;border-radius:22px;}
+            .content-grid{grid-template-columns:1fr;}
+        }
+
     </style>
 </head>
 <body>
@@ -211,58 +372,65 @@
     </div>
     <div id="appView" class="app hidden">
         <div class="sidebar">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; padding-left: 16px; padding-right: 8px;">
-                <h2 style="font-size: 18px; font-weight: 600; margin: 0;">AetherLab</h2>
-                <div class="bell-wrap hidden" id="bellWrapDesktop" onclick="showNotifications()">
+            <div class="portal-brand">
+                <div class="logo-mark">AL</div>
+                <div style="min-width:0; flex:1;">
+                    <div class="portal-brand-title">AetherLab</div>
+                    <small>Artist Portal</small>
+                </div>
+                <div class="bell-wrap hidden" id="bellWrapDesktop" onclick="showNotifications()" title="Уведомления">
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="bell-icon"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
                     <div class="unread-dot hidden" id="bellDotDesktop"></div>
                 </div>
             </div>
             
-            <button class="menu-btn" style="background: #fff; color: #000; margin-bottom: 24px; text-align: center; justify-content: center;" onclick="startNewRelease()">+ Новый релиз</button>
+            <button class="menu-btn primary-nav" data-section="newRelease" onclick="startNewRelease()"><span class="mil"><span class="ico">＋</span><span>Новый релиз</span></span></button>
+            <button class="menu-btn active" id="btn-overview" data-section="overview" onclick="nav('overview')"><span class="mil"><span class="ico">⌂</span><span>Обзор</span></span></button>
             
-            <button class="menu-btn active" id="btn-overview" onclick="nav('overview')"><span>Обзор</span></button>
-            
-            <div class="nav-group-title" onclick="toggleNavMenu('catalog', event)">Каталог <span>▼</span></div>
-            <div class="nav-group-items hidden" id="nav-menu-catalog">
-                <button class="menu-btn" id="btn-cat-all" onclick="navCatalog('all')"><span>Все релизы</span></button>
-                <button class="menu-btn" id="btn-cat-drafts" onclick="navCatalog('drafts')"><span>Черновики</span></button>
-                <button class="menu-btn" id="btn-cat-mod" onclick="navCatalog('mod')"><span>Модерация</span></button>
-                <button class="menu-btn" id="btn-cat-fix" onclick="navCatalog('fix')"><span>Требуется исправление</span></button>
+            <div class="nav-group-title" onclick="toggleNavMenu('catalog', event)">Ваша музыка <span>▼</span></div>
+            <div class="nav-group-items" id="nav-menu-catalog">
+                <button class="menu-btn" id="btn-cat-all" data-section="catalog" onclick="navCatalog('all')"><span class="mil"><span class="ico">♫</span><span>Все релизы</span></span><span class="menu-badge" id="badge-cat-all">0</span></button>
+                <button class="menu-btn" id="btn-cat-drafts" data-section="catalog" onclick="navCatalog('drafts')"><span class="mil"><span class="ico">✎</span><span>Черновики</span></span><span class="menu-badge" id="badge-cat-drafts">0</span></button>
+                <button class="menu-btn" id="btn-cat-mod" data-section="catalog" onclick="navCatalog('mod')"><span class="mil"><span class="ico">⌛</span><span>Модерация</span></span><span class="menu-badge" id="badge-cat-mod">0</span></button>
+                <button class="menu-btn" id="btn-cat-fix" data-section="catalog" onclick="navCatalog('fix')"><span class="mil"><span class="ico">!</span><span>Требуется исправление</span></span><span class="menu-badge" id="badge-cat-fix">0</span></button>
             </div>
+
+            <div class="nav-group-title">Информация</div>
+            <button class="menu-btn" id="btn-news" data-section="news" onclick="nav('news')"><span class="mil"><span class="ico">☰</span><span>Новости</span></span></button>
+            <button class="menu-btn" id="btn-guide" data-section="guide" onclick="nav('guide')"><span class="mil"><span class="ico">?</span><span>Инструкция</span></span></button>
+
             <div id="adminPanel" class="hidden">
                 <div class="nav-group-title" onclick="toggleNavMenu('admin', event)">Управление <span>▼</span></div>
-                <div class="nav-group-items hidden" id="nav-menu-admin">
-                    <button class="menu-btn" id="btn-adminChats" onclick="nav('adminChats')"><span>Связь с артистами</span></button>
-                    <button class="menu-btn" id="btn-adminUsers" onclick="nav('adminUsers')"><span>Кабинеты</span></button>
-                    <button class="menu-btn" id="btn-adminReleases" onclick="nav('adminReleases')"><span>Все релизы</span></button>
-                    <button class="menu-btn" id="btn-adminDeleted" onclick="nav('adminDeleted')"><span>Удалённые</span></button>
+                <div class="nav-group-items" id="nav-menu-admin">
+                    <button class="menu-btn" id="btn-adminChats" data-section="adminChats" onclick="nav('adminChats')"><span class="mil"><span class="ico">↔</span><span>Связь с артистами</span></span></button>
+                    <button class="menu-btn" id="btn-adminUsers" data-section="adminUsers" onclick="nav('adminUsers')"><span class="mil"><span class="ico">◎</span><span>Кабинеты</span></span></button>
+                    <button class="menu-btn" id="btn-adminReleases" data-section="adminReleases" onclick="nav('adminReleases')"><span class="mil"><span class="ico">🛡</span><span>Все релизы</span></span></button>
+                    <button class="menu-btn" id="btn-adminDeleted" data-section="adminDeleted" onclick="nav('adminDeleted')"><span class="mil"><span class="ico">⌫</span><span>Удалённые</span></span></button>
+                    <button class="menu-btn" id="btn-adminContent" data-section="adminContent" onclick="nav('adminContent')"><span class="mil"><span class="ico">✦</span><span>Новости и инструкция</span></span></button>
                 </div>
             </div>
             <div id="userSupportBtn" class="hidden">
                 <div class="nav-group-title" onclick="toggleNavMenu('support', event)">Поддержка <span>▼</span></div>
-                <div class="nav-group-items hidden" id="nav-menu-support">
-                    <button class="menu-btn" id="btn-userChat" onclick="nav('userChat')">
-                        <span>Связь с администрацией</span> 
+                <div class="nav-group-items" id="nav-menu-support">
+                    <button class="menu-btn" id="btn-userChat" data-section="userChat" onclick="nav('userChat')">
+                        <span class="mil"><span class="ico">↔</span><span>Связь с администрацией</span></span>
                         <div id="chatUnreadDot" class="chat-unread-indicator hidden"></div>
                     </button>
                 </div>
             </div>
-            <div style="margin-top: auto; padding-top: 24px;">
-                <div style="padding: 12px; margin-bottom: 12px; background: #000; border-radius: 8px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <div class="avatar-wrap" onclick="document.getElementById('avatarInput').click()">
-                            <img src="" id="userAvatar">
-                        </div>
+            <div style="margin-top:auto;padding-top:24px;">
+                <div class="profile-card">
+                    <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+                        <div class="avatar-wrap" onclick="document.getElementById('avatarInput').click()"><img src="" id="userAvatar"></div>
                         <input type="file" id="avatarInput" accept="image/*" class="hidden" onchange="uploadAvatar(this)">
-                        <div>
-                            <span id="userNameDisplay" style="font-weight: 500; font-size: 13px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">Профиль</span>
-                            <span id="userRoleDisplay" class="role-glow" style="font-size: 9px;">Артист</span>
+                        <div style="min-width:0;">
+                            <span id="userNameDisplay" style="font-weight:700;font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;">Профиль</span>
+                            <span id="userRoleDisplay" class="role-glow" style="font-size:9px;">Артист</span>
                         </div>
                     </div>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="cursor: pointer; opacity: 0.7; transition: 0.2s; min-width: 16px;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'" onclick="openSettings()"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer;opacity:.7;transition:.2s;min-width:16px;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.7'" onclick="openSettings()"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                 </div>
-                <button class="menu-btn" style="color: var(--danger); justify-content: flex-start;" onclick="logout()">Выйти</button>
+                <button class="menu-btn" style="color:var(--danger);justify-content:flex-start;" onclick="logout()"><span class="mil"><span class="ico">⇦</span><span>Выйти</span></span></button>
             </div>
         </div>
         <div class="content" onclick="document.querySelector('.sidebar').classList.remove('open')">
@@ -287,6 +455,17 @@
                         <button class="btn-primary" onclick="sendMessageAsUser()">Отправить</button>
                     </div>
                 </div>
+            </div>
+
+            <div id="sec-news" class="view-section hidden">
+                <div class="section-kicker">AetherLab • Updates</div>
+                <p class="text-sm" style="margin-bottom:16px;">Новости от администрации отображаются здесь для всех кабинетов.</p>
+                <div id="newsList"></div>
+            </div>
+            <div id="sec-guide" class="view-section hidden">
+                <div class="section-kicker">AetherLab • Help Center</div>
+                <p class="text-sm" style="margin-bottom:16px;">Инструкции по работе с релизами, черновиками и модерацией.</p>
+                <div id="guideList"></div>
             </div>
             <div id="sec-adminChats" class="view-section hidden">
                 <div class="admin-chat-layout">
@@ -353,6 +532,27 @@
                 <div class="form-group"><label>Текст песни</label><textarea id="t_lyrics" placeholder="Текст песни..." rows="3"></textarea></div>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;"><div class="form-group"><label>Нецензурная лексика <span class="req-star">*</span></label><select id="t_explicit"><option value="Нет">Нет</option><option value="Да">Да</option></select></div><div class="form-group"><label>ISRC (Штрихкод трека)</label><input type="text" id="t_isrc" placeholder="Если есть"></div></div>
                 <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;"><button class="btn-primary" style="flex: 1; min-width: 200px;" onclick="saveTrackEdit()">Сохранить и вернуться</button><button class="btn-outline" style="min-width: 120px;" onclick="cancelTrackEdit()">Отмена</button></div>
+            </div>
+
+            <div id="sec-adminContent" class="view-section hidden">
+                <div class="section-kicker">Главный администратор • Контент кабинета</div>
+                <p class="text-sm" style="margin-bottom:18px;">Здесь можно добавлять новости и инструкции. Они сразу появятся в кабинетах артистов.</p>
+                <div class="content-grid">
+                    <div class="content-card" style="padding:20px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;">
+                            <div><h2 style="margin:0 0 4px;">Новости</h2><p class="text-sm">Публикации для раздела «Новости»</p></div>
+                            <button class="btn-primary" onclick="addNewsItem()">+ Новость</button>
+                        </div>
+                        <div id="adminNewsList"></div>
+                    </div>
+                    <div class="content-card" style="padding:20px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;">
+                            <div><h2 style="margin:0 0 4px;">Инструкция</h2><p class="text-sm">Материалы для раздела «Инструкция»</p></div>
+                            <button class="btn-primary" onclick="addGuideItem()">+ Инструкция</button>
+                        </div>
+                        <div id="adminGuideList"></div>
+                    </div>
+                </div>
             </div>
             <div id="sec-adminUsers" class="view-section hidden">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
@@ -421,11 +621,15 @@
         static prompt(title, fields, onConfirm) { 
             document.getElementById('uiPromptTitle').innerText = title; 
             document.getElementById('uiPromptInputs').innerHTML = fields.map(f => {
+                const esc = (v) => String(v || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
                 if(f.type === 'select') {
-                    let opts = f.options.map(o => `<option value="${o.v}" ${o.v===f.value?'selected':''}>${o.t}</option>`).join('');
-                    return `<div class="form-group"><label>${f.label || ''}</label><select id="prompt_${f.id}">${opts}</select></div>`;
+                    let opts = f.options.map(o => `<option value="${esc(o.v)}" ${o.v===f.value?'selected':''}>${esc(o.t)}</option>`).join('');
+                    return `<div class="form-group"><label>${esc(f.label || '')}</label><select id="prompt_${f.id}">${opts}</select></div>`;
                 }
-                return `<div class="form-group"><label>${f.label || ''}</label><input type="${f.type||'text'}" id="prompt_${f.id}" placeholder="${f.placeholder||''}" value="${f.value||''}"></div>`;
+                if(f.type === 'textarea') {
+                    return `<div class="form-group"><label>${esc(f.label || '')}</label><textarea id="prompt_${f.id}" placeholder="${esc(f.placeholder || '')}" rows="${f.rows || 5}">${esc(f.value || '')}</textarea></div>`;
+                }
+                return `<div class="form-group"><label>${esc(f.label || '')}</label><input type="${f.type||'text'}" id="prompt_${f.id}" placeholder="${esc(f.placeholder||'')}" value="${esc(f.value||'')}"></div>`;
             }).join(''); 
             document.getElementById('uiPrompt').classList.remove('hidden'); 
             document.getElementById('uiPromptConfirm').onclick = () => { 
@@ -547,7 +751,7 @@
     function saveUserDB(u) { db.ref('users/' + u.id).set(u); }
     function saveChatDB(email, msgs) { db.ref('chats/' + email.replace(/\./g, '_')).set(msgs); }
 
-    let appState = { users: [], releases: [], chats: {} }; 
+    let appState = { users: [], releases: [], chats: {}, content: { news: [], guide: [] } }; 
     let currentUser = null; 
     let authMode = 'login'; 
     let currentSection = 'overview'; 
@@ -598,6 +802,16 @@
         const data = snapshot.val() || {}; appState.chats = {};
         Object.keys(data).forEach(k => { appState.chats[k] = data[k]; });
         if(currentUser && (currentSection === 'userChat' || currentSection === 'adminChats')) refreshUI();
+    }, (err) => console.error(err));
+
+
+    db.ref('content').on('value', (snapshot) => {
+        const data = snapshot.val() || {};
+        appState.content = {
+            news: normalizeContentItems(data.news),
+            guide: normalizeContentItems(data.guide)
+        };
+        if(currentUser && ['news','guide','adminContent'].includes(currentSection)) refreshUI();
     }, (err) => console.error(err));
 
     function setMultiVal(containerId, val, placeholder) {
@@ -754,7 +968,8 @@
     function navCatalog(filterMode) {
         activeCatalogFilter = filterMode; nav('catalog');
         document.querySelectorAll('#nav-menu-catalog .menu-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('btn-cat-' + filterMode).classList.add('active');
+        const activeBtn = document.getElementById('btn-cat-' + filterMode);
+        if(activeBtn) activeBtn.classList.add('active');
         document.getElementById('pageTitle').innerText = { 'all': 'Все релизы', 'drafts': 'Черновики', 'mod': 'Модерация', 'fix': 'Требуется исправление' }[filterMode];
     }
     function nav(section, force = false) {
@@ -766,30 +981,119 @@
             return;
         }
         if(section === 'userChat' && currentUser.unreadAdminMsg) { currentUser.unreadAdminMsg = false; saveUserDB(currentUser); }
-        currentSection = section; 
-        document.querySelectorAll('.view-section').forEach(s => { s.classList.add('hidden'); s.classList.remove('fade-in'); }); 
-        const activeSec = document.getElementById('sec-' + section); activeSec.classList.remove('hidden'); void activeSec.offsetWidth; activeSec.classList.add('fade-in');
+        currentSection = section;
+        document.querySelectorAll('.view-section').forEach(s => { s.classList.add('hidden'); s.classList.remove('fade-in'); });
+        const activeSec = document.getElementById('sec-' + section);
+        if(activeSec) { activeSec.classList.remove('hidden'); void activeSec.offsetWidth; activeSec.classList.add('fade-in'); }
+        document.querySelectorAll('.sidebar .menu-btn').forEach(b => b.classList.remove('active'));
         if (section !== 'catalog') {
-            document.querySelectorAll('.sidebar .menu-btn').forEach(b => b.classList.remove('active')); 
-            const e = (typeof window !== 'undefined' && window.event) ? window.event : null;
-            if(e && e.target && e.target.closest('.menu-btn')) e.target.closest('.menu-btn').classList.add('active');
-            document.getElementById('pageTitle').innerText = { 'overview': 'Обзор', 'newRelease': 'Новый релиз', 'adminUsers': 'Управление кабинетами', 'adminReleases': 'Все релизы', 'adminDeleted': 'Удаленные', 'userChat': 'Связь с администрацией', 'adminChats': 'Связь с артистами' }[section] || 'Раздел';
+            const navBtn = document.querySelector(`.sidebar .menu-btn[data-section="${section}"]`);
+            if(navBtn) navBtn.classList.add('active');
         }
+        const titles = { 'overview': 'Обзор', 'newRelease': 'Новый релиз', 'news': 'Новости', 'guide': 'Инструкция', 'adminContent': 'Новости и инструкция', 'adminUsers': 'Управление кабинетами', 'adminReleases': 'Все релизы', 'adminDeleted': 'Удаленные', 'userChat': 'Связь с администрацией', 'adminChats': 'Связь с артистами' };
+        document.getElementById('pageTitle').innerText = titles[section] || 'Раздел';
         refreshUI();
         if(window.innerWidth <= 768) {
             const sidebar = document.querySelector('.sidebar');
             if(sidebar) sidebar.classList.remove('open');
         }
     }
+    
     function refreshUI() {
+        updateSidebarCounts();
         if(currentSection === 'overview') renderOverview(); 
         if(currentSection === 'catalog') renderCatalog(); 
+        if(currentSection === 'news') renderNews();
+        if(currentSection === 'guide') renderGuide();
+        if(currentSection === 'adminContent') renderAdminContent();
         if(currentSection === 'adminUsers') renderAdminUsers(); 
         if(currentSection === 'adminReleases') renderAdminReleases(false); 
         if(currentSection === 'adminDeleted') renderAdminReleases(true); 
         if(currentSection === 'userChat') renderUserChat(); 
         if(currentSection === 'adminChats') renderAdminChatList();
     }
+    function escapeHTML(value) {
+        return String(value ?? '').replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+    }
+    function normalizeContentItems(raw) {
+        if(Array.isArray(raw)) return raw.filter(Boolean).sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+        if(raw && typeof raw === 'object') return Object.values(raw).filter(Boolean).sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+        return [];
+    }
+    function updateSidebarCounts() {
+        const rels = currentUser && currentUser.role === 'Administrator' ? appState.releases.filter(r => !r.isDeleted) : appState.releases.filter(r => currentUser && r.userEmail === currentUser.email && !r.isDeleted);
+        const setBadge = (id, value) => { const el = document.getElementById(id); if(el) el.textContent = value; };
+        setBadge('badge-cat-all', rels.filter(r => r.status === 'Одобрен' || r.status === 'Отклонён').length);
+        setBadge('badge-cat-drafts', rels.filter(r => r.status === 'Черновик').length);
+        setBadge('badge-cat-mod', rels.filter(r => r.status === 'Модерация').length);
+        setBadge('badge-cat-fix', rels.filter(r => r.status === 'Отклонён').length);
+    }
+    function renderContentList(kind, targetId, emptyText) {
+        const target = document.getElementById(targetId);
+        if(!target) return;
+        const items = normalizeContentItems(appState.content[kind]);
+        if(!items.length) {
+            target.innerHTML = `<div class="empty-panel">${escapeHTML(emptyText)}</div>`;
+            return;
+        }
+        target.innerHTML = items.map(item => `<article class="content-item"><h3>${escapeHTML(item.title)}</h3><div class="date">${escapeHTML(item.date || '')}</div><p>${escapeHTML(item.text)}</p></article>`).join('');
+    }
+    function renderNews() { renderContentList('news', 'newsList', 'Пока нет новостей от администрации.'); }
+    function renderGuide() { renderContentList('guide', 'guideList', 'Пока нет инструкций. Администратор сможет добавить их в отдельном разделе.'); }
+    function renderAdminContentList(kind, targetId) {
+        const target = document.getElementById(targetId);
+        if(!target) return;
+        const items = normalizeContentItems(appState.content[kind]);
+        if(!items.length) { target.innerHTML = `<div class="empty-panel">Ничего не добавлено.</div>`; return; }
+        target.innerHTML = items.map(item => `<article class="content-item"><h3>${escapeHTML(item.title)}</h3><div class="date">${escapeHTML(item.date || '')}</div><p>${escapeHTML(item.text)}</p><div class="admin-content-actions"><button class="btn-outline" onclick="editContentItem('${kind}','${item.id}')">Изменить</button><button class="btn-danger" onclick="deleteContentItem('${kind}','${item.id}')">Удалить</button></div></article>`).join('');
+    }
+    function renderAdminContent() {
+        if(currentUser.role !== 'Administrator') { nav('overview', true); return; }
+        renderAdminContentList('news', 'adminNewsList');
+        renderAdminContentList('guide', 'adminGuideList');
+    }
+    function saveContentKind(kind) {
+        appState.content[kind] = normalizeContentItems(appState.content[kind]);
+        db.ref('content/' + kind).set(appState.content[kind]);
+    }
+    function addContentItem(kind) {
+        const isNews = kind === 'news';
+        UI.prompt(isNews ? 'Добавить новость' : 'Добавить инструкцию', [
+            {id:'title', label:'Заголовок', placeholder:isNews ? 'Например: Обновление правил модерации' : 'Например: Как отправить релиз'},
+            {id:'text', label:'Текст', type:'textarea', rows:7, placeholder:'Введите текст...'}
+        ], (res) => {
+            if(!res.title || !res.text) return UI.alert('Ошибка', 'Заполните заголовок и текст.');
+            const item = { id: Date.now().toString(), title: res.title.trim(), text: res.text.trim(), date: new Date().toLocaleString(), createdAt: Date.now() };
+            appState.content[kind].unshift(item);
+            saveContentKind(kind);
+            renderAdminContent();
+        });
+    }
+    function editContentItem(kind, id) {
+        const item = appState.content[kind].find(x => x.id === id);
+        if(!item) return;
+        UI.prompt(kind === 'news' ? 'Изменить новость' : 'Изменить инструкцию', [
+            {id:'title', label:'Заголовок', value:item.title},
+            {id:'text', label:'Текст', type:'textarea', rows:7, value:item.text}
+        ], (res) => {
+            if(!res.title || !res.text) return UI.alert('Ошибка', 'Заполните заголовок и текст.');
+            item.title = res.title.trim();
+            item.text = res.text.trim();
+            item.date = new Date().toLocaleString();
+            saveContentKind(kind);
+            renderAdminContent();
+        });
+    }
+    function deleteContentItem(kind, id) {
+        UI.confirm('Удалить эту запись?', () => {
+            appState.content[kind] = appState.content[kind].filter(x => x.id !== id);
+            saveContentKind(kind);
+            renderAdminContent();
+        });
+    }
+    function addNewsItem() { addContentItem('news'); }
+    function addGuideItem() { addContentItem('guide'); }
+
     function renderOverview() {
         let list = appState.releases; 
         if (currentUser.role !== 'Administrator') { list = list.filter(r => r.userEmail === currentUser.email); document.getElementById('overviewDesc').innerText = "Статистика по вашим релизам"; } 
