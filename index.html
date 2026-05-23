@@ -864,6 +864,35 @@
             .aether-date-day{height:42px;}
         }
 
+        /* ===== Calendar alignment fix ===== */
+        .aether-date-week,
+        .aether-date-grid{
+            grid-template-columns:repeat(7,minmax(0,1fr))!important;
+            align-items:center;
+        }
+        .aether-date-week span{
+            display:flex!important;
+            align-items:center;
+            justify-content:center;
+            min-width:0;
+            line-height:1;
+        }
+        .aether-date-day{
+            width:100%!important;
+            min-width:0!important;
+            padding:0!important;
+            margin:0!important;
+            display:flex!important;
+            align-items:center!important;
+            justify-content:center!important;
+            line-height:1!important;
+            text-align:center!important;
+        }
+        .aether-date-popover button.aether-date-day{
+            box-sizing:border-box!important;
+        }
+
+
     </style>
 </head>
 <body>
