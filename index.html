@@ -2883,5 +2883,121 @@
     })();
 
 </script>
+    <script>
+(function () {
+    const sectionRoutes = {
+        overview: '/dashboard',
+        newRelease: '/new-release',
+        news: '/news',
+        guide: '/instruction',
+        userChat: '/support',
+        adminChats: '/artists-support',
+        adminUsers: '/cabinets',
+        adminReleases: '/admin-releases',
+        adminDeleted: '/deleted',
+        adminContent: '/content-manager',
+        karaoke: '/lyrics-karaoke'
+    };
+
+    const catalogRoutes = {
+        all: '/releases',
+        drafts: '/drafts',
+        mod: '/moderation',
+        fix: '/fixes'
+    };
+
+    const pathToAction = {
+        '/': () => nav('overview'),
+        '/dashboard': () => nav('overview'),
+        '/new-release': () => startNewRelease(),
+        '/releases': () => navCatalog('all'),
+        '/drafts': () => navCatalog('drafts'),
+        '/moderation': () => navCatalog('mod'),
+        '/fixes': () => navCatalog('fix'),
+        '/news': () => nav('news'),
+        '/instruction': () => nav('guide'),
+        '/support': () => nav('userChat'),
+        '/artists-support': () => nav('adminChats'),
+        '/cabinets': () => nav('adminUsers'),
+        '/admin-releases': () => nav('adminReleases'),
+        '/deleted': () => nav('adminDeleted'),
+        '/content-manager': () => nav('adminContent'),
+        '/lyrics-karaoke': () => nav('karaoke')
+    };
+
+    function setKitePath(path) {
+        if (location.pathname !== path) {
+            history.pushState({ kitePath: path }, '', path);
+        }
+    }
+
+    function openCurrentPath() {
+        const path = location.pathname.replace(/\/$/, '') || '/';
+        const action = pathToAction[path] || pathToAction['/dashboard'];
+
+        window.__kiteRouteOpening = true;
+        try {
+            action();
+        } catch (e) {
+            console.warn('Kite route open error:', e);
+        }
+        window.__kiteRouteOpening = false;
+    }
+
+    function patchNavigation() {
+        if (typeof window.nav === 'function' && !window.nav.__kitePatched) {
+            const oldNav = window.nav;
+            window.nav = function (section) {
+                const result = oldNav.apply(this, arguments);
+                if (!window.__kiteRouteOpening && sectionRoutes[section]) {
+                    setKitePath(sectionRoutes[section]);
+                }
+                return result;
+            };
+            window.nav.__kitePatched = true;
+        }
+
+        if (typeof window.navCatalog === 'function' && !window.navCatalog.__kitePatched) {
+            const oldNavCatalog = window.navCatalog;
+            window.navCatalog = function (type) {
+                const result = oldNavCatalog.apply(this, arguments);
+                if (!window.__kiteRouteOpening && catalogRoutes[type]) {
+                    setKitePath(catalogRoutes[type]);
+                }
+                return result;
+            };
+            window.navCatalog.__kitePatched = true;
+        }
+
+        if (typeof window.startNewRelease === 'function' && !window.startNewRelease.__kitePatched) {
+            const oldStartNewRelease = window.startNewRelease;
+            window.startNewRelease = function () {
+                const result = oldStartNewRelease.apply(this, arguments);
+                if (!window.__kiteRouteOpening) {
+                    setKitePath('/new-release');
+                }
+                return result;
+            };
+            window.startNewRelease.__kitePatched = true;
+        }
+    }
+
+    window.addEventListener('popstate', openCurrentPath);
+
+    document.addEventListener('DOMContentLoaded', function () {
+        patchNavigation();
+
+        const routeTimer = setInterval(function () {
+            patchNavigation();
+
+            const app = document.getElementById('appView');
+            if (app && !app.classList.contains('hidden')) {
+                clearInterval(routeTimer);
+                openCurrentPath();
+            }
+        }, 300);
+    });
+})();
+</script>
 </body>
 </html>
