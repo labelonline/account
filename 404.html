@@ -3353,67 +3353,75 @@
     
     // ВАША ИСПРАВЛЕННАЯ ФУНКЦИЯ ОТПРАВКИ НА МОДЕРАЦИЮ
     function submitFinalRelease() {
-        document.querySelectorAll('.error-field').forEach(el => el.classList.remove('error-field')); 
+        document.querySelectorAll('.error-field').forEach(el => el.classList.remove('error-field'));
         let hasError = false;
-        ['r_type', 'r_title', 'r_genre', 'r_year', 'r_releaseDate'].forEach(id => { 
-            const el = document.getElementById(id); 
+        ['r_type', 'r_title', 'r_genre', 'r_year', 'r_releaseDate'].forEach(id => {
+            const el = document.getElementById(id);
             if(!el.value) { el.classList.add('error-field'); hasError = true; }
         });
-        
+
         if(!getMultiVal('r_artist_container')) { document.getElementById('r_artist_container').classList.add('error-field'); hasError = true; }
         if(!draftRelease.coverFile) { document.getElementById('r_cover_box').classList.add('error-field'); hasError = true; }
         if(hasError) return UI.alert("Ошибка", "Заполните обязательные поля релиза.");
-        
-        const type = document.getElementById('r_type').value; 
+
+        const type = document.getElementById('r_type').value;
         if(draftRelease.tracks.length === 0) return UI.alert("Ошибка", "Добавьте трек");
-        for(let i=0; i < draftRelease.tracks.length; i++) { 
-            if(!draftRelease.tracks[i].isFilled) return UI.alert("Ошибка", `Заполните инфо о треке №${i+1}`); 
+        for(let i=0; i < draftRelease.tracks.length; i++) {
+            if(!draftRelease.tracks[i].isFilled) return UI.alert("Ошибка", `Заполните инфо о треке №${i+1}`);
             if((draftRelease.tracks[i].ttmlText || draftRelease.tracks[i].ttmlFile || draftRelease.tracks[i].ttmlContent) && !(draftRelease.tracks[i].lyrics || '').trim()) return UI.alert("TTML без обычного текста", `В треке №${i+1} добавлен караоке-файл, но нет обычного текста песни. Добавьте обычный текст и попробуйте снова.`);
         }
-        
+
         const existingRelease = appState.releases.find(r => r.id === currentDraftId);
         const isAdmin = currentUser.role === 'Administrator';
         if(existingRelease && existingRelease.status === 'Отклонён' && !isAdmin) updateReleaseChangeComment();
-        
+
         const finalId = currentDraftId || Date.now().toString();
 
-        const releaseData = { 
-            id: finalId, 
-            userId: (existingRelease && isAdmin) ? existingRelease.userId : currentUser.id, 
-            userEmail: (existingRelease && isAdmin) ? existingRelease.userEmail : currentUser.email, 
-            type, 
-            title: document.getElementById('r_title').value, 
-            artist: getMultiVal('r_artist_container'), 
-            genre: document.getElementById('r_genre').value, 
-            year: document.getElementById('r_year').value, 
-            releaseDate: document.getElementById('r_releaseDate').value, 
-            comment: document.getElementById('r_comment').value, 
-            status: (existingRelease && isAdmin) ? existingRelease.status : 'Модерация', 
-            date: existingRelease ? existingRelease.date : new Date().toLocaleDateString(), 
-            coverFile: draftRelease.coverFile, 
-            tracks: draftRelease.tracks, 
-            isDeleted: false, 
-            upc: document.getElementById('r_upc').value, 
-            adminIsrc: existingRelease ? existingRelease.adminIsrc : '' 
+        const releaseData = {
+            id: finalId,
+            userId: (existingRelease && isAdmin) ? existingRelease.userId : currentUser.id,
+            userEmail: (existingRelease && isAdmin) ? existingRelease.userEmail : currentUser.email,
+            type,
+            title: document.getElementById('r_title').value,
+            artist: getMultiVal('r_artist_container'),
+            genre: document.getElementById('r_genre').value,
+            year: document.getElementById('r_year').value,
+            releaseDate: document.getElementById('r_releaseDate').value,
+            comment: document.getElementById('r_comment').value,
+            status: (existingRelease && isAdmin) ? existingRelease.status : 'Модерация',
+            date: existingRelease ? existingRelease.date : new Date().toLocaleDateString(),
+            coverFile: draftRelease.coverFile,
+            tracks: draftRelease.tracks,
+            isDeleted: false,
+            upc: document.getElementById('r_upc').value,
+            adminIsrc: existingRelease ? existingRelease.adminIsrc : ''
         };
-        
-        isDraftDirty = false;
-        currentDraftId = finalId;
-        const localIndex = appState.releases.findIndex(r => r.id === finalId);
-        if(localIndex >= 0) appState.releases[localIndex] = releaseData; else appState.releases.push(releaseData);
 
-        if(!isAdmin) { 
-            UI.alert("Поздравляем!", "Релиз был успешно отправлен на проверку. Проверка занимает от 1 до 5 рабочих дней."); 
-            navCatalog('mod'); 
-            sendEmailNotification("Новый релиз на модерации", `Артист ${currentUser.login} (${currentUser.email}) отправил релиз "${releaseData.title}" (${releaseData.type}) на проверку.\n\nЗайдите в панель управления, чтобы проверить.`);
-        } else { 
-            UI.alert("Сохранено!", "Изменения применены."); 
-            nav('adminReleases', true); 
-        }
+        const submitBtn = document.getElementById('submitReleaseBtn');
+        if(submitBtn) { submitBtn.disabled = true; submitBtn.dataset.oldText = submitBtn.innerText; submitBtn.innerText = 'Отправка...'; }
 
-        db.ref('releases/' + finalId).set(releaseData).catch(err => {
+        db.ref('releases/' + finalId).set(releaseData).then(() => {
+            isDraftDirty = false;
+            currentDraftId = finalId;
+            const localIndex = appState.releases.findIndex(r => r.id === finalId);
+            if(localIndex >= 0) appState.releases[localIndex] = releaseData;
+            else appState.releases.push(releaseData);
+
+            if(!isAdmin) {
+                navCatalog('mod');
+                UI.alert("Поздравляем!", "Релиз был успешно отправлен на проверку. Проверка занимает от 1 до 5 рабочих дней.");
+                sendEmailNotification("Новый релиз на модерации", `Артист ${currentUser.login} (${currentUser.email}) отправил релиз "${releaseData.title}" (${releaseData.type}) на проверку.\n\nЗайдите в панель управления, чтобы проверить.`);
+            } else {
+                nav('adminReleases', true);
+                UI.alert("Сохранено!", "Изменения применены.");
+            }
+
+            refreshUI();
+        }).catch(err => {
             console.error(err);
-            UI.alert("Сбой сети или базы данных", "Ошибка при загрузке файлов. Скорее всего, аудиофайлы слишком тяжелые для передачи в формате Base64, и сервер оборвал соединение. Попробуйте сжать файлы.");
+            UI.alert("Сбой сети или базы данных", "Релиз не был отправлен на модерацию, поэтому письмо администратору не отправлялось. Проверьте подключение/Firebase или уменьшите размер файлов и попробуйте снова.");
+        }).finally(() => {
+            if(submitBtn) { submitBtn.disabled = false; submitBtn.innerText = submitBtn.dataset.oldText || 'Отправить на модерацию'; delete submitBtn.dataset.oldText; }
         });
     }
 
@@ -3672,12 +3680,21 @@ function renderCard(r, isAdmin) {
         } else container.innerHTML = list.map(r => renderCard(r, false)).reverse().join(''); 
     }
     function renderAdminReleases(showDeleted) {
-        let list = appState.releases.filter(r => r.isDeleted === showDeleted);
+        let list = appState.releases.filter(r => !!r && r.isDeleted === showDeleted);
+
+        // В админском разделе «Все релизы» должны отображаться все релизы,
+        // которые уже попали к администратору: на модерации, принятые и отклонённые.
+        // Черновики артистов здесь не показываем, потому что они ещё не отправлены на проверку.
         if (!showDeleted) {
-            const searchInput = document.getElementById('searchAdminReleases'); const searchVal = searchInput ? searchInput.value.toLowerCase() : '';
-            if (searchVal) list = list.filter(r => `${r.title} ${r.artist} ${r.upc || ''} ${r.userEmail || ''}`.toLowerCase().includes(searchVal));
+            list = list.filter(r => r.status !== 'Черновик');
+            const searchInput = document.getElementById('searchAdminReleases');
+            const searchVal = searchInput ? searchInput.value.toLowerCase() : '';
+            if (searchVal) list = list.filter(r => `${r.title || ''} ${r.artist || ''} ${r.upc || ''} ${r.userEmail || ''} ${r.status || ''}`.toLowerCase().includes(searchVal));
         }
-        document.getElementById(showDeleted ? 'adminDeletedList' : 'adminReleasesList').innerHTML = list.length ? list.map(r => renderCard(r, true)).reverse().join('') : '<p class="text-sm">Список пуст</p>';
+
+        const target = document.getElementById(showDeleted ? 'adminDeletedList' : 'adminReleasesList');
+        if(!target) return;
+        target.innerHTML = list.length ? list.map(r => renderCard(r, true)).reverse().join('') : '<p class="text-sm">Список пуст</p>';
     }
 
     function adminSubmitAllDrafts() {
