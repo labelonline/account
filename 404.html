@@ -1998,8 +1998,20 @@
         enableAuthButton();
     });
 
+    window.__kitePendingReleases = window.__kitePendingReleases || {};
+    function mergePendingReleases(remoteList) {
+        const map = {};
+        (remoteList || []).forEach(r => { if(r && r.id) map[String(r.id)] = r; });
+        Object.keys(window.__kitePendingReleases || {}).forEach(id => {
+            const pending = window.__kitePendingReleases[id];
+            if(pending && pending.id) map[String(pending.id)] = pending;
+        });
+        return Object.values(map);
+    }
+
     db.ref('releases').on('value', (snapshot) => {
-        const data = snapshot.val() || {}; appState.releases = Object.values(data);
+        const data = snapshot.val() || {};
+        appState.releases = mergePendingReleases(Object.values(data));
         if(currentUser) { refreshUI(); checkNotifications(); }
     }, (err) => console.error(err));
 
@@ -3351,13 +3363,14 @@
         editTrackId = null;
     }
     
-    // ВАША ИСПРАВЛЕННАЯ ФУНКЦИЯ ОТПРАВКИ НА МОДЕРАЦИЮ
+    // Моментальная отправка на модерацию: сначала обновляем интерфейс, потом сохраняем в Firebase в фоне.
     function submitFinalRelease() {
+        if(window.__kiteSubmitFinalBusy) return;
         document.querySelectorAll('.error-field').forEach(el => el.classList.remove('error-field'));
         let hasError = false;
         ['r_type', 'r_title', 'r_genre', 'r_year', 'r_releaseDate'].forEach(id => {
             const el = document.getElementById(id);
-            if(!el.value) { el.classList.add('error-field'); hasError = true; }
+            if(!el || !el.value) { if(el) el.classList.add('error-field'); hasError = true; }
         });
 
         if(!getMultiVal('r_artist_container')) { document.getElementById('r_artist_container').classList.add('error-field'); hasError = true; }
@@ -3371,12 +3384,19 @@
             if((draftRelease.tracks[i].ttmlText || draftRelease.tracks[i].ttmlFile || draftRelease.tracks[i].ttmlContent) && !(draftRelease.tracks[i].lyrics || '').trim()) return UI.alert("TTML без обычного текста", `В треке №${i+1} добавлен караоке-файл, но нет обычного текста песни. Добавьте обычный текст и попробуйте снова.`);
         }
 
+        window.__kiteSubmitFinalBusy = true;
+        const submitBtn = document.getElementById('submitReleaseBtn');
+        if(submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.dataset.oldText = submitBtn.innerText;
+            submitBtn.innerText = 'Отправлено';
+        }
+
         const existingRelease = appState.releases.find(r => r.id === currentDraftId);
         const isAdmin = currentUser.role === 'Administrator';
         if(existingRelease && existingRelease.status === 'Отклонён' && !isAdmin) updateReleaseChangeComment();
 
         const finalId = currentDraftId || Date.now().toString();
-
         const releaseData = {
             id: finalId,
             userId: (existingRelease && isAdmin) ? existingRelease.userId : currentUser.id,
@@ -3397,31 +3417,58 @@
             adminIsrc: existingRelease ? existingRelease.adminIsrc : ''
         };
 
-        const submitBtn = document.getElementById('submitReleaseBtn');
-        if(submitBtn) { submitBtn.disabled = true; submitBtn.dataset.oldText = submitBtn.innerText; submitBtn.innerText = 'Отправка...'; }
+        // Сразу кладём релиз локально, чтобы он мгновенно появился в нужном разделе.
+        window.__kitePendingReleases = window.__kitePendingReleases || {};
+        window.__kitePendingReleases[finalId] = releaseData;
+        const localIndex = appState.releases.findIndex(r => String(r.id) === String(finalId));
+        if(localIndex >= 0) appState.releases[localIndex] = releaseData;
+        else appState.releases.push(releaseData);
 
+        isDraftDirty = false;
+        currentDraftId = finalId;
+        refreshUI();
+
+        if(!isAdmin) {
+            navCatalog('mod');
+            setTimeout(() => UI.alert("Поздравляем!", "Релиз был успешно отправлен на проверку. Проверка занимает от 1 до 5 рабочих дней."), 40);
+        } else {
+            nav('adminReleases', true);
+            setTimeout(() => UI.alert("Сохранено!", "Изменения применены."), 40);
+        }
+
+        setTimeout(() => {
+            if(submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = submitBtn.dataset.oldText || 'Отправить на модерацию';
+                delete submitBtn.dataset.oldText;
+            }
+            window.__kiteSubmitFinalBusy = false;
+        }, 700);
+
+        // Сохраняем в Firebase в фоне. Почта уходит только после успешной записи,
+        // чтобы больше не было ситуации «письмо пришло, а релиза у админа нет».
         db.ref('releases/' + finalId).set(releaseData).then(() => {
-            isDraftDirty = false;
-            currentDraftId = finalId;
-            const localIndex = appState.releases.findIndex(r => r.id === finalId);
-            if(localIndex >= 0) appState.releases[localIndex] = releaseData;
+            delete window.__kitePendingReleases[finalId];
+            const idx = appState.releases.findIndex(r => String(r.id) === String(finalId));
+            if(idx >= 0) appState.releases[idx] = releaseData;
             else appState.releases.push(releaseData);
+            refreshUI();
 
             if(!isAdmin) {
-                navCatalog('mod');
-                UI.alert("Поздравляем!", "Релиз был успешно отправлен на проверку. Проверка занимает от 1 до 5 рабочих дней.");
                 sendEmailNotification("Новый релиз на модерации", `Артист ${currentUser.login} (${currentUser.email}) отправил релиз "${releaseData.title}" (${releaseData.type}) на проверку.\n\nЗайдите в панель управления, чтобы проверить.`);
-            } else {
-                nav('adminReleases', true);
-                UI.alert("Сохранено!", "Изменения применены.");
             }
-
-            refreshUI();
         }).catch(err => {
             console.error(err);
-            UI.alert("Сбой сети или базы данных", "Релиз не был отправлен на модерацию, поэтому письмо администратору не отправлялось. Проверьте подключение/Firebase или уменьшите размер файлов и попробуйте снова.");
-        }).finally(() => {
-            if(submitBtn) { submitBtn.disabled = false; submitBtn.innerText = submitBtn.dataset.oldText || 'Отправить на модерацию'; delete submitBtn.dataset.oldText; }
+            // Убираем локальную «ожидающую» копию, если база реально отказала.
+            delete window.__kitePendingReleases[finalId];
+            appState.releases = appState.releases.filter(r => String(r.id) !== String(finalId) || !!(existingRelease && String(existingRelease.id) === String(finalId)));
+            if(existingRelease) {
+                const idx = appState.releases.findIndex(r => String(r.id) === String(existingRelease.id));
+                if(idx >= 0) appState.releases[idx] = existingRelease;
+                else appState.releases.push(existingRelease);
+            }
+            refreshUI();
+            UI.alert("Сбой базы данных", "Релиз не сохранился в Firebase, поэтому он не попадёт администратору. Проверь подключение/Firebase или уменьши размер файлов и попробуй ещё раз.");
         });
     }
 
