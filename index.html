@@ -1735,6 +1735,108 @@
         db = createLocalDatabaseAdapter();
     }
     const ADMIN_EMAIL = 'denisbiletskiy0@gmail.com'; 
+
+    // ===== Cloudinary uploads =====
+    // Файлы нельзя хранить прямо в Firebase Realtime Database: база должна хранить только ссылки.
+    // Cloudinary хранит обложки и WAV, а Firebase хранит secure_url.
+    const CLOUDINARY_CLOUD_NAME = 'didulpof7';
+    const CLOUDINARY_UPLOAD_PRESET = 'kite_unsigned';
+    const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`;
+
+    function isRemoteFileUrl(value) {
+        return typeof value === 'string' && /^https?:\/\//i.test(value);
+    }
+    function isDataUrl(value) {
+        return typeof value === 'string' && /^data:/i.test(value);
+    }
+    function dataURLToBlob(dataUrl) {
+        const parts = String(dataUrl).split(',');
+        const meta = parts[0] || '';
+        const mimeMatch = meta.match(/data:([^;]+)/i);
+        const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+        const binary = atob(parts[1] || '');
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        return new Blob([bytes], { type: mime });
+    }
+    async function uploadFileToCloudinary(fileOrBlob, filename) {
+        if(!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) throw new Error('Cloudinary не настроен.');
+        const formData = new FormData();
+        formData.append('file', fileOrBlob, filename || 'file');
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        const response = await fetch(CLOUDINARY_UPLOAD_URL, { method: 'POST', body: formData });
+        const data = await response.json().catch(() => ({}));
+        if(!response.ok || !data.secure_url) {
+            const message = data && data.error && data.error.message ? data.error.message : 'Не удалось загрузить файл в Cloudinary.';
+            throw new Error(message);
+        }
+        return {
+            url: data.secure_url,
+            publicId: data.public_id || '',
+            resourceType: data.resource_type || '',
+            format: data.format || '',
+            bytes: data.bytes || 0,
+            createdAt: data.created_at || ''
+        };
+    }
+    function cleanTrackForDatabase(track) {
+        const clean = Object.assign({}, track || {});
+        delete clean._audioFileObj;
+        delete clean._uploadPromise;
+        delete clean.audioObjectUrl;
+        delete clean.cloudinaryPending;
+        delete clean.cloudinaryError;
+        return clean;
+    }
+    function cleanReleaseForDatabase(release) {
+        const clean = Object.assign({}, release || {});
+        clean.tracks = Array.isArray(clean.tracks) ? clean.tracks.map(cleanTrackForDatabase) : [];
+        delete clean._coverFileObj;
+        delete clean._coverUploadPromise;
+        delete clean.coverObjectUrl;
+        delete clean.coverUploadError;
+        return clean;
+    }
+    async function ensureReleaseFilesUploaded(releaseId) {
+        if(!draftRelease.coverFile) throw new Error('Добавьте обложку.');
+
+        if(draftRelease._coverUploadPromise) await draftRelease._coverUploadPromise;
+        if(!isRemoteFileUrl(draftRelease.coverFile)) {
+            let coverSource = draftRelease._coverFileObj || null;
+            let coverName = coverSource && coverSource.name ? coverSource.name : `${releaseId || Date.now()}_cover.jpg`;
+            if(!coverSource && isDataUrl(draftRelease.coverFile)) coverSource = dataURLToBlob(draftRelease.coverFile);
+            if(!coverSource) throw new Error('Обложка ещё не загружена. Выберите её заново.');
+            const meta = await uploadFileToCloudinary(coverSource, coverName);
+            draftRelease.coverFile = meta.url;
+            draftRelease.coverCloudinary = meta;
+            draftRelease.coverUploadError = '';
+            const preview = document.getElementById('coverPreview');
+            if(preview) preview.src = meta.url;
+        }
+
+        for(const track of (draftRelease.tracks || [])) {
+            if(track._uploadPromise) await track._uploadPromise;
+            if(isRemoteFileUrl(track.audioFile)) continue;
+
+            let audioSource = track._audioFileObj || null;
+            let audioName = track.filename || `${track.title || 'track'}.wav`;
+            if(!audioSource && isDataUrl(track.audioFile)) audioSource = dataURLToBlob(track.audioFile);
+            if(!audioSource) throw new Error(`Аудиофайл «${track.filename || track.title || 'трек'}» ещё не загружен. Добавьте его заново.`);
+
+            track.cloudinaryPending = true;
+            track.cloudinaryError = '';
+            renderDraftTracks();
+            const meta = await uploadFileToCloudinary(audioSource, audioName);
+            track.audioFile = meta.url;
+            track.audioCloudinary = meta;
+            track.cloudinaryPending = false;
+            track.cloudinaryError = '';
+            renderDraftTracks();
+        }
+    }
+    function buildReleaseDataForDatabase(releaseData) {
+        return cleanReleaseForDatabase(releaseData);
+    }
     
     class UI {
         static alert(title, text) { document.getElementById('uiAlertTitle').innerText = title; document.getElementById('uiAlertText').innerHTML = text; document.getElementById('uiAlert').classList.remove('hidden'); }
@@ -3104,40 +3206,53 @@
         });
     }
 
-    function saveDraftAsIs(showSuccess = false) {
+    async function saveDraftAsIs(showSuccess = false) {
+        if(window.__kiteSaveDraftBusy) return;
         const finalId = currentDraftId || Date.now().toString();
+        const draftBtn = document.getElementById('saveDraftChangesBtn');
+        const oldDraftText = draftBtn ? draftBtn.innerText : '';
+        window.__kiteSaveDraftBusy = true;
+        if(draftBtn) { draftBtn.disabled = true; draftBtn.innerText = 'Загружаем файлы...'; }
 
-        const releaseData = { 
-            id: finalId, 
-            userId: currentUser.id, 
-            userEmail: currentUser.email, 
-            type: document.getElementById('r_type').value, 
-            title: document.getElementById('r_title').value || 'Без названия', 
-            artist: getMultiVal('r_artist_container') || currentUser.login, 
-            genre: document.getElementById('r_genre').value, 
-            year: document.getElementById('r_year').value, 
-            releaseDate: document.getElementById('r_releaseDate').value, 
-            upc: document.getElementById('r_upc').value, 
-            comment: document.getElementById('r_comment').value, 
-            status: 'Черновик', 
-            date: new Date().toLocaleDateString(), 
-            coverFile: draftRelease.coverFile, 
-            tracks: draftRelease.tracks, 
-            isDeleted: false, 
-            adminIsrc: '' 
-        };
+        try {
+            await ensureReleaseFilesUploaded(finalId);
 
-        currentDraftId = finalId; 
-        isDraftDirty = false;
-        const localIndex = appState.releases.findIndex(r => r.id === finalId);
-        if(localIndex >= 0) appState.releases[localIndex] = releaseData; else appState.releases.push(releaseData);
-        if(showSuccess) UI.alert("Успешно", "Черновик сохранён.");
-        refreshUI();
+            const releaseData = buildReleaseDataForDatabase({ 
+                id: finalId, 
+                userId: currentUser.id, 
+                userEmail: currentUser.email, 
+                type: document.getElementById('r_type').value, 
+                title: document.getElementById('r_title').value || 'Без названия', 
+                artist: getMultiVal('r_artist_container') || currentUser.login, 
+                genre: document.getElementById('r_genre').value, 
+                year: document.getElementById('r_year').value, 
+                releaseDate: document.getElementById('r_releaseDate').value, 
+                upc: document.getElementById('r_upc').value, 
+                comment: document.getElementById('r_comment').value, 
+                status: 'Черновик', 
+                date: new Date().toLocaleDateString(), 
+                coverFile: draftRelease.coverFile, 
+                coverCloudinary: draftRelease.coverCloudinary || null,
+                tracks: draftRelease.tracks, 
+                isDeleted: false, 
+                adminIsrc: '' 
+            });
 
-        db.ref('releases/' + finalId).set(releaseData).catch(err => {
+            currentDraftId = finalId; 
+            isDraftDirty = false;
+            const localIndex = appState.releases.findIndex(r => r.id === finalId);
+            if(localIndex >= 0) appState.releases[localIndex] = releaseData; else appState.releases.push(releaseData);
+            refreshUI();
+
+            await db.ref('releases/' + finalId).set(releaseData);
+            if(showSuccess) UI.alert("Успешно", "Черновик сохранён.");
+        } catch(err) {
             console.error(err);
-            UI.alert("Ошибка сети / базы", "Произошла ошибка. Скорее всего, ваши аудиофайлы превышают лимит Firebase Database для отправки одним пакетом.");
-        });
+            UI.alert("Ошибка загрузки", `Файлы не удалось загрузить/сохранить: ${escapeHTML(err.message || err)}.`);
+        } finally {
+            if(draftBtn) { draftBtn.disabled = false; draftBtn.innerText = oldDraftText || 'Сохранить как черновик'; }
+            window.__kiteSaveDraftBusy = false;
+        }
     }
 
     function startNewRelease() {
@@ -3222,12 +3337,45 @@
     
     function deleteDraft(id) { UI.confirm("Удалить этот черновик навсегда?", () => { const idx = appState.releases.findIndex(r => r.id === id); if(idx>=0){ appState.releases.splice(idx,1); db.ref('releases/'+id).remove(); } renderCatalog(); }); }
     function handleCoverUpload(input) {
-        const file = input.files[0]; if(!file) return; const img = new Image(); img.src = URL.createObjectURL(file);
+        const file = input.files[0];
+        if(!file) return;
+        const img = new Image();
+        const localUrl = URL.createObjectURL(file);
+        img.src = localUrl;
         img.onload = () => { 
             if(img.width === 3000 && img.height === 3000) { 
-                const reader = new FileReader(); reader.readAsDataURL(file);
-                reader.onload = () => { document.getElementById('r_cover_box').classList.remove('error-field'); draftRelease.coverFile = reader.result; isDraftDirty = true; document.getElementById('coverPreview').src = reader.result; document.getElementById('coverPreview').classList.remove('hidden'); document.getElementById('coverHint').classList.add('hidden'); };
-            } else { UI.alert("Ошибка", "Размер обложки должен быть только 3000x3000 px"); input.value = ""; } 
+                document.getElementById('r_cover_box').classList.remove('error-field');
+                draftRelease.coverFile = localUrl;
+                draftRelease.coverObjectUrl = localUrl;
+                draftRelease._coverFileObj = file;
+                draftRelease.coverUploadError = '';
+                isDraftDirty = true;
+                const preview = document.getElementById('coverPreview');
+                const hint = document.getElementById('coverHint');
+                preview.src = localUrl;
+                preview.classList.remove('hidden');
+                hint.classList.remove('hidden');
+                hint.innerHTML = 'Загрузка обложки...';
+
+                draftRelease._coverUploadPromise = uploadFileToCloudinary(file, file.name).then(meta => {
+                    draftRelease.coverFile = meta.url;
+                    draftRelease.coverCloudinary = meta;
+                    draftRelease.coverUploadError = '';
+                    preview.src = meta.url;
+                    hint.classList.add('hidden');
+                    return meta;
+                }).catch(err => {
+                    console.error(err);
+                    draftRelease.coverUploadError = err.message || 'Ошибка загрузки';
+                    hint.classList.remove('hidden');
+                    hint.innerHTML = 'Ошибка загрузки<br>нажмите, чтобы выбрать заново';
+                    return null;
+                });
+            } else {
+                URL.revokeObjectURL(localUrl);
+                UI.alert("Ошибка", "Размер обложки должен быть только 3000x3000 px");
+                input.value = "";
+            } 
         };
     }
     function toggleReleaseType() { const type = document.getElementById('r_type').value; if(type) document.getElementById('tracklistArea').classList.remove('hidden'); else document.getElementById('tracklistArea').classList.add('hidden'); }
@@ -3248,31 +3396,69 @@
         files.forEach(file => { 
             if(!isAllowedWavFile(file)) return showWrongAudioFormatError(input);
             if(file.size > 50*1024*1024) return UI.alert("Ошибка", `Файл ${file.name} больше 50 МБ.`); 
-            const reader = new FileReader(); reader.readAsDataURL(file);
-            reader.onload = () => { 
-                isDraftDirty = true; 
-                let trackTitle = file.name.replace(/\.[^/.]+$/, "");
-                if (rType === 'Сингл' && rTitle) trackTitle = rTitle;
-                const newTrack = { id: Date.now()+Math.random(), filename: file.name, audioFile: reader.result, title: trackTitle, artist: rArtist, version: '', author: '', comp: '', type: 'Original', lang: '', lyrics: '', explicit: 'Нет', isrc: '', previewStart: '', duration: '', isFilled: false };
-                draftRelease.tracks.push(newTrack);
-                const audio = new Audio();
-                audio.preload = 'metadata';
-                audio.onloadedmetadata = () => {
-                    if(Number.isFinite(audio.duration) && audio.duration > 0) newTrack.duration = formatAudioDuration(audio.duration);
-                    renderDraftTracks();
-                    audio.src = '';
-                };
-                audio.onerror = () => { audio.src = ''; };
-                audio.src = reader.result;
-                renderDraftTracks(); 
+
+            isDraftDirty = true; 
+            let trackTitle = file.name.replace(/\.[^/.]+$/, "");
+            if (rType === 'Сингл' && rTitle) trackTitle = rTitle;
+            const localAudioUrl = URL.createObjectURL(file);
+            const newTrack = {
+                id: Date.now()+Math.random(),
+                filename: file.name,
+                audioFile: localAudioUrl,
+                audioObjectUrl: localAudioUrl,
+                title: trackTitle,
+                artist: rArtist,
+                version: '',
+                author: '',
+                comp: '',
+                type: 'Original',
+                lang: '',
+                lyrics: '',
+                explicit: 'Нет',
+                isrc: '',
+                previewStart: '',
+                duration: '',
+                isFilled: false,
+                cloudinaryPending: true,
+                cloudinaryError: ''
             };
+            newTrack._audioFileObj = file;
+            draftRelease.tracks.push(newTrack);
+
+            const audio = new Audio();
+            audio.preload = 'metadata';
+            audio.onloadedmetadata = () => {
+                if(Number.isFinite(audio.duration) && audio.duration > 0) newTrack.duration = formatAudioDuration(audio.duration);
+                renderDraftTracks();
+                audio.src = '';
+            };
+            audio.onerror = () => { audio.src = ''; };
+            audio.src = localAudioUrl;
+            renderDraftTracks();
+
+            newTrack._uploadPromise = uploadFileToCloudinary(file, file.name).then(meta => {
+                newTrack.audioFile = meta.url;
+                newTrack.audioCloudinary = meta;
+                newTrack.cloudinaryPending = false;
+                newTrack.cloudinaryError = '';
+                renderDraftTracks();
+                return meta;
+            }).catch(err => {
+                console.error(err);
+                newTrack.cloudinaryPending = false;
+                newTrack.cloudinaryError = err.message || 'Ошибка загрузки';
+                renderDraftTracks();
+                return null;
+            });
         });
         input.value = ""; 
     }
     function renderDraftTracks() {
         const list = document.getElementById('draftTracksList');
         list.innerHTML = draftRelease.tracks.map((t, idx) => {
-            const statusLabel = t.isFilled ? '<span style="color:var(--success); font-size: 11px;">✓ Заполнено</span>' : '<span style="color:var(--danger); font-size: 11px; font-weight:bold;">! Требует заполнения</span>';
+            const filledLabel = t.isFilled ? '<span style="color:var(--success); font-size: 11px;">✓ Заполнено</span>' : '<span style="color:var(--danger); font-size: 11px; font-weight:bold;">! Требует заполнения</span>';
+            const uploadLabel = t.cloudinaryPending ? '<span style="color:var(--warning); font-size: 11px; font-weight:bold;">⏳ Загружается файл</span>' : (t.cloudinaryError ? `<span style="color:var(--danger); font-size: 11px; font-weight:bold;">Ошибка Cloudinary: ${escapeHTML(t.cloudinaryError)}</span>` : '<span style="color:var(--success); font-size: 11px;">✓ Файл загружен</span>');
+            const statusLabel = `${filledLabel} &nbsp; ${uploadLabel}`;
             const title = escapeHTML(t.title || 'Без названия');
             const filename = escapeHTML(t.filename || 'Аудиофайл');
             const audio = t.audioFile ? `<div style="margin-top:12px;"><audio controls preload="metadata" data-title="${filename}" src="${t.audioFile}"></audio></div>` : '';
@@ -3363,8 +3549,8 @@
         editTrackId = null;
     }
     
-    // Моментальная отправка на модерацию: сначала обновляем интерфейс, потом сохраняем в Firebase в фоне.
-    function submitFinalRelease() {
+    // Отправка на модерацию: сначала догружаем файлы в Cloudinary, потом в Firebase кладём только ссылки.
+    async function submitFinalRelease() {
         if(window.__kiteSubmitFinalBusy) return;
         document.querySelectorAll('.error-field').forEach(el => el.classList.remove('error-field'));
         let hasError = false;
@@ -3389,87 +3575,68 @@
         if(submitBtn) {
             submitBtn.disabled = true;
             submitBtn.dataset.oldText = submitBtn.innerText;
-            submitBtn.innerText = 'Отправлено';
+            submitBtn.innerText = 'Загружаем файлы...';
         }
 
         const existingRelease = appState.releases.find(r => r.id === currentDraftId);
         const isAdmin = currentUser.role === 'Administrator';
         if(existingRelease && existingRelease.status === 'Отклонён' && !isAdmin) updateReleaseChangeComment();
-
         const finalId = currentDraftId || Date.now().toString();
-        const releaseData = {
-            id: finalId,
-            userId: (existingRelease && isAdmin) ? existingRelease.userId : currentUser.id,
-            userEmail: (existingRelease && isAdmin) ? existingRelease.userEmail : currentUser.email,
-            type,
-            title: document.getElementById('r_title').value,
-            artist: getMultiVal('r_artist_container'),
-            genre: document.getElementById('r_genre').value,
-            year: document.getElementById('r_year').value,
-            releaseDate: document.getElementById('r_releaseDate').value,
-            comment: document.getElementById('r_comment').value,
-            status: (existingRelease && isAdmin) ? existingRelease.status : 'Модерация',
-            date: existingRelease ? existingRelease.date : new Date().toLocaleDateString(),
-            coverFile: draftRelease.coverFile,
-            tracks: draftRelease.tracks,
-            isDeleted: false,
-            upc: document.getElementById('r_upc').value,
-            adminIsrc: existingRelease ? existingRelease.adminIsrc : ''
-        };
 
-        // Сразу кладём релиз локально, чтобы он мгновенно появился в нужном разделе.
-        window.__kitePendingReleases = window.__kitePendingReleases || {};
-        window.__kitePendingReleases[finalId] = releaseData;
-        const localIndex = appState.releases.findIndex(r => String(r.id) === String(finalId));
-        if(localIndex >= 0) appState.releases[localIndex] = releaseData;
-        else appState.releases.push(releaseData);
+        try {
+            await ensureReleaseFilesUploaded(finalId);
+            if(submitBtn) submitBtn.innerText = 'Сохраняем релиз...';
 
-        isDraftDirty = false;
-        currentDraftId = finalId;
-        refreshUI();
+            const releaseData = buildReleaseDataForDatabase({
+                id: finalId,
+                userId: (existingRelease && isAdmin) ? existingRelease.userId : currentUser.id,
+                userEmail: (existingRelease && isAdmin) ? existingRelease.userEmail : currentUser.email,
+                type,
+                title: document.getElementById('r_title').value,
+                artist: getMultiVal('r_artist_container'),
+                genre: document.getElementById('r_genre').value,
+                year: document.getElementById('r_year').value,
+                releaseDate: document.getElementById('r_releaseDate').value,
+                comment: document.getElementById('r_comment').value,
+                status: (existingRelease && isAdmin) ? existingRelease.status : 'Модерация',
+                date: existingRelease ? existingRelease.date : new Date().toLocaleDateString(),
+                coverFile: draftRelease.coverFile,
+                coverCloudinary: draftRelease.coverCloudinary || null,
+                tracks: draftRelease.tracks,
+                isDeleted: false,
+                upc: document.getElementById('r_upc').value,
+                adminIsrc: existingRelease ? existingRelease.adminIsrc : ''
+            });
 
-        if(!isAdmin) {
-            navCatalog('mod');
-            setTimeout(() => UI.alert("Поздравляем!", "Релиз был успешно отправлен на проверку. Проверка занимает от 1 до 5 рабочих дней."), 40);
-        } else {
-            nav('adminReleases', true);
-            setTimeout(() => UI.alert("Сохранено!", "Изменения применены."), 40);
-        }
+            await db.ref('releases/' + finalId).set(releaseData);
 
-        setTimeout(() => {
+            const localIndex = appState.releases.findIndex(r => String(r.id) === String(finalId));
+            if(localIndex >= 0) appState.releases[localIndex] = releaseData;
+            else appState.releases.push(releaseData);
+
+            isDraftDirty = false;
+            currentDraftId = finalId;
+            refreshUI();
+
+            if(!isAdmin) {
+                navCatalog('mod');
+                sendEmailNotification("Новый релиз на модерации", `Артист ${currentUser.login} (${currentUser.email}) отправил релиз "${releaseData.title}" (${releaseData.type}) на проверку.\n\nЗайдите в панель управления, чтобы проверить.`);
+                setTimeout(() => UI.alert("Поздравляем!", "Релиз был успешно отправлен на проверку. Проверка занимает от 1 до 5 рабочих дней."), 40);
+            } else {
+                nav('adminReleases', true);
+                setTimeout(() => UI.alert("Сохранено!", "Изменения применены."), 40);
+            }
+        } catch(err) {
+            console.error(err);
+            UI.alert("Ошибка загрузки", `Релиз не отправлен: ${escapeHTML(err.message || err)}. Проверь Cloudinary Upload preset и попробуй ещё раз.`);
+        } finally {
             if(submitBtn) {
                 submitBtn.disabled = false;
                 submitBtn.innerText = submitBtn.dataset.oldText || 'Отправить на модерацию';
                 delete submitBtn.dataset.oldText;
             }
             window.__kiteSubmitFinalBusy = false;
-        }, 700);
-
-        // Сохраняем в Firebase в фоне. Почта уходит только после успешной записи,
-        // чтобы больше не было ситуации «письмо пришло, а релиза у админа нет».
-        db.ref('releases/' + finalId).set(releaseData).then(() => {
-            delete window.__kitePendingReleases[finalId];
-            const idx = appState.releases.findIndex(r => String(r.id) === String(finalId));
-            if(idx >= 0) appState.releases[idx] = releaseData;
-            else appState.releases.push(releaseData);
-            refreshUI();
-
-            if(!isAdmin) {
-                sendEmailNotification("Новый релиз на модерации", `Артист ${currentUser.login} (${currentUser.email}) отправил релиз "${releaseData.title}" (${releaseData.type}) на проверку.\n\nЗайдите в панель управления, чтобы проверить.`);
-            }
-        }).catch(err => {
-            console.error(err);
-            // Убираем локальную «ожидающую» копию, если база реально отказала.
-            delete window.__kitePendingReleases[finalId];
-            appState.releases = appState.releases.filter(r => String(r.id) !== String(finalId) || !!(existingRelease && String(existingRelease.id) === String(finalId)));
-            if(existingRelease) {
-                const idx = appState.releases.findIndex(r => String(r.id) === String(existingRelease.id));
-                if(idx >= 0) appState.releases[idx] = existingRelease;
-                else appState.releases.push(existingRelease);
-            }
-            refreshUI();
-            UI.alert("Сбой базы данных", "Релиз не сохранился в Firebase, поэтому он не попадёт администратору. Проверь подключение/Firebase или уменьши размер файлов и попробуй ещё раз.");
-        });
+        }
     }
 
     
@@ -3549,7 +3716,7 @@
         copy.date = new Date().toLocaleDateString();
         copy.rejectReason = '';
         appState.releases.push(copy);
-        db.ref('releases/' + copy.id).set(copy);
+        db.ref('releases/' + copy.id).set(buildReleaseDataForDatabase(copy));
         refreshUI();
         UI.alert('Готово', 'Копия релиза сохранена в черновики.');
     }
@@ -3727,13 +3894,12 @@ function renderCard(r, isAdmin) {
         } else container.innerHTML = list.map(r => renderCard(r, false)).reverse().join(''); 
     }
     function renderAdminReleases(showDeleted) {
-        let list = appState.releases.filter(r => !!r && r.isDeleted === showDeleted);
+        // showDeleted=false: главный администратор видит ВСЕ неудалённые релизы:
+        // черновики, модерацию, одобренные и отклонённые.
+        // !r.isDeleted нужен, чтобы старые релизы без поля isDeleted тоже не пропадали.
+        let list = appState.releases.filter(r => !!r && (showDeleted ? !!r.isDeleted : !r.isDeleted));
 
-        // В админском разделе «Все релизы» должны отображаться все релизы,
-        // которые уже попали к администратору: на модерации, принятые и отклонённые.
-        // Черновики артистов здесь не показываем, потому что они ещё не отправлены на проверку.
         if (!showDeleted) {
-            list = list.filter(r => r.status !== 'Черновик');
             const searchInput = document.getElementById('searchAdminReleases');
             const searchVal = searchInput ? searchInput.value.toLowerCase() : '';
             if (searchVal) list = list.filter(r => `${r.title || ''} ${r.artist || ''} ${r.upc || ''} ${r.userEmail || ''} ${r.status || ''}`.toLowerCase().includes(searchVal));
