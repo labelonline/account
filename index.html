@@ -3701,9 +3701,10 @@
     function downloadTrackFile(releaseId, trackIndex){
         const r = appState.releases.find(x => String(x.id) === String(releaseId));
         const t = r && r.tracks && r.tracks[trackIndex];
-        if(!t || !t.audioFile) return UI.alert('Файл недоступен', 'У этого трека нет загруженного аудиофайла.');
+        const audioUrl = t && (t.audioFile || t.audioUrl || t.fileUrl || t.url);
+        if(!t || !audioUrl) return UI.alert('Файл недоступен', 'У этого трека нет загруженного аудиофайла.');
         const a = document.createElement('a');
-        a.href = t.audioFile;
+        a.href = audioUrl;
         a.download = t.filename || `${t.artist || r.artist || 'artist'} - ${t.title || r.title || 'track'}.wav`;
         document.body.appendChild(a); a.click(); a.remove();
     }
@@ -3982,6 +3983,29 @@ function renderCard(r, isAdmin) {
         document.getElementById('admRelCover').src = coverUrl;
         document.getElementById('admCoverDl').onclick = () => { const a = document.createElement('a'); a.href = coverUrl; a.download = `${r.artist || 'artist'}-${r.title || 'cover'}.jpg`; a.click(); };
         const explicit = tracks.some(t => String(t.explicit || '').toLowerCase() === 'да') ? 'Да' : 'Нет';
+        const getTrackAudioUrl = (t) => String((t && (t.audioFile || t.audioUrl || t.fileUrl || t.url)) || '').trim();
+        const tracksMediaHtml = tracks.map((t, idx) => {
+            const audioUrl = getTrackAudioUrl(t);
+            const trackTitle = t.title || r.title || 'Без названия';
+            const trackArtist = t.artist || r.artist || '—';
+            const audioTitle = `${trackArtist} — ${trackTitle}`;
+            return `
+                <div class="release-info-track-card" style="align-items:stretch;">
+                    <div class="release-info-track-num">${idx + 1}</div>
+                    <div class="release-info-track-main">
+                        <div class="release-info-track-title">${escapeHTML(trackTitle)}</div>
+                        <div class="release-info-track-sub">${escapeHTML(trackArtist)}</div>
+                        ${audioUrl ? `
+                            <audio controls preload="metadata" data-title="${escapeAttr(audioTitle)}" src="${escapeAttr(audioUrl)}"></audio>
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+                                <button class="btn-outline" style="padding:8px 12px;font-size:12px;" onclick="downloadTrackFile('${escapeAttr(r.id)}', ${idx})">Скачать аудио</button>
+                                ${t.filename ? `<span class="text-sm" style="align-self:center;">${escapeHTML(t.filename)}</span>` : ''}
+                            </div>
+                        ` : `<div class="empty-panel" style="padding:14px;box-shadow:none;">Аудиофайл для этого трека не найден.</div>`}
+                    </div>
+                </div>
+            `;
+        }).join('') || '<div class="empty-panel">Аудиофайлы пока не добавлены.</div>';
         const tracksHtml = tracks.map((t, idx) => `
             <div class="release-info-track-card">
                 <div class="release-info-track-num">${idx + 1}</div>
@@ -4018,8 +4042,10 @@ function renderCard(r, isAdmin) {
                 <div class="release-info-section"><h3>Персоны и роли</h3><div class="release-info-persons"><span>${safeArtist}</span><span class="badge badge-ok">Исполнитель</span></div></div>
                 <div class="release-info-section"><h3>Трек-лист</h3>${tracksHtml}</div>
             </div>`;
-        document.getElementById('admRelTracks').innerHTML = '';
+        const admRelTracksBox = document.getElementById('admRelTracks');
+        admRelTracksBox.innerHTML = tracksMediaHtml;
         document.getElementById('adminReleaseModal').classList.remove('hidden');
+        if(typeof aetherUpgradeAllAudioPlayers === 'function') setTimeout(() => aetherUpgradeAllAudioPlayers(admRelTracksBox), 0);
     }
 
 
