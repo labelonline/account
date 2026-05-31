@@ -1452,6 +1452,141 @@
             font-family:inherit;
         }
 
+    
+
+        /* ===== Rich text editor for news and instructions ===== */
+        .rich-editor-shell{
+            border:1px solid rgba(255,255,255,.12);
+            background:rgba(255,255,255,.04);
+            border-radius:22px;
+            overflow:hidden;
+            box-shadow:0 14px 32px rgba(0,0,0,.18);
+        }
+        .rich-toolbar{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            flex-wrap:wrap;
+            padding:10px;
+            border-bottom:1px solid rgba(255,255,255,.10);
+            background:rgba(15,19,27,.82);
+        }
+        .rich-toolbar button{
+            width:36px;
+            height:36px;
+            padding:0;
+            border-radius:12px;
+            display:grid;
+            place-items:center;
+            background:rgba(255,255,255,.055);
+            border:1px solid rgba(255,255,255,.10);
+            color:#eef2fb;
+            box-shadow:none;
+            font-weight:800;
+        }
+        .rich-toolbar button:hover{
+            background:rgba(68,110,240,.18);
+            border-color:rgba(68,110,240,.36);
+            color:#fff;
+            transform:translateY(-1px);
+        }
+        .rich-toolbar .rich-tool-wide{
+            width:auto;
+            min-width:82px;
+            padding:0 12px;
+            font-size:12px;
+        }
+        .rich-editor{
+            min-height:190px;
+            max-height:420px;
+            overflow:auto;
+            padding:16px;
+            color:#f5f7fb;
+            line-height:1.7;
+            outline:none;
+            background:rgba(255,255,255,.025);
+        }
+        .rich-editor:focus{
+            box-shadow:inset 0 0 0 2px rgba(68,110,240,.24);
+        }
+        .rich-editor:empty::before{
+            content:attr(data-placeholder);
+            color:var(--text-muted);
+            pointer-events:none;
+        }
+        .rich-hotkeys-help{
+            margin-top:8px;
+            color:var(--text-muted);
+            font-size:12px;
+            line-height:1.55;
+        }
+        .content-body a,
+        .rich-editor a{
+            color:#8fb0ff;
+            text-decoration:underline;
+            text-underline-offset:3px;
+        }
+        .content-body blockquote,
+        .rich-editor blockquote{
+            margin:8px 0;
+            padding:10px 14px;
+            border-left:3px solid var(--accent);
+            border-radius:0 14px 14px 0;
+            background:rgba(68,110,240,.10);
+            color:#dce5ff;
+        }
+        .content-body code,
+        .rich-editor code{
+            padding:2px 6px;
+            border-radius:8px;
+            background:rgba(255,255,255,.10);
+            border:1px solid rgba(255,255,255,.10);
+            font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+            font-size:.94em;
+        }
+        .content-body pre,
+        .rich-editor pre{
+            white-space:pre-wrap;
+            margin:8px 0;
+            padding:12px;
+            border-radius:16px;
+            background:rgba(255,255,255,.08);
+            border:1px solid rgba(255,255,255,.10);
+            font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+        }
+        .content-body .rich-spoiler,
+        .rich-editor .rich-spoiler{
+            border-radius:8px;
+            background:rgba(255,255,255,.14);
+            color:transparent;
+            text-shadow:0 0 9px rgba(245,247,251,.72);
+            padding:0 4px;
+            transition:.18s;
+        }
+        .content-body .rich-spoiler:hover,
+        .rich-editor .rich-spoiler:hover,
+        .content-body .rich-spoiler:focus,
+        .rich-editor .rich-spoiler:focus{
+            color:inherit;
+            text-shadow:none;
+        }
+        .content-body .rich-section-title,
+        .rich-editor .rich-section-title{
+            display:inline-block;
+            margin:12px 0 4px;
+            color:#fff;
+            font-size:1.45em;
+            line-height:1.18;
+            font-weight:900;
+            letter-spacing:-.025em;
+        }
+        @media(max-width:768px){
+            .rich-toolbar{gap:6px;padding:8px;}
+            .rich-toolbar button{width:34px;height:34px;border-radius:11px;}
+            .rich-toolbar .rich-tool-wide{min-width:74px;font-size:11px;}
+            .rich-editor{min-height:180px;max-height:360px;}
+        }
+
     </style>
 </head>
 <body>
@@ -1893,6 +2028,176 @@
         return cleanReleaseForDatabase(releaseData);
     }
     
+
+    function richLooksLikeHTML(value) {
+        return /<\/?[a-z][\s\S]*>/i.test(String(value || ''));
+    }
+    function sanitizeRichHTML(input) {
+        const raw = String(input || '');
+        const template = document.createElement('template');
+        template.innerHTML = raw;
+        const allowed = new Set(['B','STRONG','I','EM','U','S','STRIKE','DEL','BLOCKQUOTE','CODE','PRE','A','SPAN','BR','DIV','P','H1','H2','H3']);
+        const cleanNode = (node) => {
+            if(node.nodeType === Node.TEXT_NODE) return document.createTextNode(node.textContent || '');
+            if(node.nodeType !== Node.ELEMENT_NODE) return document.createTextNode('');
+            const tag = node.tagName.toUpperCase();
+            if(!allowed.has(tag)) {
+                const frag = document.createDocumentFragment();
+                Array.from(node.childNodes).forEach(child => frag.appendChild(cleanNode(child)));
+                return frag;
+            }
+            let outTag = tag.toLowerCase();
+            if(['DIV','P','H1','H2','H3'].includes(tag)) outTag = 'span';
+            const el = document.createElement(outTag);
+            if(tag === 'A') {
+                let href = (node.getAttribute('href') || '').trim();
+                if(href && !/^(https?:|mailto:|tel:)/i.test(href)) href = 'https://' + href.replace(/^\/+/, '');
+                if(href) {
+                    el.setAttribute('href', href);
+                    el.setAttribute('target', '_blank');
+                    el.setAttribute('rel', 'noopener noreferrer');
+                }
+            }
+            if(tag === 'SPAN') {
+                const cls = String(node.getAttribute('class') || '').split(/\s+/).filter(c => ['rich-spoiler','rich-section-title'].includes(c));
+                if(cls.length) el.setAttribute('class', cls.join(' '));
+            }
+            if(['H1','H2','H3'].includes(tag)) el.setAttribute('class', 'rich-section-title');
+            Array.from(node.childNodes).forEach(child => el.appendChild(cleanNode(child)));
+            return el;
+        };
+        const out = document.createElement('div');
+        Array.from(template.content.childNodes).forEach(node => out.appendChild(cleanNode(node)));
+        return out.innerHTML;
+    }
+    function richStoredToEditorHTML(value) {
+        const raw = String(value || '');
+        if(!richLooksLikeHTML(raw)) return escapeHTML(raw).replace(/\n/g, '<br>');
+        return sanitizeRichHTML(raw).replace(/\n/g, '<br>');
+    }
+    function nodeToSafeRichHTML(node) {
+        const holder = document.createElement('div');
+        holder.appendChild(node.cloneNode(true));
+        return sanitizeRichHTML(holder.innerHTML);
+    }
+    function richEditorToStoredHTML(editor) {
+        if(!editor) return '';
+        const lines = [];
+        let inline = [];
+        const flushInline = () => {
+            if(inline.length) {
+                lines.push(sanitizeRichHTML(inline.join('')));
+                inline = [];
+            }
+        };
+        Array.from(editor.childNodes).forEach(node => {
+            if(node.nodeType === Node.TEXT_NODE) {
+                inline.push(escapeHTML(node.textContent || ''));
+                return;
+            }
+            if(node.nodeType !== Node.ELEMENT_NODE) return;
+            const tag = node.tagName.toUpperCase();
+            if(tag === 'BR') {
+                flushInline();
+                if(!lines.length || lines[lines.length - 1] !== '') lines.push('');
+                return;
+            }
+            if(['DIV','P','H1','H2','H3','BLOCKQUOTE','PRE'].includes(tag)) {
+                flushInline();
+                const inner = sanitizeRichHTML(node.innerHTML || '');
+                if(tag === 'BLOCKQUOTE') lines.push(`<blockquote>${inner || '<br>'}</blockquote>`);
+                else if(tag === 'PRE') lines.push(`<pre>${inner || '<br>'}</pre>`);
+                else if(['H1','H2','H3'].includes(tag)) lines.push(`<span class="rich-section-title">${inner}</span>`);
+                else lines.push(inner || '');
+                return;
+            }
+            inline.push(nodeToSafeRichHTML(node));
+        });
+        flushInline();
+        return sanitizeRichHTML(lines.join('\n')).replace(/(\n){4,}/g, '\n\n\n').trim();
+    }
+    function richHTMLToPlainText(html) {
+        const div = document.createElement('div');
+        div.innerHTML = sanitizeRichHTML(String(html || '').replace(/\n/g, '<br>'));
+        return (div.innerText || div.textContent || '').replace(/\u00a0/g, ' ').trim();
+    }
+    function richStoredToLines(value) {
+        const raw = String(value || '');
+        if(!richLooksLikeHTML(raw)) return raw.split('\n').map(line => escapeHTML(line));
+        return sanitizeRichHTML(raw).split('\n');
+    }
+    function renderRichToolbar(editorId) {
+        const id = String(editorId || '').replace(/[^a-zA-Z0-9_-]/g, '');
+        return `<div class="rich-toolbar" onmousedown="event.preventDefault()">
+            <button type="button" title="Жирный · Ctrl+B" onclick="formatRichText('${id}','bold')"><b>B</b></button>
+            <button type="button" title="Курсив · Ctrl+I" onclick="formatRichText('${id}','italic')"><i>I</i></button>
+            <button type="button" title="Подчёркнутый · Ctrl+U" onclick="formatRichText('${id}','underline')"><u>U</u></button>
+            <button type="button" title="Зачёркнутый · Ctrl+Shift+X" onclick="formatRichText('${id}','strike')"><s>S</s></button>
+            <button type="button" title="Цитата · Ctrl+Shift+." onclick="formatRichText('${id}','quote')">❝</button>
+            <button type="button" title="Моноширинный · Ctrl+Shift+M" onclick="formatRichText('${id}','code')">⌘</button>
+            <button type="button" title="Скрытый · Ctrl+Shift+P" onclick="formatRichText('${id}','spoiler')">▣</button>
+            <button type="button" title="Добавить ссылку · Ctrl+K" onclick="formatRichText('${id}','link')">↗</button>
+            <button type="button" class="rich-tool-wide" title="Сделать выделенный текст большим разделом · Ctrl+Shift+H" onclick="formatRichText('${id}','section')">Раздел</button>
+        </div>`;
+    }
+    function focusRichEditor(editorId) {
+        const editor = document.getElementById(editorId);
+        if(editor) editor.focus();
+        return editor;
+    }
+    function wrapRichSelection(editorId, tagName, className = '') {
+        const editor = focusRichEditor(editorId);
+        const sel = window.getSelection();
+        if(!editor || !sel || !sel.rangeCount) return;
+        const range = sel.getRangeAt(0);
+        if(!editor.contains(range.commonAncestorContainer) || range.collapsed) return;
+        const wrapper = document.createElement(tagName);
+        if(className) wrapper.className = className;
+        try {
+            range.surroundContents(wrapper);
+        } catch(e) {
+            wrapper.appendChild(range.extractContents());
+            range.insertNode(wrapper);
+        }
+        sel.removeAllRanges();
+        const nextRange = document.createRange();
+        nextRange.selectNodeContents(wrapper);
+        sel.addRange(nextRange);
+    }
+    function formatRichText(editorId, action) {
+        const editor = focusRichEditor(editorId);
+        if(!editor) return;
+        if(action === 'bold') document.execCommand('bold', false, null);
+        else if(action === 'italic') document.execCommand('italic', false, null);
+        else if(action === 'underline') document.execCommand('underline', false, null);
+        else if(action === 'strike') document.execCommand('strikeThrough', false, null);
+        else if(action === 'quote') document.execCommand('formatBlock', false, 'blockquote');
+        else if(action === 'code') wrapRichSelection(editorId, 'code');
+        else if(action === 'spoiler') wrapRichSelection(editorId, 'span', 'rich-spoiler');
+        else if(action === 'section') wrapRichSelection(editorId, 'span', 'rich-section-title');
+        else if(action === 'link') {
+            const url = prompt('Вставьте ссылку');
+            if(url) document.execCommand('createLink', false, url.trim());
+        }
+        editor.dispatchEvent(new Event('input', { bubbles:true }));
+    }
+    function handleRichEditorHotkeys(e, editorId) {
+        if(!e.ctrlKey) return;
+        const key = String(e.key || '').toLowerCase();
+        if(!e.shiftKey && key === 'b') { e.preventDefault(); formatRichText(editorId, 'bold'); }
+        else if(!e.shiftKey && key === 'i') { e.preventDefault(); formatRichText(editorId, 'italic'); }
+        else if(!e.shiftKey && key === 'u') { e.preventDefault(); formatRichText(editorId, 'underline'); }
+        else if(e.shiftKey && key === 'x') { e.preventDefault(); formatRichText(editorId, 'strike'); }
+        else if(e.shiftKey && (key === '.' || key === '>')) { e.preventDefault(); formatRichText(editorId, 'quote'); }
+        else if(e.shiftKey && key === 'm') { e.preventDefault(); formatRichText(editorId, 'code'); }
+        else if(e.shiftKey && key === 'p') { e.preventDefault(); formatRichText(editorId, 'spoiler'); }
+        else if(!e.shiftKey && key === 'k') { e.preventDefault(); formatRichText(editorId, 'link'); }
+        else if(e.shiftKey && key === 'h') { e.preventDefault(); formatRichText(editorId, 'section'); }
+    }
+    function getPromptRichEditorValue(id) {
+        return richEditorToStoredHTML(document.getElementById(id));
+    }
+
     class UI {
         static alert(title, text) { document.getElementById('uiAlertTitle').innerText = title; document.getElementById('uiAlertText').innerHTML = text; document.getElementById('uiAlert').classList.remove('hidden'); }
         static prompt(title, fields, onConfirm) { 
@@ -1902,6 +2207,10 @@
                 if(f.type === 'select') {
                     let opts = f.options.map(o => `<option value="${esc(o.v)}" ${o.v===f.value?'selected':''}>${esc(o.t)}</option>`).join('');
                     return `<div class="form-group"><label>${esc(f.label || '')}</label><select id="prompt_${f.id}">${opts}</select></div>`;
+                }
+                if(f.type === 'richtext') {
+                    const editorId = `prompt_${f.id}`;
+                    return `<div class="form-group"><label>${esc(f.label || '')}</label><div class="rich-editor-shell">${renderRichToolbar(editorId)}<div class="rich-editor" id="${editorId}" contenteditable="true" data-placeholder="${esc(f.placeholder || 'Введите текст...')}" onkeydown="handleRichEditorHotkeys(event,'${editorId}')">${richStoredToEditorHTML(f.value || '')}</div></div><div class="rich-hotkeys-help">Горячие клавиши: Ctrl+B — жирный, Ctrl+I — курсив, Ctrl+U — подчёркивание, Ctrl+Shift+X — зачёркивание, Ctrl+Shift+. — цитата, Ctrl+Shift+M — моноширинный, Ctrl+Shift+P — скрытый, Ctrl+K — ссылка. Кнопка «Раздел» делает выделенный текст крупным заголовком.</div></div>`;
                 }
                 if(f.type === 'textarea') {
                     return `<div class="form-group"><label>${esc(f.label || '')}</label><textarea id="prompt_${f.id}" placeholder="${esc(f.placeholder || '')}" rows="${f.rows || 5}">${esc(f.value || '')}</textarea></div>`;
@@ -1915,7 +2224,7 @@
             }).join(''); 
             document.getElementById('uiPrompt').classList.remove('hidden'); 
             document.getElementById('uiPromptConfirm').onclick = () => { 
-                const results = {}; fields.forEach(f => { const el = document.getElementById(`prompt_${f.id}`); results[f.id] = f.type === 'file' ? (f.multiple ? Array.from(el.files || []) : (el.files && el.files[0] ? el.files[0] : null)) : el.value; }); 
+                const results = {}; fields.forEach(f => { const el = document.getElementById(`prompt_${f.id}`); results[f.id] = f.type === 'file' ? (f.multiple ? Array.from(el.files || []) : (el.files && el.files[0] ? el.files[0] : null)) : (f.type === 'richtext' ? getPromptRichEditorValue(`prompt_${f.id}`) : el.value); }); 
                 this.closePrompt(); onConfirm(results); 
             }; 
         }
@@ -2830,8 +3139,7 @@
         if(label) label.textContent = String(current + 1);
     }
     function renderTextWithMedia(item, admin = false, kind = '') {
-        const text = String(item.text || '');
-        const lines = text.split('\n');
+        const lines = richStoredToLines(item.text || '');
         const blocks = getContentMediaBlocks(item);
         const byLine = {};
         const afterAll = [];
@@ -2847,7 +3155,7 @@
         const html = [];
         if(byLine[0]) byLine[0].forEach(block => html.push(renderMediaBlock(block, item, admin, kind, 'before-text')));
         lines.forEach((line, index) => {
-            html.push(`<span class="content-line">${escapeHTML(line) || '&nbsp;'}</span>`);
+            html.push(`<span class="content-line">${line || '&nbsp;'}</span>`);
             const lineNumber = index + 1;
             if(byLine[lineNumber]) byLine[lineNumber].forEach(block => html.push(renderMediaBlock(block, item, admin, kind, 'inline-media')));
         });
@@ -2986,13 +3294,13 @@
         const isNews = kind === 'news';
         UI.prompt(isNews ? 'Добавить новость' : 'Добавить инструкцию', [
             {id:'title', label:'Заголовок', placeholder:isNews ? 'Например: Обновление правил модерации' : 'Например: Как отправить релиз'},
-            {id:'text', label:'Текст', type:'textarea', rows:7, placeholder:'Введите текст...'},
+            {id:'text', label:'Текст', type:'richtext', placeholder:'Введите текст и выделите нужные фрагменты для форматирования...'},
             {id:'media', label:'Фото или видео (необязательно)', type:'file', accept:'image/*,video/*', multiple:true},
             {id:'caption', label:'Подпись к фото/видео (необязательно)', placeholder:'Текст под медиа'},
             {id:'afterLine', label:'Вставить медиа после строки', type:'number', placeholder:'Например: 4. 0 — перед текстом, пусто — после всего текста'}
         ], async (res) => {
-            if(!res.title || !res.text) return UI.alert('Ошибка', 'Заполните заголовок и текст.');
-            const item = { id: Date.now().toString(), title: res.title.trim(), text: res.text.trim(), date: new Date().toLocaleString(), createdAt: Date.now(), mediaBlocks: [] };
+            if(!res.title || !richHTMLToPlainText(res.text)) return UI.alert('Ошибка', 'Заполните заголовок и текст.');
+            const item = { id: Date.now().toString(), title: res.title.trim(), text: sanitizeRichHTML(res.text).trim(), date: new Date().toLocaleString(), createdAt: Date.now(), mediaBlocks: [] };
             if(res.media && res.media.length) {
                 const files = await Promise.all(res.media.map(async (file, index) => ({ id: Date.now().toString() + '_file_' + index, src: await fileToDataURL(file), type: file.type && file.type.startsWith('video') ? 'video' : 'image' })));
                 item.mediaBlocks.push({ id: Date.now().toString() + '_media', files, caption: (res.caption || '').trim(), afterLine: normalizeAfterLine(res.afterLine) });
@@ -3007,11 +3315,11 @@
         if(!item) return;
         UI.prompt(kind === 'news' ? 'Изменить новость' : 'Изменить инструкцию', [
             {id:'title', label:'Заголовок', value:item.title},
-            {id:'text', label:'Текст', type:'textarea', rows:7, value:item.text}
+            {id:'text', label:'Текст', type:'richtext', value:item.text, placeholder:'Введите текст и выделите нужные фрагменты для форматирования...'}
         ], (res) => {
-            if(!res.title || !res.text) return UI.alert('Ошибка', 'Заполните заголовок и текст.');
+            if(!res.title || !richHTMLToPlainText(res.text)) return UI.alert('Ошибка', 'Заполните заголовок и текст.');
             item.title = res.title.trim();
-            item.text = res.text.trim();
+            item.text = sanitizeRichHTML(res.text).trim();
             item.date = new Date().toLocaleString();
             saveContentKind(kind);
             renderAdminContent();
