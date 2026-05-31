@@ -1580,6 +1580,54 @@
             font-weight:900;
             letter-spacing:-.025em;
         }
+
+        .rich-toolbar .rich-separator{
+            width:1px;
+            align-self:stretch;
+            min-height:28px;
+            margin:4px 2px;
+            background:rgba(255,255,255,.10);
+        }
+        .rich-toolbar button.rich-undo-tool{
+            background:rgba(68,110,240,.10);
+            border-color:rgba(68,110,240,.22);
+            color:#dbe6ff;
+        }
+        .rich-toolbar button.rich-undo-tool:hover{
+            background:rgba(68,110,240,.20);
+            border-color:rgba(68,110,240,.42);
+        }
+        body.kite-modal-locked{
+            overflow:hidden!important;
+        }
+        body.kite-modal-locked .content,
+        body.kite-modal-locked .sidebar{
+            overflow:hidden!important;
+        }
+        #uiPrompt{
+            overflow:hidden!important;
+            overscroll-behavior:contain;
+        }
+        #uiPrompt .dialog{
+            max-height:calc(100dvh - 40px)!important;
+            display:flex!important;
+            flex-direction:column!important;
+            overflow:hidden!important;
+        }
+        #uiPromptInputs{
+            flex:1 1 auto!important;
+            max-height:none!important;
+            overflow-y:auto!important;
+            overscroll-behavior:contain;
+            -webkit-overflow-scrolling:touch;
+            padding-right:10px;
+        }
+        #uiPrompt .dialog-actions{
+            flex:0 0 auto;
+            padding-top:14px;
+            border-top:1px solid rgba(255,255,255,.08);
+            background:linear-gradient(180deg,rgba(23,28,39,0),rgba(23,28,39,.96) 28%);
+        }
         @media(max-width:768px){
             .rich-toolbar{gap:6px;padding:8px;}
             .rich-toolbar button{width:34px;height:34px;border-radius:11px;}
@@ -2129,6 +2177,9 @@
     function renderRichToolbar(editorId) {
         const id = String(editorId || '').replace(/[^a-zA-Z0-9_-]/g, '');
         return `<div class="rich-toolbar" onmousedown="event.preventDefault()">
+            <button type="button" class="rich-undo-tool" title="Отменить · Ctrl+Z" onclick="richEditorUndo('${id}')">↶</button>
+            <button type="button" class="rich-undo-tool" title="Вернуть · Ctrl+Shift+Z / Ctrl+Y" onclick="richEditorRedo('${id}')">↷</button>
+            <span class="rich-separator"></span>
             <button type="button" title="Жирный · Ctrl+B" onclick="formatRichText('${id}','bold')"><b>B</b></button>
             <button type="button" title="Курсив · Ctrl+I" onclick="formatRichText('${id}','italic')"><i>I</i></button>
             <button type="button" title="Подчёркнутый · Ctrl+U" onclick="formatRichText('${id}','underline')"><u>U</u></button>
@@ -2140,6 +2191,65 @@
             <button type="button" class="rich-tool-wide" title="Сделать выделенный текст большим разделом · Ctrl+Shift+H" onclick="formatRichText('${id}','section')">Раздел</button>
         </div>`;
     }
+    const richEditorHistory = {};
+    function getRichEditorHistory(editorId) {
+        const id = String(editorId || '');
+        if(!richEditorHistory[id]) richEditorHistory[id] = { stack: [], index: -1, timer: null, silent: false };
+        return richEditorHistory[id];
+    }
+    function initRichEditorHistory(editorId) {
+        const editor = document.getElementById(editorId);
+        if(!editor) return;
+        const hist = getRichEditorHistory(editorId);
+        if(!hist.stack.length) {
+            hist.stack = [editor.innerHTML];
+            hist.index = 0;
+        }
+        if(editor.dataset.richHistoryReady === '1') return;
+        editor.dataset.richHistoryReady = '1';
+        editor.addEventListener('input', () => scheduleRichHistoryPush(editorId));
+        editor.addEventListener('paste', () => setTimeout(() => pushRichHistory(editorId, true), 0));
+        editor.addEventListener('blur', () => pushRichHistory(editorId, true));
+    }
+    function pushRichHistory(editorId, force = false) {
+        const editor = document.getElementById(editorId);
+        if(!editor) return;
+        const hist = getRichEditorHistory(editorId);
+        if(hist.silent) return;
+        const html = editor.innerHTML;
+        if(!force && hist.stack[hist.index] === html) return;
+        if(hist.stack[hist.index] === html) return;
+        if(hist.index < hist.stack.length - 1) hist.stack = hist.stack.slice(0, hist.index + 1);
+        hist.stack.push(html);
+        if(hist.stack.length > 80) hist.stack.shift();
+        hist.index = hist.stack.length - 1;
+    }
+    function scheduleRichHistoryPush(editorId) {
+        const hist = getRichEditorHistory(editorId);
+        clearTimeout(hist.timer);
+        hist.timer = setTimeout(() => pushRichHistory(editorId, true), 220);
+    }
+    function restoreRichHistory(editorId, direction) {
+        const editor = document.getElementById(editorId);
+        if(!editor) return;
+        initRichEditorHistory(editorId);
+        const hist = getRichEditorHistory(editorId);
+        const next = hist.index + direction;
+        if(next < 0 || next >= hist.stack.length) return;
+        hist.silent = true;
+        hist.index = next;
+        editor.innerHTML = hist.stack[hist.index] || '';
+        hist.silent = false;
+        editor.focus();
+        editor.dispatchEvent(new Event('input', { bubbles:true }));
+    }
+    function richEditorUndo(editorId) {
+        restoreRichHistory(editorId, -1);
+    }
+    function richEditorRedo(editorId) {
+        restoreRichHistory(editorId, 1);
+    }
+
     function focusRichEditor(editorId) {
         const editor = document.getElementById(editorId);
         if(editor) editor.focus();
@@ -2167,6 +2277,11 @@
     function formatRichText(editorId, action) {
         const editor = focusRichEditor(editorId);
         if(!editor) return;
+        initRichEditorHistory(editorId);
+        if(action === 'undo') return richEditorUndo(editorId);
+        if(action === 'redo') return richEditorRedo(editorId);
+        pushRichHistory(editorId, true);
+        const before = editor.innerHTML;
         if(action === 'bold') document.execCommand('bold', false, null);
         else if(action === 'italic') document.execCommand('italic', false, null);
         else if(action === 'underline') document.execCommand('underline', false, null);
@@ -2179,11 +2294,14 @@
             const url = prompt('Вставьте ссылку');
             if(url) document.execCommand('createLink', false, url.trim());
         }
+        if(editor.innerHTML !== before) pushRichHistory(editorId, true);
         editor.dispatchEvent(new Event('input', { bubbles:true }));
     }
     function handleRichEditorHotkeys(e, editorId) {
         if(!e.ctrlKey) return;
         const key = String(e.key || '').toLowerCase();
+        if(!e.shiftKey && key === 'z') { e.preventDefault(); richEditorUndo(editorId); return; }
+        if((e.shiftKey && key === 'z') || (!e.shiftKey && key === 'y')) { e.preventDefault(); richEditorRedo(editorId); return; }
         if(!e.shiftKey && key === 'b') { e.preventDefault(); formatRichText(editorId, 'bold'); }
         else if(!e.shiftKey && key === 'i') { e.preventDefault(); formatRichText(editorId, 'italic'); }
         else if(!e.shiftKey && key === 'u') { e.preventDefault(); formatRichText(editorId, 'underline'); }
@@ -2210,7 +2328,7 @@
                 }
                 if(f.type === 'richtext') {
                     const editorId = `prompt_${f.id}`;
-                    return `<div class="form-group"><label>${esc(f.label || '')}</label><div class="rich-editor-shell">${renderRichToolbar(editorId)}<div class="rich-editor" id="${editorId}" contenteditable="true" data-placeholder="${esc(f.placeholder || 'Введите текст...')}" onkeydown="handleRichEditorHotkeys(event,'${editorId}')">${richStoredToEditorHTML(f.value || '')}</div></div><div class="rich-hotkeys-help">Горячие клавиши: Ctrl+B — жирный, Ctrl+I — курсив, Ctrl+U — подчёркивание, Ctrl+Shift+X — зачёркивание, Ctrl+Shift+. — цитата, Ctrl+Shift+M — моноширинный, Ctrl+Shift+P — скрытый, Ctrl+K — ссылка. Кнопка «Раздел» делает выделенный текст крупным заголовком.</div></div>`;
+                    return `<div class="form-group"><label>${esc(f.label || '')}</label><div class="rich-editor-shell">${renderRichToolbar(editorId)}<div class="rich-editor" id="${editorId}" contenteditable="true" data-placeholder="${esc(f.placeholder || 'Введите текст...')}" onfocus="initRichEditorHistory('${editorId}')" onkeydown="handleRichEditorHotkeys(event,'${editorId}')">${richStoredToEditorHTML(f.value || '')}</div></div><div class="rich-hotkeys-help">Горячие клавиши: Ctrl+Z — отменить, Ctrl+Shift+Z / Ctrl+Y — вернуть, Ctrl+B — жирный, Ctrl+I — курсив, Ctrl+U — подчёркивание, Ctrl+Shift+X — зачёркивание, Ctrl+Shift+. — цитата, Ctrl+Shift+M — моноширинный, Ctrl+Shift+P — скрытый, Ctrl+K — ссылка. Кнопка «Раздел» делает выделенный текст крупным заголовком.</div></div>`;
                 }
                 if(f.type === 'textarea') {
                     return `<div class="form-group"><label>${esc(f.label || '')}</label><textarea id="prompt_${f.id}" placeholder="${esc(f.placeholder || '')}" rows="${f.rows || 5}">${esc(f.value || '')}</textarea></div>`;
@@ -2222,16 +2340,49 @@
                 }
                 return `<div class="form-group"><label>${esc(f.label || '')}</label><input type="${f.type||'text'}" id="prompt_${f.id}" placeholder="${esc(f.placeholder||'')}" value="${esc(f.value||'')}"></div>`;
             }).join(''); 
-            document.getElementById('uiPrompt').classList.remove('hidden'); 
+            document.body.classList.add('kite-modal-locked');
+            const promptOverlay = document.getElementById('uiPrompt');
+            promptOverlay.classList.remove('hidden');
+            promptOverlay.scrollTop = 0;
+            const promptInputsBox = document.getElementById('uiPromptInputs');
+            if(promptInputsBox) promptInputsBox.scrollTop = 0;
+            setTimeout(() => fields.forEach(f => { if(f.type === 'richtext') initRichEditorHistory(`prompt_${f.id}`); }), 0);
             document.getElementById('uiPromptConfirm').onclick = () => { 
                 const results = {}; fields.forEach(f => { const el = document.getElementById(`prompt_${f.id}`); results[f.id] = f.type === 'file' ? (f.multiple ? Array.from(el.files || []) : (el.files && el.files[0] ? el.files[0] : null)) : (f.type === 'richtext' ? getPromptRichEditorValue(`prompt_${f.id}`) : el.value); }); 
                 this.closePrompt(); onConfirm(results); 
             }; 
         }
-        static closePrompt() { document.getElementById('uiPrompt').classList.add('hidden'); }
+        static closePrompt() { document.getElementById('uiPrompt').classList.add('hidden'); document.body.classList.remove('kite-modal-locked'); }
         static confirm(title, onConfirm) { document.getElementById('uiConfirmTitle').innerText = title; document.getElementById('uiConfirm').classList.remove('hidden'); document.getElementById('uiConfirmBtn').onclick = () => { this.closeConfirm(); onConfirm(); }; }
         static closeConfirm() { document.getElementById('uiConfirm').classList.add('hidden'); }
     }
+
+    function initPromptScrollContainment() {
+        const prompt = document.getElementById('uiPrompt');
+        if(!prompt || prompt.dataset.scrollContainmentReady === '1') return;
+        prompt.dataset.scrollContainmentReady = '1';
+        prompt.addEventListener('wheel', (e) => {
+            const scrollable = e.target.closest('#uiPromptInputs, .rich-editor');
+            if(!scrollable) { e.preventDefault(); return; }
+            const canScroll = scrollable.scrollHeight > scrollable.clientHeight;
+            if(!canScroll) { e.preventDefault(); return; }
+            const atTop = scrollable.scrollTop <= 0;
+            const atBottom = Math.ceil(scrollable.scrollTop + scrollable.clientHeight) >= scrollable.scrollHeight;
+            if((e.deltaY < 0 && atTop) || (e.deltaY > 0 && atBottom)) e.preventDefault();
+        }, { passive:false });
+        let touchStartY = 0;
+        prompt.addEventListener('touchstart', (e) => { touchStartY = e.touches && e.touches[0] ? e.touches[0].clientY : 0; }, { passive:true });
+        prompt.addEventListener('touchmove', (e) => {
+            const scrollable = e.target.closest('#uiPromptInputs, .rich-editor');
+            if(!scrollable) { e.preventDefault(); return; }
+            const currentY = e.touches && e.touches[0] ? e.touches[0].clientY : touchStartY;
+            const deltaY = touchStartY - currentY;
+            const atTop = scrollable.scrollTop <= 0;
+            const atBottom = Math.ceil(scrollable.scrollTop + scrollable.clientHeight) >= scrollable.scrollHeight;
+            if((deltaY < 0 && atTop) || (deltaY > 0 && atBottom)) e.preventDefault();
+        }, { passive:false });
+    }
+    document.addEventListener('DOMContentLoaded', initPromptScrollContainment);
 
     function updateCustomFileName(inputId) {
         const input = document.getElementById(inputId);
