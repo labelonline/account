@@ -1637,6 +1637,36 @@
             .rich-editor{min-height:180px;max-height:360px;}
         }
 
+
+        /* ===== Questionnaire / label application ===== */
+        .questionnaire-dialog{
+            max-width:560px!important;
+            width:min(560px,94vw)!important;
+            border:1px solid var(--border)!important;
+            background:rgba(18,23,34,.96)!important;
+            border-radius:28px!important;
+            box-shadow:var(--shadow)!important;
+        }
+        .questionnaire-dialog textarea{min-height:150px;resize:vertical;line-height:1.55;}
+        .label-hint{color:rgba(170,176,192,.62);font-weight:500;margin-left:6px;font-size:12px;}
+        .questionnaire-check-btn{width:100%;margin-top:16px;border:1px solid rgba(255,255,255,.08)!important;display:flex;align-items:center;justify-content:center;gap:10px;background:rgba(255,255,255,.035)!important;}
+        .questionnaire-check-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+        .questionnaire-card{padding:18px;border-radius:22px;border:1px solid var(--border);background:rgba(255,255,255,.04);box-shadow:var(--shadow);margin-bottom:12px;cursor:pointer;transition:.18s;}
+        .questionnaire-card:hover{transform:translateY(-1px);border-color:rgba(68,110,240,.36);background:rgba(255,255,255,.055);}
+        .questionnaire-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:10px;}
+        .questionnaire-name{font-size:17px;font-weight:800;color:#fff;line-height:1.25;}
+        .questionnaire-email{font-size:13px;color:var(--text-muted);margin-top:4px;}
+        .questionnaire-desc-preview{color:#d7deee;line-height:1.55;white-space:pre-wrap;margin-top:10px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+        .questionnaire-detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:18px 0;}
+        .questionnaire-detail-box{padding:14px;border-radius:18px;border:1px solid var(--border);background:rgba(255,255,255,.04);}
+        .questionnaire-detail-box span{display:block;color:var(--text-muted);font-size:12px;margin-bottom:6px;}
+        .questionnaire-detail-box strong{display:block;color:#fff;font-size:15px;line-height:1.35;word-break:break-word;}
+        .questionnaire-status{padding:7px 11px;border-radius:999px;font-size:12px;font-weight:800;border:1px solid var(--border);white-space:nowrap;}
+        .questionnaire-status.pending{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.26);color:#ffd493;}
+        .questionnaire-status.accepted{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.26);color:#92f4b3;}
+        .questionnaire-status.rejected{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.26);color:#ffb1b1;}
+        @media(max-width:768px){.questionnaire-dialog{max-height:92dvh!important;overflow-y:auto!important}.questionnaire-card-head{flex-direction:column}.questionnaire-status{align-self:flex-start}}
+
     </style>
 </head>
 <body>
@@ -1695,7 +1725,25 @@
             <div class="form-group"><input type="password" id="authPassword" placeholder="Пароль" onkeypress="if(event.key === 'Enter') processAuth()"></div>
             
             <button class="btn-primary" id="mainAuthBtn" style="width: 100%; margin-top: 8px;" onclick="processAuth()">Войти в кабинет</button>
-            <button class="btn-outline" style="width: 100%; margin-top: 12px; border: none;" onclick="toggleAuthMode()" id="switchAuthBtn">Создать кабинет</button>
+            <button class="btn-outline" style="width: 100%; margin-top: 12px;" onclick="openQuestionnaireForm()" id="switchAuthBtn">Заполнить анкету для вступления в лейбл</button>
+            <button class="btn-outline questionnaire-check-btn" type="button" onclick="showQuestionnaireCheck()" id="checkQuestionnaireBtn"><svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/><path d="M8 9h8M8 13h5"/></svg><span>Проверить анкету</span></button>
+        </div>
+    </div>
+    <div id="questionnaireView" class="overlay hidden" style="background: var(--bg-body); z-index: 9999; overflow-y:auto; padding:24px;">
+        <div class="dialog questionnaire-dialog">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:22px;">
+                <div>
+                    <h2 style="font-size:28px;font-weight:800;letter-spacing:-.03em;margin:0 0 8px;">Анкета для вступления в лейбл</h2>
+                    <p class="text-sm" style="line-height:1.55;">Заполните данные, чтобы команда Kite могла рассмотреть вашу заявку.</p>
+                </div>
+                <button class="btn-outline" style="padding:8px 12px;" onclick="closeQuestionnaireForm()">Закрыть</button>
+            </div>
+            <div class="form-group"><label>Имя<span class="req-star">*</span></label><input type="text" id="qFirstName" autocomplete="given-name" placeholder="Ваше имя"></div>
+            <div class="form-group"><label>Фамилия<span class="req-star">*</span></label><input type="text" id="qLastName" autocomplete="family-name" placeholder="Ваша фамилия"></div>
+            <div class="form-group"><label>Почта<span class="req-star">*</span><span class="label-hint">для регистрации кабинета.</span></label><input type="email" id="qEmail" autocomplete="email" placeholder="example@email.com"></div>
+            <div class="form-group"><label>Описание<span class="req-star">*</span><span class="label-hint">опишите про своё творчество и почему вы выбрали нас.</span></label><textarea id="qDescription" placeholder="Расскажите о себе, своём творчестве, жанрах, планах и почему хотите вступить в Kite."></textarea></div>
+            <button class="btn-primary" style="width:100%;margin-top:8px;" onclick="submitQuestionnaire()">Отправить анкету</button>
+            <button class="btn-outline" style="width:100%;margin-top:12px;" onclick="closeQuestionnaireForm()">Назад ко входу</button>
         </div>
     </div>
     <div id="appView" class="app hidden">
@@ -1746,6 +1794,7 @@
                 <div class="nav-group-items hidden" id="nav-menu-admin">
                     <button class="menu-btn" id="btn-adminChats" data-section="adminChats" onclick="nav('adminChats')"><span class="mil"><span class="ico"><svg viewBox="0 0 24 24"><path d="M7 7h10a4 4 0 0 1 0 8h-2"/><path d="M7 7l3-3M7 7l3 3"/><path d="M17 17H7a4 4 0 0 1 0-8h2"/><path d="M17 17l-3-3M17 17l-3 3"/></svg></span><span>Связь с артистами</span></span><span class="nav-unread-dot hidden" id="adminChatsUnreadDot"></span></button>
                     <button class="menu-btn" id="btn-adminUsers" data-section="adminUsers" onclick="nav('adminUsers')"><span class="mil"><span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.6-4 4.4-6 8-6s6.4 2 8 6"/></svg></span><span>Кабинеты</span></span></button>
+                    <button class="menu-btn" id="btn-questionnaires" data-section="questionnaires" onclick="nav('questionnaires')"><span class="mil"><span class="ico"><svg viewBox="0 0 24 24"><path d="M8 3h8l2 3h2v15H4V6h2l2-3Z"/><path d="M9 11h6"/><path d="M9 15h4"/></svg></span><span>Анкеты</span></span><span class="menu-badge" id="questionnairesCount">0</span></button>
                     <button class="menu-btn" id="btn-adminReleases" data-section="adminReleases" onclick="nav('adminReleases')"><span class="mil"><span class="ico"><svg viewBox="0 0 24 24"><path d="M12 3 20 6v6c0 5-3.4 8-8 9-4.6-1-8-4-8-9V6l8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span><span>Все релизы</span></span></button>
                     <button class="menu-btn" id="btn-adminDeleted" data-section="adminDeleted" onclick="nav('adminDeleted')"><span class="mil"><span class="ico"><svg viewBox="0 0 24 24"><path d="M9 6h11v12H9l-5-6 5-6Z"/><path d="m12 9 5 6M17 9l-5 6"/></svg></span><span>Удалённые</span></span></button>
                     <button class="menu-btn" id="btn-adminContent" data-section="adminContent" onclick="nav('adminContent')"><span class="mil"><span class="ico"><svg viewBox="0 0 24 24"><path d="M12 3l2.2 6.2L20 12l-5.8 2.8L12 21l-2.2-6.2L4 12l5.8-2.8L12 3Z"/></svg></span><span>Новости и инструкция</span></span></button>
@@ -1913,6 +1962,12 @@
                         <div id="adminGuideList"></div>
                     </div>
                 </div>
+            </div>
+
+            <div id="sec-questionnaires" class="view-section hidden">
+                <div class="section-kicker">Главный администратор • Анкеты</div>
+                <p class="text-sm" style="margin-bottom:18px;">Здесь отображаются все анкеты, которые отправили артисты для вступления в лейбл.</p>
+                <div id="questionnairesList"></div>
             </div>
             <div id="sec-adminUsers" class="view-section hidden">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
@@ -2480,7 +2535,7 @@
 
     function enableAuthButton() {
         const authBtn = document.getElementById('mainAuthBtn');
-        if(authBtn) { authBtn.disabled = false; authBtn.innerText = authMode === 'login' ? 'Войти в кабинет' : 'Создать кабинет'; }
+        if(authBtn) { authBtn.disabled = false; authBtn.innerText = 'Войти в кабинет'; }
     }
     function setAuthButtonLoading(text = 'Подключение...') {
         const authBtn = document.getElementById('mainAuthBtn');
@@ -2573,7 +2628,7 @@
         return db.ref('chats/' + safe).set(chatArrayToObject(normalized)).catch(err => console.error(err));
     }
 
-    let appState = { users: [], releases: [], chats: {}, content: { news: [], guide: [] }, promoLinks: [] }; 
+    let appState = { users: [], releases: [], chats: {}, content: { news: [], guide: [] }, promoLinks: [], questionnaires: [] }; 
     let currentUser = null; 
     let authMode = 'login'; 
     let currentSection = 'overview'; 
@@ -2663,6 +2718,15 @@
         const data = snapshot.val() || {};
         appState.promoLinks = Object.values(data);
         if(currentUser && currentSection === 'promoLinks') refreshUI();
+    }, (err) => console.error(err));
+
+    db.ref('questionnaires').on('value', (snapshot) => {
+        const data = snapshot.val() || {};
+        appState.questionnaires = Object.values(data).sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0));
+        if(currentUser) {
+            if(currentSection === 'questionnaires') renderQuestionnaires();
+            updateSidebarCounts();
+        }
     }, (err) => console.error(err));
 
     function setMultiVal(containerId, val, placeholder) {
@@ -3141,7 +3205,7 @@
         if(section === 'news' || section === 'guide') markContentRead(section, true);
         currentSection = section;
         if(section === 'karaoke' || section === 'promoLinks') setNavMenuState('marketing', true);
-        if(['adminChats','adminUsers','adminReleases','adminDeleted','adminContent'].includes(section)) setNavMenuState('admin', true);
+        if(['adminChats','adminUsers','questionnaires','adminReleases','adminDeleted','adminContent'].includes(section)) setNavMenuState('admin', true);
         document.querySelectorAll('.view-section').forEach(s => { s.classList.add('hidden'); s.classList.remove('fade-in'); });
         const activeSec = document.getElementById('sec-' + section);
         if(activeSec) { activeSec.classList.remove('hidden'); void activeSec.offsetWidth; activeSec.classList.add('fade-in'); }
@@ -3150,7 +3214,7 @@
             const navBtn = document.querySelector(`.sidebar .menu-btn[data-section="${section}"]`);
             if(navBtn) navBtn.classList.add('active');
         }
-        const titles = { 'overview': 'Обзор', 'newRelease': 'Новый релиз', 'news': 'Новости', 'guide': 'Инструкция', 'adminContent': 'Новости и инструкция', 'adminUsers': 'Управление кабинетами', 'adminReleases': 'Все релизы', 'adminDeleted': 'Удаленные', 'userChat': 'Связь с администрацией', 'adminChats': 'Связь с артистами', 'karaoke': 'Караоке текст', 'promoLinks': 'Промо-ссылки' };
+        const titles = { 'overview': 'Обзор', 'newRelease': 'Новый релиз', 'news': 'Новости', 'guide': 'Инструкция', 'adminContent': 'Новости и инструкция', 'adminUsers': 'Управление кабинетами', 'questionnaires': 'Анкеты', 'adminReleases': 'Все релизы', 'adminDeleted': 'Удаленные', 'userChat': 'Связь с администрацией', 'adminChats': 'Связь с артистами', 'karaoke': 'Караоке текст', 'promoLinks': 'Промо-ссылки' };
         document.getElementById('pageTitle').innerText = titles[section] || 'Раздел';
         refreshUI();
         checkNotifications();
@@ -3167,7 +3231,8 @@
         if(currentSection === 'news') renderNews();
         if(currentSection === 'guide') renderGuide();
         if(currentSection === 'adminContent') renderAdminContent();
-        if(currentSection === 'adminUsers') renderAdminUsers(); 
+        if(currentSection === 'adminUsers') renderAdminUsers();
+        if(currentSection === 'questionnaires') renderQuestionnaires(); 
         if(currentSection === 'adminReleases') renderAdminReleases(false); 
         if(currentSection === 'adminDeleted') renderAdminReleases(true); 
         if(currentSection === 'userChat') renderUserChat(); 
@@ -3414,6 +3479,8 @@
         toggleDot('newsUnreadDot', hasUnreadContent('news'));
         toggleDot('guideUnreadDot', hasUnreadContent('guide'));
         toggleDot('adminChatsUnreadDot', currentUser && currentUser.role === 'Administrator' && hasUnreadArtistChats());
+        const qCountEl = document.getElementById('questionnairesCount');
+        if(qCountEl) qCountEl.innerText = String((appState.questionnaires || []).filter(q => (q.status || 'На проверке') === 'На проверке').length || (appState.questionnaires || []).length || 0);
     }
     function renderContentList(kind, targetId, emptyText) {
         const target = document.getElementById(targetId);
@@ -3712,6 +3779,7 @@
                 if(appState.users.find(x => x.email === checkEmail)) return UI.alert("Ошибка", "Почта уже занята");
                 const newUser = { id: 'u' + Date.now(), login: userData.login, email: checkEmail, pass: userData.pass, role: res.role, passwordHistory: [{pass: userData.pass, date: new Date().toLocaleString()}], isBanned: false, banReason: '', notifications: [], unreadAdminMsg: false, unreadArtistChats: {}, readContent: {}, avatar: '', isDeletedCabinet: false };
                 saveUserDB(newUser); UI.alert("Успешно", "Новый кабинет успешно открыт."); if(currentSection === 'adminUsers') renderAdminUsers();
+        if(currentSection === 'questionnaires') renderQuestionnaires();
             });
         });
     }
@@ -5402,6 +5470,222 @@ function renderCard(r, isAdmin) {
     });
     aetherAudioObserver.observe(document.documentElement, { childList:true, subtree:true });
 
+
+
+    /* ===== Label questionnaires ===== */
+    function openQuestionnaireForm() {
+        authMode = 'login';
+        const auth = document.getElementById('authView');
+        const q = document.getElementById('questionnaireView');
+        if(auth) auth.classList.add('hidden');
+        if(q) q.classList.remove('hidden');
+        ['qFirstName','qLastName','qEmail','qDescription'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.classList.remove('error-field');
+        });
+        const qEmail = document.getElementById('qEmail');
+        const authEmail = document.getElementById('authEmail');
+        if(qEmail && authEmail && authEmail.value.trim()) qEmail.value = authEmail.value.trim();
+    }
+    function closeQuestionnaireForm() {
+        const q = document.getElementById('questionnaireView');
+        const auth = document.getElementById('authView');
+        if(q) q.classList.add('hidden');
+        if(auth) auth.classList.remove('hidden');
+    }
+    function showQuestionnaireCheck() {
+        UI.alert('Проверка анкеты', 'Проверьте свою электронную почту, которую вы указывали при заполнении анкеты.');
+    }
+    function getQuestionnaireStatusClass(status) {
+        const st = String(status || '').toLowerCase();
+        if(st.includes('прин')) return 'accepted';
+        if(st.includes('отк')) return 'rejected';
+        return 'pending';
+    }
+    function getQuestionnaireStatusText(status) {
+        return status || 'На проверке';
+    }
+    async function submitQuestionnaire() {
+        const firstNameEl = document.getElementById('qFirstName');
+        const lastNameEl = document.getElementById('qLastName');
+        const emailEl = document.getElementById('qEmail');
+        const descriptionEl = document.getElementById('qDescription');
+        const fields = [firstNameEl, lastNameEl, emailEl, descriptionEl];
+        fields.forEach(el => el && el.classList.remove('error-field'));
+        const firstName = (firstNameEl?.value || '').trim();
+        const lastName = (lastNameEl?.value || '').trim();
+        const email = (emailEl?.value || '').toLowerCase().trim();
+        const description = (descriptionEl?.value || '').trim();
+        let hasError = false;
+        if(!firstName) { firstNameEl && firstNameEl.classList.add('error-field'); hasError = true; }
+        if(!lastName) { lastNameEl && lastNameEl.classList.add('error-field'); hasError = true; }
+        if(!email || !email.includes('@')) { emailEl && emailEl.classList.add('error-field'); hasError = true; }
+        if(!description) { descriptionEl && descriptionEl.classList.add('error-field'); hasError = true; }
+        if(hasError) return UI.alert('Ошибка', 'Заполните все поля анкеты.' );
+
+        const btn = event && event.target ? event.target : null;
+        const oldText = btn ? btn.innerText : '';
+        if(btn) { btn.disabled = true; btn.innerText = 'Отправка...'; }
+        const id = 'q_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        const item = { id, firstName, lastName, email, description, status: 'На проверке', createdAt: Date.now(), updatedAt: Date.now() };
+        try {
+            appState.questionnaires = [item].concat((appState.questionnaires || []).filter(q => q.id !== id));
+            await db.ref('questionnaires/' + id).set(item);
+            closeQuestionnaireForm();
+            fields.forEach(el => { if(el) el.value = ''; });
+            UI.alert('Анкета отправлена', 'Спасибо! Ваша анкета отправлена на рассмотрение. Проверьте электронную почту, которую вы указали при заполнении анкеты.');
+        } catch (err) {
+            console.error(err);
+            UI.alert('Ошибка', 'Не удалось отправить анкету. Проверьте подключение к интернету и попробуйте ещё раз.');
+        } finally {
+            if(btn) { btn.disabled = false; btn.innerText = oldText || 'Отправить анкету'; }
+        }
+    }
+    function renderQuestionnaires() {
+        const area = document.getElementById('questionnairesList');
+        if(!area) return;
+        const list = (appState.questionnaires || []).slice().sort((a,b)=>Number(b.createdAt||0)-Number(a.createdAt||0));
+        const countEl = document.getElementById('questionnairesCount');
+        if(countEl) countEl.innerText = String(list.filter(q => (q.status || 'На проверке') === 'На проверке').length || list.length || 0);
+        if(!list.length) {
+            area.innerHTML = '<div class="empty-panel">Пока нет отправленных анкет.</div>';
+            return;
+        }
+        area.innerHTML = list.map(q => {
+            const status = getQuestionnaireStatusText(q.status);
+            const cls = getQuestionnaireStatusClass(status);
+            const created = q.createdAt ? new Date(q.createdAt).toLocaleString('ru-RU') : '—';
+            return `<div class="questionnaire-card" onclick="openQuestionnaireDetails('${escapeAttr(q.id)}')">
+                <div class="questionnaire-card-head">
+                    <div>
+                        <div class="questionnaire-name">${escapeHTML(q.firstName || '')} ${escapeHTML(q.lastName || '')}</div>
+                        <div class="questionnaire-email">${escapeHTML(q.email || '—')}</div>
+                        <div class="text-sm" style="margin-top:4px;">Отправлена: ${escapeHTML(created)}</div>
+                    </div>
+                    <span class="questionnaire-status ${cls}">${escapeHTML(status)}</span>
+                </div>
+                <div class="questionnaire-desc-preview">${escapeHTML(q.description || '')}</div>
+            </div>`;
+        }).join('');
+    }
+    function openQuestionnaireDetails(id) {
+        const q = (appState.questionnaires || []).find(item => String(item.id) === String(id));
+        if(!q) return UI.alert('Ошибка', 'Анкета не найдена.');
+        const existing = document.getElementById('questionnaireDetailModal');
+        if(existing) existing.remove();
+        const status = getQuestionnaireStatusText(q.status);
+        const cls = getQuestionnaireStatusClass(status);
+        const created = q.createdAt ? new Date(q.createdAt).toLocaleString('ru-RU') : '—';
+        document.body.insertAdjacentHTML('beforeend', `<div id="questionnaireDetailModal" class="overlay" style="z-index:10004; padding:24px; overflow-y:auto; align-items:flex-start;">
+            <div class="dialog questionnaire-dialog" style="margin:auto;">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:18px;">
+                    <div>
+                        <h2 style="margin:0 0 8px;font-size:26px;font-weight:800;">Анкета артиста</h2>
+                        <span class="questionnaire-status ${cls}">${escapeHTML(status)}</span>
+                    </div>
+                    <button class="btn-outline" style="padding:8px 12px;" onclick="closeQuestionnaireDetails()">Закрыть</button>
+                </div>
+                <div class="questionnaire-detail-grid">
+                    <div class="questionnaire-detail-box"><span>Имя</span><strong>${escapeHTML(q.firstName || '—')}</strong></div>
+                    <div class="questionnaire-detail-box"><span>Фамилия</span><strong>${escapeHTML(q.lastName || '—')}</strong></div>
+                    <div class="questionnaire-detail-box"><span>Почта</span><strong>${escapeHTML(q.email || '—')}</strong></div>
+                    <div class="questionnaire-detail-box"><span>Дата отправки</span><strong>${escapeHTML(created)}</strong></div>
+                </div>
+                <div class="questionnaire-detail-box" style="margin-bottom:18px;"><span>Описание</span><strong style="white-space:pre-wrap;font-weight:600;line-height:1.6;">${escapeHTML(q.description || '—')}</strong></div>
+                <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:flex-end;">
+                    <button class="btn-danger" onclick="setQuestionnaireStatus('${escapeAttr(q.id)}','Отклонена')">Отклонить</button>
+                    <button class="btn-success" onclick="openQuestionnaireCabinetDialog('${escapeAttr(q.id)}')">Принять</button>
+                </div>
+            </div>
+        </div>`);
+    }
+    function closeQuestionnaireDetails(){
+        const modal = document.getElementById('questionnaireDetailModal');
+        if(modal) modal.remove();
+    }
+
+    function generateKitePassword(length = 16) {
+        const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*?';
+        const randomValues = new Uint32Array(length);
+        if(window.crypto && crypto.getRandomValues) crypto.getRandomValues(randomValues);
+        else for(let i = 0; i < length; i++) randomValues[i] = Math.floor(Math.random() * alphabet.length);
+        let password = '';
+        for(let i = 0; i < length; i++) password += alphabet[randomValues[i] % alphabet.length];
+        return password;
+    }
+    function openQuestionnaireCabinetDialog(id) {
+        const q = (appState.questionnaires || []).find(item => String(item.id) === String(id));
+        if(!q) return UI.alert('Ошибка', 'Анкета не найдена.');
+        const fullName = `${(q.firstName || '').trim()} ${(q.lastName || '').trim()}`.trim() || 'Новый артист';
+        const email = String(q.email || '').toLowerCase().trim();
+        if(!email || !email.includes('@')) return UI.alert('Ошибка', 'В анкете указана некорректная почта.');
+        if(appState.users.find(x => String(x.email || '').toLowerCase() === email)) {
+            return UI.alert('Кабинет уже существует', 'Кабинет с этой почтой уже есть в разделе «Кабинеты».');
+        }
+        closeQuestionnaireDetails();
+        UI.prompt('Открытие кабинета: Артист', [
+            {id: 'login', label: 'Логин', placeholder: 'Введите логин', value: fullName},
+            {id: 'email', label: 'Почта', type: 'email', placeholder: 'Введите почту', value: email},
+            {id: 'pass', label: 'Пароль', placeholder: 'Введите пароль', value: generateKitePassword()}
+        ], async (userData) => {
+            const login = String(userData.login || '').trim();
+            const userEmail = String(userData.email || '').toLowerCase().trim();
+            const pass = String(userData.pass || '').trim();
+            if(!login || !userEmail || !userEmail.includes('@') || !pass) return UI.alert('Ошибка', 'Заполните логин, почту и пароль.');
+            if(appState.users.find(x => String(x.email || '').toLowerCase() === userEmail)) return UI.alert('Ошибка', 'Почта уже занята.');
+            const newUser = {
+                id: 'u' + Date.now(),
+                login,
+                email: userEmail,
+                pass,
+                role: 'Artist',
+                passwordHistory: [{pass, date: new Date().toLocaleString()}],
+                isBanned: false,
+                banReason: '',
+                notifications: [],
+                unreadAdminMsg: false,
+                unreadArtistChats: {},
+                readContent: {},
+                avatar: '',
+                isDeletedCabinet: false,
+                createdFromQuestionnaire: q.id,
+                createdAt: Date.now()
+            };
+            q.status = 'Принята';
+            q.updatedAt = Date.now();
+            q.reviewedBy = currentUser ? currentUser.email : '';
+            q.createdCabinetId = newUser.id;
+            try {
+                appState.users.push(newUser);
+                await db.ref('users/' + newUser.id).set(newUser);
+                await db.ref('questionnaires/' + q.id).set(q);
+                renderQuestionnaires();
+                if(currentSection === 'adminUsers') renderAdminUsers();
+                UI.alert('Кабинет открыт', `Анкета принята, кабинет артиста создан.<br><br><b>Логин:</b> ${escapeHTML(login)}<br><b>Почта:</b> ${escapeHTML(userEmail)}<br><b>Пароль:</b> <code>${escapeHTML(pass)}</code>`);
+            } catch(err) {
+                console.error(err);
+                appState.users = appState.users.filter(u => u.id !== newUser.id);
+                UI.alert('Ошибка', 'Не удалось создать кабинет. Проверьте подключение к Firebase и попробуйте ещё раз.');
+            }
+        });
+    }
+    async function setQuestionnaireStatus(id, status) {
+        const q = (appState.questionnaires || []).find(item => String(item.id) === String(id));
+        if(!q) return UI.alert('Ошибка', 'Анкета не найдена.');
+        q.status = status;
+        q.updatedAt = Date.now();
+        q.reviewedBy = currentUser ? currentUser.email : '';
+        try {
+            await db.ref('questionnaires/' + q.id).set(q);
+            closeQuestionnaireDetails();
+            renderQuestionnaires();
+            UI.alert('Готово', status === 'Принята' ? 'Анкета принята.' : 'Анкета отклонена.');
+        } catch(err) {
+            console.error(err);
+            UI.alert('Ошибка', 'Не удалось изменить статус анкеты.');
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', restoreKiteSession);
     window.addEventListener('pageshow', () => { if(!currentUser) restoreKiteSession(); });
 
@@ -5425,7 +5709,8 @@ function renderCard(r, isAdmin) {
         adminDeleted: '/deleted',
         adminContent: '/content-manager',
         karaoke: '/lyrics-karaoke',
-        promoLinks: '/promo-links'
+        promoLinks: '/promo-links',
+        questionnaires: '/questionnaires'
     };
 
     const catalogRoutes = {
@@ -5452,7 +5737,8 @@ function renderCard(r, isAdmin) {
         '/deleted': () => nav('adminDeleted'),
         '/content-manager': () => nav('adminContent'),
         '/lyrics-karaoke': () => nav('karaoke'),
-        '/promo-links': () => nav('promoLinks')
+        '/promo-links': () => nav('promoLinks'),
+        '/questionnaires': () => nav('questionnaires')
     };
 
     function setKitePath(path) {
