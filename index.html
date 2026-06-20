@@ -1906,45 +1906,11 @@
                     </div>
                     <div style="width: 300px;">
                         <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">Обложка <span class="req-star">*</span></label>
-                        <div class="upload-box" id="r_cover_box" onclick="document.getElementById('r_cover').click()"><span id="coverHint" class="text-sm">Нажмите для загрузки<br>3000x3000<br><small style="display:block;margin-top:6px;color:var(--text-muted);font-size:11px;line-height:1.35;">Максимальный размер: 25 МБ</small></span><img id="coverPreview" class="upload-img hidden"><input type="file" id="r_cover" accept="image/*" class="hidden" onchange="handleCoverUpload(this)"></div>
+                        <div class="upload-box" id="r_cover_box" onclick="document.getElementById('r_cover').click()"><span id="coverHint" class="text-sm">Нажмите для загрузки<br>3000x3000<br><small style="display:block;margin-top:6px;color:var(--text-muted);font-size:11px;line-height:1.35;">Максимальный размер: 10 МБ</small></span><img id="coverPreview" class="upload-img hidden"><input type="file" id="r_cover" accept="image/*" class="hidden" onchange="handleCoverUpload(this)"></div>
                     </div>
-                    <div style="flex:1 1 100%; max-width:900px; margin-top: 6px;">
-                        <div class="karaoke-panel" style="margin-bottom:0;">
-                            <h3 style="margin-bottom:8px;">Дополнительные материалы Apple Music</h3>
-                            <p class="text-sm" style="margin-bottom:16px;">Необязательно. Если этих материалов нет — релиз всё равно можно отправить.</p>
-                            <div class="karaoke-grid">
-                                <div class="form-group">
-                                    <label>Animated Cover MOV 3:4</label>
-                                    <div class="custom-file-wrap">
-                                        <button class="custom-file-btn" type="button" onclick="document.getElementById('r_animated_cover_34').click()">Выбрать MOV 3:4</button>
-                                        <span class="custom-file-name" id="r_animated_cover_34_name">Файл не выбран</span>
-                                        <input type="file" id="r_animated_cover_34" class="custom-file-input" accept=".mov,video/quicktime" onchange="handleAppleMusicExtraUpload(this, 'animatedCover34')">
-                                    </div>
-                                    <div class="text-sm" style="margin-top:6px;">Максимум: 2 ГБ. Вертикальный MOV 3:4.</div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Animated Cover MOV 1:1</label>
-                                    <div class="custom-file-wrap">
-                                        <button class="custom-file-btn" type="button" onclick="document.getElementById('r_animated_cover_11').click()">Выбрать MOV 1:1</button>
-                                        <span class="custom-file-name" id="r_animated_cover_11_name">Файл не выбран</span>
-                                        <input type="file" id="r_animated_cover_11" class="custom-file-input" accept=".mov,video/quicktime" onchange="handleAppleMusicExtraUpload(this, 'animatedCover11')">
-                                    </div>
-                                    <div class="text-sm" style="margin-top:6px;">Максимум: 2 ГБ. Квадратный MOV 1:1.</div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Dolby Atmos</label>
-                                    <div class="custom-file-wrap">
-                                        <button class="custom-file-btn" type="button" onclick="document.getElementById('r_dolby_atmos').click()">Выбрать файл</button>
-                                        <span class="custom-file-name" id="r_dolby_atmos_name">Файл не выбран</span>
-                                        <input type="file" id="r_dolby_atmos" class="custom-file-input" accept=".wav,.adm,.bw64,audio/wav,audio/x-wav" onchange="handleAppleMusicExtraUpload(this, 'dolbyAtmos')">
-                                    </div>
-                                    <div class="text-sm" style="margin-top:6px;">Максимум: 200 МБ. Только готовый Dolby Atmos мастер.</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                </div>
                 <div id="tracklistArea" class="hidden" style="margin-top: 40px; max-width: 900px; border-top: 1px solid var(--border); padding-top: 32px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;"><div><h3>Трек-лист <span class="req-star">*</span></h3><p class="text-sm">Поддерживаемый формат: WAV (до 100 МБ)</p></div><button class="btn-outline" style="font-size: 12px; padding: 6px 12px;" onclick="document.getElementById('addAudioFile').click()">+ Добавить аудиофайл</button><input type="file" id="addAudioFile" accept=".wav,audio/wav,audio/x-wav,audio/wave,audio/vnd.wave" class="hidden" multiple onchange="addTracks(this)"></div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;"><div><h3>Трек-лист <span class="req-star">*</span></h3><p class="text-sm">Поддерживаемый формат: WAV (до 50МБ)</p></div><button class="btn-outline" style="font-size: 12px; padding: 6px 12px;" onclick="document.getElementById('addAudioFile').click()">+ Добавить аудиофайл</button><input type="file" id="addAudioFile" accept=".wav,audio/wav,audio/x-wav,audio/wave,audio/vnd.wave" class="hidden" multiple onchange="addTracks(this)"></div>
                     <div id="draftTracksList"></div>
                     <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
                         <button class="btn-outline hidden" id="saveDraftChangesBtn" style="flex: 1; min-width: 200px; padding: 16px; font-size: 15px;" onclick="saveDraftAsIs(true)">Сохранить как черновик</button>
@@ -2065,28 +2031,13 @@
     }
     const ADMIN_EMAIL = 'denisbiletskiy0@gmail.com'; 
 
-    // ===== Cloudflare R2 uploads =====
-    // Firebase хранит только метаданные и ключи файлов. Сами WAV/обложки/Apple Music материалы лежат в Cloudflare R2.
-    const KITE_R2_API_BASE = 'https://kite-r2-api.labelvvrmusic.workers.dev';
-        const KITE_R2_SIMPLE_UPLOAD_MAX = 90 * 1024 * 1024; // безопасный предел для обычного PUT через Worker
-    const KITE_R2_CHUNK_SIZE = 8 * 1024 * 1024; // multipart-части для больших WAV/Dolby/MOV
-    const KITE_FILE_LIMITS = {
-        cover: 25 * 1024 * 1024,
-        audioWav: 100 * 1024 * 1024,
-        ttml: 5 * 1024 * 1024,
-        animatedCover34: 2 * 1024 * 1024 * 1024,
-        animatedCover11: 2 * 1024 * 1024 * 1024,
-        animatedCover: 2 * 1024 * 1024 * 1024,
-        dolbyAtmos: 200 * 1024 * 1024
-    };
+    // ===== Cloudinary uploads =====
+    // Файлы нельзя хранить прямо в Firebase Realtime Database: база должна хранить только ссылки.
+    // Cloudinary хранит обложки и WAV, а Firebase хранит secure_url.
+    const CLOUDINARY_CLOUD_NAME = 'didulpof7';
+    const CLOUDINARY_UPLOAD_PRESET = 'kite_unsigned';
+    const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`;
 
-    function formatFileSize(bytes) {
-        bytes = Number(bytes) || 0;
-        if(bytes >= 1024 * 1024 * 1024) return (bytes / (1024 * 1024 * 1024)).toFixed(bytes >= 10 * 1024 * 1024 * 1024 ? 0 : 2).replace(/\.00$/, '') + ' ГБ';
-        if(bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(bytes >= 100 * 1024 * 1024 ? 0 : 1).replace(/\.0$/, '') + ' МБ';
-        if(bytes >= 1024) return Math.round(bytes / 1024) + ' КБ';
-        return bytes + ' Б';
-    }
     function isRemoteFileUrl(value) {
         return typeof value === 'string' && /^https?:\/\//i.test(value);
     }
@@ -2103,260 +2054,25 @@
         for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
         return new Blob([bytes], { type: mime });
     }
-    function sanitizeR2Segment(value, fallback = 'file') {
-        const clean = String(value || fallback)
-            .normalize('NFKD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/[^a-zA-Z0-9._-]+/g, '-')
-            .replace(/^-+|-+$/g, '')
-            .slice(0, 120);
-        return clean || fallback;
-    }
-    function makeR2Key(releaseId, category, filename, index = '') {
-        const artistId = sanitizeR2Segment((currentUser && (currentUser.id || currentUser.email)) || 'artist', 'artist');
-        const relId = sanitizeR2Segment(releaseId || currentDraftId || Date.now(), 'release');
-        const safeName = sanitizeR2Segment(filename || 'file', 'file');
-        const idx = index === '' || index === null || index === undefined ? '' : `${String(index).padStart(2, '0')}-`;
-        return `releases/${artistId}/${relId}/${sanitizeR2Segment(category, 'files')}/${idx}${Date.now()}-${safeName}`;
-    }
-    function r2FileUrl(key) {
-        return `${KITE_R2_API_BASE}/file?key=${encodeURIComponent(key)}`;
-    }
-    function getKiteUploadToken() {
-        return '';
-    }
-    function clearKiteUploadToken() {}
-    async function r2JsonRequest(path, options = {}) {
-        const headers = new Headers(options.headers || {});
-        if(options.jsonBody !== undefined) {
-            headers.set('Content-Type', 'application/json');
-            options.body = JSON.stringify(options.jsonBody);
-            delete options.jsonBody;
-        }
-        const response = await fetch(`${KITE_R2_API_BASE}${path}`, Object.assign({}, options, { headers }));
+    async function uploadFileToCloudinary(fileOrBlob, filename) {
+        if(!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) throw new Error('Cloudinary не настроен.');
+        const formData = new FormData();
+        formData.append('file', fileOrBlob, filename || 'file');
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        const response = await fetch(CLOUDINARY_UPLOAD_URL, { method: 'POST', body: formData });
         const data = await response.json().catch(() => ({}));
-        if(!response.ok || data.ok === false) {
-            throw new Error(data.error || data.message || `Сервер загрузки вернул ошибку ${response.status}`);
+        if(!response.ok || !data.secure_url) {
+            const message = data && data.error && data.error.message ? data.error.message : 'Не удалось загрузить файл в Cloudinary.';
+            throw new Error(message);
         }
-        return data;
-    }
-    async function uploadFileToR2Simple(fileOrBlob, key, filename, onProgress) {
-        return new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open('PUT', `${KITE_R2_API_BASE}/upload?key=${encodeURIComponent(key)}`);
-            xhr.setRequestHeader('Content-Type', fileOrBlob.type || 'application/octet-stream');
-            xhr.upload.onprogress = (event) => {
-                if(event.lengthComputable && onProgress) {
-                    onProgress(Math.max(1, Math.min(99, Math.round((event.loaded / event.total) * 100))));
-                }
-            };
-            xhr.onload = () => {
-                let data = {};
-                try { data = JSON.parse(xhr.responseText || '{}'); } catch(e) {}
-                if(xhr.status < 200 || xhr.status >= 300 || data.ok === false) {
-                    reject(new Error(data.error || data.message || `Сервер загрузки вернул ошибку ${xhr.status}`));
-                    return;
-                }
-                if(onProgress) onProgress(100);
-                resolve(Object.assign({}, data, {
-                    url: data.url || r2FileUrl(key),
-                    key,
-                    fileName: filename || (fileOrBlob && fileOrBlob.name) || 'file',
-                    size: fileOrBlob.size || data.size || 0,
-                    contentType: fileOrBlob.type || data.contentType || 'application/octet-stream',
-                    provider: 'cloudflare-r2'
-                }));
-            };
-            xhr.onerror = () => reject(new Error('Не удалось подключиться к серверу загрузки.'));
-            xhr.onabort = () => reject(new Error('Загрузка файла отменена.'));
-            xhr.send(fileOrBlob);
-        });
-    }
-    async function uploadFileToR2Multipart(file, key, filename, onProgress) {
-        const create = await r2JsonRequest('/multipart/create', {
-            method: 'POST',
-            jsonBody: {
-                key,
-                fileName: filename || file.name || 'file',
-                size: file.size || 0,
-                contentType: file.type || 'application/octet-stream'
-            }
-        });
-        const uploadId = create.uploadId;
-        const parts = [];
-        const totalParts = Math.ceil(file.size / KITE_R2_CHUNK_SIZE) || 1;
-        try {
-            for(let partNumber = 1; partNumber <= totalParts; partNumber++) {
-                const start = (partNumber - 1) * KITE_R2_CHUNK_SIZE;
-                const end = Math.min(start + KITE_R2_CHUNK_SIZE, file.size);
-                const chunk = file.slice(start, end);
-                const response = await fetch(`${KITE_R2_API_BASE}/multipart/part?key=${encodeURIComponent(key)}&uploadId=${encodeURIComponent(uploadId)}&partNumber=${partNumber}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/octet-stream'
-                    },
-                    body: chunk
-                });
-                const data = await response.json().catch(() => ({}));
-                if(!response.ok || data.ok === false) throw new Error(data.error || `Ошибка загрузки части ${partNumber}`);
-                parts.push({ partNumber: data.partNumber || partNumber, etag: data.etag });
-                if(onProgress) onProgress(Math.round((partNumber / totalParts) * 100));
-            }
-            const complete = await r2JsonRequest('/multipart/complete', {
-                method: 'POST',
-                jsonBody: { key, uploadId, parts }
-            });
-            return Object.assign({}, complete, {
-                url: complete.url || r2FileUrl(key),
-                key,
-                fileName: filename || file.name || 'file',
-                size: file.size || 0,
-                contentType: file.type || 'application/octet-stream',
-                provider: 'cloudflare-r2',
-                multipart: true
-            });
-        } catch(err) {
-            try { await r2JsonRequest('/multipart/abort', { method: 'POST', jsonBody: { key, uploadId } }); } catch(e) { console.warn('Не удалось отменить multipart upload:', e); }
-            throw err;
-        }
-    }
-    async function uploadFileToR2(fileOrBlob, filename, options = {}) {
-        const key = options.key || makeR2Key(options.releaseId, options.category || 'files', filename || (fileOrBlob && fileOrBlob.name) || 'file', options.index || '');
-        const size = fileOrBlob && fileOrBlob.size ? fileOrBlob.size : 0;
-        if(size > KITE_R2_SIMPLE_UPLOAD_MAX && fileOrBlob instanceof File) {
-            return uploadFileToR2Multipart(fileOrBlob, key, filename, options.onProgress);
-        }
-        return uploadFileToR2Simple(fileOrBlob, key, filename, options.onProgress);
-    }
-    // Совместимость со старым кодом: имя функции оставлено, но теперь загрузка идёт в Cloudflare R2.
-    async function uploadFileToCloudinary(fileOrBlob, filename, options = {}) {
-        return uploadFileToR2(fileOrBlob, filename, options);
-    }
-    function updateTrackUploadStatus(track, patch = {}) {
-        if(!track) return;
-        Object.assign(track, patch);
-        if(typeof renderDraftTracks === 'function') renderDraftTracks();
-    }
-    function startTrackAudioUpload(track) {
-        if(!track || !track._audioFileObj || track._uploadPromise || (track.audioR2 && track.audioR2.key)) return track && track._uploadPromise;
-        const audioSource = track._audioFileObj;
-        const audioName = track.filename || `${track.title || 'track'}.wav`;
-        track.r2Pending = true;
-        track.cloudinaryPending = true;
-        track.r2Error = '';
-        track.cloudinaryError = '';
-        track.r2Progress = 1;
-        renderDraftTracks();
-        track._uploadPromise = uploadFileToR2(audioSource, audioName, {
-            releaseId: getDraftReleaseUploadId(),
-            category: 'tracks',
-            index: (draftRelease.tracks || []).indexOf(track) + 1,
-            onProgress: (percent) => {
-                track.r2Progress = percent;
-                renderDraftTracks();
-            }
-        }).then(meta => {
-            if(track.audioObjectUrl) {
-                try { URL.revokeObjectURL(track.audioObjectUrl); } catch(e) {}
-            }
-            track.audioFile = meta.url;
-            track.audioR2 = meta;
-            track.audioCloudinary = meta;
-            track.audioObjectUrl = '';
-            track._audioFileObj = null;
-            track.r2Pending = false;
-            track.cloudinaryPending = false;
-            track.r2Error = '';
-            track.cloudinaryError = '';
-            track.r2Progress = 100;
-            renderDraftTracks();
-            return meta;
-        }).catch(err => {
-            track.r2Pending = false;
-            track.cloudinaryPending = false;
-            track.r2Error = err && err.message ? err.message : 'Ошибка загрузки';
-            track.cloudinaryError = track.r2Error;
-            renderDraftTracks();
-            throw err;
-        });
-        return track._uploadPromise;
-    }
-    function getDraftReleaseUploadId(){
-        if(currentDraftId) return currentDraftId;
-        if(draftRelease && draftRelease.id) return draftRelease.id;
-        if(!draftRelease._uploadId) draftRelease._uploadId = 'draft-' + Date.now() + '-' + Math.random().toString(36).slice(2);
-        return draftRelease._uploadId;
-    }
-    function setAppleMusicExtraName(type, text){
-        const map = {
-            animatedCover34: 'r_animated_cover_34_name',
-            animatedCover11: 'r_animated_cover_11_name',
-            dolbyAtmos: 'r_dolby_atmos_name'
+        return {
+            url: data.secure_url,
+            publicId: data.public_id || '',
+            resourceType: data.resource_type || '',
+            format: data.format || '',
+            bytes: data.bytes || 0,
+            createdAt: data.created_at || ''
         };
-        const el = document.getElementById(map[type]);
-        if(el) el.textContent = text;
-    }
-    function startAppleMusicExtraUpload(type, file){
-        if(!file) return null;
-        draftRelease.appleMusicFiles = draftRelease.appleMusicFiles || {};
-        const config = {
-            animatedCover34: { field: 'animatedCover34', promise: '_animatedCover34UploadPromise', category: 'apple-music/animated-cover-34', label: 'Animated Cover 3:4' },
-            animatedCover11: { field: 'animatedCover11', promise: '_animatedCover11UploadPromise', category: 'apple-music/animated-cover-11', label: 'Animated Cover 1:1' },
-            dolbyAtmos: { field: 'dolbyAtmos', promise: '_dolbyAtmosUploadPromise', category: 'apple-music/dolby-atmos', label: 'Dolby Atmos' }
-        }[type];
-        if(!config) return null;
-        setAppleMusicExtraName(type, `${file.name} · загружается 1%`);
-        const promise = uploadFileToR2(file, file.name, {
-            releaseId: getDraftReleaseUploadId(),
-            category: config.category,
-            onProgress: (percent) => setAppleMusicExtraName(type, `${file.name} · загружается ${percent}%`)
-        }).then(meta => {
-            draftRelease.appleMusicFiles[config.field] = meta;
-            if(type === 'animatedCover34') draftRelease.appleMusicFiles.animatedCover = null;
-            setAppleMusicExtraName(type, `${file.name} · загружено`);
-            return meta;
-        }).catch(err => {
-            setAppleMusicExtraName(type, `${file.name} · ошибка загрузки`);
-            throw err;
-        });
-        draftRelease[config.promise] = promise;
-        return promise;
-    }
-    function startCoverUploadIfReady(file){
-        if(!file) return null;
-        const hint = document.getElementById('coverHint');
-        if(hint) {
-            hint.classList.remove('hidden');
-            hint.innerHTML = 'Обложка загружается 1%';
-        }
-        draftRelease._coverUploadPromise = uploadFileToR2(file, file.name || `${getDraftReleaseUploadId()}_cover.jpg`, {
-            releaseId: getDraftReleaseUploadId(),
-            category: 'cover',
-            onProgress: (percent) => {
-                const h = document.getElementById('coverHint');
-                if(h) {
-                    h.classList.remove('hidden');
-                    h.innerHTML = `Обложка загружается ${percent}%`;
-                }
-            }
-        }).then(meta => {
-            draftRelease.coverFile = meta.url;
-            draftRelease.coverR2 = meta;
-            draftRelease.coverCloudinary = meta;
-            draftRelease._coverFileObj = null;
-            draftRelease.coverUploadError = '';
-            const preview = document.getElementById('coverPreview');
-            const h = document.getElementById('coverHint');
-            if(preview) preview.src = meta.url;
-            if(h) h.classList.add('hidden');
-            return meta;
-        }).catch(err => {
-            draftRelease.coverUploadError = err && err.message ? err.message : 'Ошибка загрузки обложки';
-            const h = document.getElementById('coverHint');
-            if(h) h.innerHTML = '<span style="color:var(--danger);">Ошибка загрузки обложки</span>';
-            throw err;
-        });
-        return draftRelease._coverUploadPromise;
     }
     function cleanTrackForDatabase(track) {
         const clean = Object.assign({}, track || {});
@@ -2365,10 +2081,6 @@
         delete clean.audioObjectUrl;
         delete clean.cloudinaryPending;
         delete clean.cloudinaryError;
-        delete clean.r2Pending;
-        delete clean.r2Error;
-        delete clean._ttmlFileObj;
-        delete clean._ttmlUploadPromise;
         return clean;
     }
     function cleanReleaseForDatabase(release) {
@@ -2378,64 +2090,46 @@
         delete clean._coverUploadPromise;
         delete clean.coverObjectUrl;
         delete clean.coverUploadError;
-        delete clean._animatedCoverFileObj;
-        delete clean._animatedCover34FileObj;
-        delete clean._animatedCover11FileObj;
-        delete clean._dolbyAtmosFileObj;
-        delete clean._animatedCoverUploadPromise;
-        delete clean._animatedCover34UploadPromise;
-        delete clean._animatedCover11UploadPromise;
-        delete clean._dolbyAtmosUploadPromise;
-        delete clean.animatedCoverUploadError;
-        delete clean.animatedCover34UploadError;
-        delete clean.animatedCover11UploadError;
-        delete clean.dolbyAtmosUploadError;
         return clean;
     }
     async function ensureReleaseFilesUploaded(releaseId) {
         if(!draftRelease.coverFile) throw new Error('Добавьте обложку.');
 
-        if(draftRelease._coverFileObj && !draftRelease._coverUploadPromise) startCoverUploadIfReady(draftRelease._coverFileObj);
         if(draftRelease._coverUploadPromise) await draftRelease._coverUploadPromise;
         if(!isRemoteFileUrl(draftRelease.coverFile)) {
-            throw new Error('Обложка ещё загружается. Подождите завершения загрузки и попробуйте снова.');
+            let coverSource = draftRelease._coverFileObj || null;
+            let coverName = coverSource && coverSource.name ? coverSource.name : `${releaseId || Date.now()}_cover.jpg`;
+            if(!coverSource && isDataUrl(draftRelease.coverFile)) coverSource = dataURLToBlob(draftRelease.coverFile);
+            if(!coverSource) throw new Error('Обложка ещё не загружена. Выберите её заново.');
+            const meta = await uploadFileToCloudinary(coverSource, coverName);
+            draftRelease.coverFile = meta.url;
+            draftRelease.coverCloudinary = meta;
+            draftRelease.coverUploadError = '';
+            const preview = document.getElementById('coverPreview');
+            if(preview) preview.src = meta.url;
         }
 
-        draftRelease.appleMusicFiles = draftRelease.appleMusicFiles || {};
-
-        if(draftRelease._animatedCover34FileObj && !draftRelease._animatedCover34UploadPromise && !(draftRelease.appleMusicFiles.animatedCover34 && draftRelease.appleMusicFiles.animatedCover34.key)) startAppleMusicExtraUpload('animatedCover34', draftRelease._animatedCover34FileObj);
-        if(draftRelease._animatedCover11FileObj && !draftRelease._animatedCover11UploadPromise && !(draftRelease.appleMusicFiles.animatedCover11 && draftRelease.appleMusicFiles.animatedCover11.key)) startAppleMusicExtraUpload('animatedCover11', draftRelease._animatedCover11FileObj);
-        if(draftRelease._dolbyAtmosFileObj && !draftRelease._dolbyAtmosUploadPromise && !(draftRelease.appleMusicFiles.dolbyAtmos && draftRelease.appleMusicFiles.dolbyAtmos.key)) startAppleMusicExtraUpload('dolbyAtmos', draftRelease._dolbyAtmosFileObj);
-
-        if(draftRelease._animatedCover34UploadPromise) await draftRelease._animatedCover34UploadPromise;
-        if(draftRelease._animatedCover11UploadPromise) await draftRelease._animatedCover11UploadPromise;
-        if(draftRelease._dolbyAtmosUploadPromise) await draftRelease._dolbyAtmosUploadPromise;
-
-        for(let i = 0; i < (draftRelease.tracks || []).length; i++) {
-            const track = draftRelease.tracks[i];
-
-            if(track._audioFileObj && !track._uploadPromise && !(track.audioR2 && track.audioR2.key)) startTrackAudioUpload(track);
+        for(const track of (draftRelease.tracks || [])) {
             if(track._uploadPromise) await track._uploadPromise;
+            if(isRemoteFileUrl(track.audioFile)) continue;
 
-            const audioAlreadyUploaded = isRemoteFileUrl(track.audioFile) && (track.audioR2 || track.audioCloudinary) && !track._audioFileObj;
-            if(!audioAlreadyUploaded) {
-                throw new Error(`Аудиофайл «${track.filename || track.title || 'трек'}» ещё загружается. Подождите завершения загрузки и попробуйте снова.`);
-            }
+            let audioSource = track._audioFileObj || null;
+            let audioName = track.filename || `${track.title || 'track'}.wav`;
+            if(!audioSource && isDataUrl(track.audioFile)) audioSource = dataURLToBlob(track.audioFile);
+            if(!audioSource) throw new Error(`Аудиофайл «${track.filename || track.title || 'трек'}» ещё не загружен. Добавьте его заново.`);
 
-            if(track._ttmlFileObj && !(track.ttmlR2 && track.ttmlR2.key)) {
-                const ttmlMeta = await uploadFileToR2(track._ttmlFileObj, track._ttmlFileObj.name, {
-                    releaseId,
-                    category: `tracks/${String(i + 1).padStart(2, '0')}-ttml`
-                });
-
-                track.ttmlR2 = ttmlMeta;
-                track.ttmlFile = ttmlMeta.url;
-            }
+            track.cloudinaryPending = true;
+            track.cloudinaryError = '';
+            renderDraftTracks();
+            const meta = await uploadFileToCloudinary(audioSource, audioName);
+            track.audioFile = meta.url;
+            track.audioCloudinary = meta;
+            track.cloudinaryPending = false;
+            track.cloudinaryError = '';
+            renderDraftTracks();
         }
     }
-
-
-function buildReleaseDataForDatabase(releaseData) {
+    function buildReleaseDataForDatabase(releaseData) {
         return cleanReleaseForDatabase(releaseData);
     }
     
@@ -2941,7 +2635,7 @@ function buildReleaseDataForDatabase(releaseData) {
     let activeCatalogFilter = 'all'; 
     let isDraftDirty = false; 
     let currentDraftId = null; 
-    let draftRelease = { coverFile: null, coverR2: null, tracks: [], appleMusicFiles: {} }; 
+    let draftRelease = { coverFile: null, tracks: [] }; 
     let editTrackId = null; 
     let activeAdminChatUser = null; 
     let isDBLoaded = false;
@@ -4138,7 +3832,7 @@ function buildReleaseDataForDatabase(releaseData) {
         const draftBtn = document.getElementById('saveDraftChangesBtn');
         const oldDraftText = draftBtn ? draftBtn.innerText : '';
         window.__kiteSaveDraftBusy = true;
-        if(draftBtn) { draftBtn.disabled = true; draftBtn.innerText = 'Дожидаемся загрузки...'; }
+        if(draftBtn) { draftBtn.disabled = true; draftBtn.innerText = 'Загружаем файлы...'; }
 
         try {
             await ensureReleaseFilesUploaded(finalId);
@@ -4159,9 +3853,7 @@ function buildReleaseDataForDatabase(releaseData) {
                 status: preserveExisting ? (existingRelease.status || 'Черновик') : 'Черновик',
                 date: preserveExisting ? (existingRelease.date || new Date().toLocaleDateString()) : new Date().toLocaleDateString(),
                 coverFile: draftRelease.coverFile, 
-                coverR2: draftRelease.coverR2 || draftRelease.coverCloudinary || (existingRelease && (existingRelease.coverR2 || existingRelease.coverCloudinary)) || null,
-                coverCloudinary: draftRelease.coverCloudinary || draftRelease.coverR2 || (existingRelease && existingRelease.coverCloudinary) || null,
-                appleMusicFiles: draftRelease.appleMusicFiles || (existingRelease && existingRelease.appleMusicFiles) || {},
+                coverCloudinary: draftRelease.coverCloudinary || (existingRelease && existingRelease.coverCloudinary) || null,
                 tracks: draftRelease.tracks, 
                 isDeleted: preserveExisting ? !!existingRelease.isDeleted : false,
                 adminIsrc: preserveExisting ? (existingRelease.adminIsrc || '') : '',
@@ -4188,7 +3880,7 @@ function buildReleaseDataForDatabase(releaseData) {
     function startNewRelease() {
         const rejectBox = document.getElementById('editRejectReasonBox');
         if(rejectBox) { rejectBox.classList.add('hidden'); rejectBox.innerHTML = ''; }
-        draftRelease = { coverFile: null, coverR2: null, tracks: [], appleMusicFiles: {} }; 
+        draftRelease = { coverFile: null, tracks: [] }; 
         window.editingOriginalReleaseForComment = null;
         currentDraftId = null; 
         isDraftDirty = false; 
@@ -4199,7 +3891,6 @@ function buildReleaseDataForDatabase(releaseData) {
         document.getElementById('coverPreview').src = ''; 
         document.getElementById('coverPreview').classList.add('hidden'); 
         document.getElementById('coverHint').classList.remove('hidden'); 
-        resetAppleMusicExtraInputs();
         
         document.getElementById('submitReleaseBtn').innerText = "Отправить релиз на модерацию";
         
@@ -4232,8 +3923,6 @@ function buildReleaseDataForDatabase(releaseData) {
         document.querySelectorAll('.error-field').forEach(el => el.classList.remove('error-field'));
         
         draftRelease.coverFile = r.coverFile; 
-        draftRelease.coverR2 = r.coverR2 || r.coverCloudinary || null;
-        draftRelease.appleMusicFiles = r.appleMusicFiles || {};
         draftRelease.tracks = r.tracks || [];
         
         ['type','title','genre','year','upc','releaseDate','comment'].forEach(key => { 
@@ -4251,7 +3940,6 @@ function buildReleaseDataForDatabase(releaseData) {
             document.getElementById('coverPreview').classList.add('hidden'); 
             document.getElementById('coverHint').classList.remove('hidden'); 
         }
-        renderAppleMusicExtraInputs();
         
         document.getElementById('submitReleaseBtn').innerText = currentUser.role === 'Administrator' ? "Отправить на модерацию" : (r.status === 'Отклонён' ? "Отправить исправленный релиз на модерацию" : "Отправить релиз на модерацию");
         
@@ -4270,21 +3958,20 @@ function buildReleaseDataForDatabase(releaseData) {
     }
     
     function deleteDraft(id) { UI.confirm("Удалить этот черновик навсегда?", () => { const idx = appState.releases.findIndex(r => r.id === id); if(idx>=0){ appState.releases.splice(idx,1); db.ref('releases/'+id).remove(); } renderCatalog(); }); }
-
     function handleCoverUpload(input) {
-        const file = input.files && input.files[0];
+        const file = input.files[0];
         if(!file) return;
-        const maxCoverSize = KITE_FILE_LIMITS.cover;
+        const maxCoverSize = 10 * 1024 * 1024;
         if(file.size > maxCoverSize) {
             input.value = "";
-            UI.alert("Ошибка", `Обложка не должна быть больше ${formatFileSize(KITE_FILE_LIMITS.cover)}.`);
+            UI.alert("Ошибка", "Обложка не должна быть больше 10 МБ.");
             return;
         }
         const img = new Image();
         const localUrl = URL.createObjectURL(file);
         img.src = localUrl;
-        img.onload = () => {
-            if(img.width === 3000 && img.height === 3000) {
+        img.onload = () => { 
+            if(img.width === 3000 && img.height === 3000) { 
                 document.getElementById('r_cover_box').classList.remove('error-field');
                 draftRelease.coverFile = localUrl;
                 draftRelease.coverObjectUrl = localUrl;
@@ -4293,103 +3980,50 @@ function buildReleaseDataForDatabase(releaseData) {
                 isDraftDirty = true;
                 const preview = document.getElementById('coverPreview');
                 const hint = document.getElementById('coverHint');
-                if(preview) {
-                    preview.src = localUrl;
-                    preview.classList.remove('hidden');
-                }
-                if(hint) {
+                preview.src = localUrl;
+                preview.classList.remove('hidden');
+                hint.classList.remove('hidden');
+                hint.innerHTML = 'Загрузка обложки...';
+
+                draftRelease._coverUploadPromise = uploadFileToCloudinary(file, file.name).then(meta => {
+                    draftRelease.coverFile = meta.url;
+                    draftRelease.coverCloudinary = meta;
+                    draftRelease.coverUploadError = '';
+                    preview.src = meta.url;
+                    hint.classList.add('hidden');
+                    return meta;
+                }).catch(err => {
+                    console.error(err);
+                    draftRelease.coverUploadError = err.message || 'Ошибка загрузки';
                     hint.classList.remove('hidden');
-                    hint.innerHTML = 'Обложка загружается 1%';
-                }
-                draftRelease._coverUploadPromise = null;
-                draftRelease.coverR2 = null;
-                draftRelease.coverCloudinary = null;
-                startCoverUploadIfReady(file);
+                    hint.innerHTML = 'Ошибка загрузки<br>нажмите, чтобы выбрать заново';
+                    return null;
+                });
             } else {
                 URL.revokeObjectURL(localUrl);
                 UI.alert("Ошибка", "Размер обложки должен быть только 3000x3000 px");
                 input.value = "";
-            }
-        };
-        img.onerror = () => {
-            URL.revokeObjectURL(localUrl);
-            UI.alert("Ошибка", "Не удалось прочитать обложку. Выберите другой файл.");
-            input.value = "";
+            } 
         };
     }
+    function toggleReleaseType() { const type = document.getElementById('r_type').value; if(type) document.getElementById('tracklistArea').classList.remove('hidden'); else document.getElementById('tracklistArea').classList.add('hidden'); }
 
-    function resetAppleMusicExtraInputs(){
-        const animated34Input = document.getElementById('r_animated_cover_34');
-        const animated11Input = document.getElementById('r_animated_cover_11');
-        const dolbyInput = document.getElementById('r_dolby_atmos');
-        const animated34Name = document.getElementById('r_animated_cover_34_name');
-        const animated11Name = document.getElementById('r_animated_cover_11_name');
-        const dolbyName = document.getElementById('r_dolby_atmos_name');
-        if(animated34Input) animated34Input.value = '';
-        if(animated11Input) animated11Input.value = '';
-        if(dolbyInput) dolbyInput.value = '';
-        if(animated34Name) animated34Name.textContent = 'Файл не выбран';
-        if(animated11Name) animated11Name.textContent = 'Файл не выбран';
-        if(dolbyName) dolbyName.textContent = 'Файл не выбран';
+    function isAllowedWavFile(file) {
+        if(!file) return false;
+        const nameOk = /\.wav$/i.test(file.name || '');
+        const typeOk = /^(audio\/(wav|wave|x-wav|vnd\.wave))$/i.test(file.type || '');
+        return nameOk || typeOk;
     }
-    function renderAppleMusicExtraInputs(){
-        const files = (draftRelease && draftRelease.appleMusicFiles) || {};
-        const animated34Name = document.getElementById('r_animated_cover_34_name');
-        const animated11Name = document.getElementById('r_animated_cover_11_name');
-        const dolbyName = document.getElementById('r_dolby_atmos_name');
-        const oldAnimated = files.animatedCover || null;
-        if(animated34Name) animated34Name.textContent = files.animatedCover34 ? (files.animatedCover34.fileName || 'Animated Cover 3:4 загружен') : (oldAnimated ? (oldAnimated.fileName || 'Animated Cover загружен') : 'Файл не выбран');
-        if(animated11Name) animated11Name.textContent = files.animatedCover11 ? (files.animatedCover11.fileName || 'Animated Cover 1:1 загружен') : 'Файл не выбран';
-        if(dolbyName) dolbyName.textContent = files.dolbyAtmos ? (files.dolbyAtmos.fileName || 'Dolby Atmos загружен') : 'Файл не выбран';
-    }
-    function handleAppleMusicExtraUpload(input, type){
-        const file = input.files && input.files[0];
-        if(!file) return;
-        draftRelease.appleMusicFiles = draftRelease.appleMusicFiles || {};
-        const isAnimated34 = type === 'animatedCover34';
-        const isAnimated11 = type === 'animatedCover11';
-        const isAnimated = isAnimated34 || isAnimated11 || type === 'animatedCover';
-        const limit = isAnimated34 ? KITE_FILE_LIMITS.animatedCover34 : (isAnimated11 ? KITE_FILE_LIMITS.animatedCover11 : (isAnimated ? KITE_FILE_LIMITS.animatedCover : KITE_FILE_LIMITS.dolbyAtmos));
-        if(file.size > limit) {
-            input.value = '';
-            return UI.alert('Ошибка', `Файл больше ${formatFileSize(limit)}.`);
-        }
-        if(isAnimated && !/\.mov$/i.test(file.name || '')) {
-            input.value = '';
-            return UI.alert('Ошибка', 'Animated Cover должен быть в формате MOV.');
-        }
-        if(!isAnimated && !/\.(wav|adm|bw64)$/i.test(file.name || '')) {
-            input.value = '';
-            return UI.alert('Ошибка', 'Dolby Atmos загрузите как WAV/ADM/BW64-файл.');
-        }
-        if(isAnimated34 || type === 'animatedCover') {
-            draftRelease._animatedCover34FileObj = file;
-            draftRelease.appleMusicFiles.animatedCover34 = null;
-            draftRelease.appleMusicFiles.animatedCover = null;
-            const name = document.getElementById('r_animated_cover_34_name');
-            if(name) name.textContent = `${file.name} · загружается 1%`;
-            startAppleMusicExtraUpload('animatedCover34', file);
-        } else if(isAnimated11) {
-            draftRelease._animatedCover11FileObj = file;
-            draftRelease.appleMusicFiles.animatedCover11 = null;
-            const name = document.getElementById('r_animated_cover_11_name');
-            if(name) name.textContent = `${file.name} · загружается 1%`;
-            startAppleMusicExtraUpload('animatedCover11', file);
-        } else {
-            draftRelease._dolbyAtmosFileObj = file;
-            draftRelease.appleMusicFiles.dolbyAtmos = null;
-            const name = document.getElementById('r_dolby_atmos_name');
-            if(name) name.textContent = `${file.name} · загружается 1%`;
-            startAppleMusicExtraUpload('dolbyAtmos', file);
-        }
-        isDraftDirty = true;
+    function showWrongAudioFormatError(input) {
+        if(input) input.value = '';
+        UI.alert('Ошибка', 'не тот формат аудиофайла.');
     }
     function addTracks(input) {
         const files = Array.from(input.files); if(!files.length) return;
         const rType = document.getElementById('r_type').value; const rTitle = document.getElementById('r_title').value.trim(); const rArtist = getMultiVal('r_artist_container');
         files.forEach(file => { 
             if(!isAllowedWavFile(file)) return showWrongAudioFormatError(input);
-            if(file.size > KITE_FILE_LIMITS.audioWav) return UI.alert("Ошибка", `Файл ${file.name} больше ${formatFileSize(KITE_FILE_LIMITS.audioWav)}.`); 
+            if(file.size > 50*1024*1024) return UI.alert("Ошибка", `Файл ${file.name} больше 50 МБ.`); 
 
             isDraftDirty = true; 
             let trackTitle = file.name.replace(/\.[^/.]+$/, "");
@@ -4413,11 +4047,8 @@ function buildReleaseDataForDatabase(releaseData) {
                 previewStart: '',
                 duration: '',
                 isFilled: false,
-                cloudinaryPending: false,
-                cloudinaryError: '',
-                r2Pending: false,
-                r2Error: '',
-                r2Progress: 0
+                cloudinaryPending: true,
+                cloudinaryError: ''
             };
             newTrack._audioFileObj = file;
             draftRelease.tracks.push(newTrack);
@@ -4433,8 +4064,20 @@ function buildReleaseDataForDatabase(releaseData) {
             audio.src = localAudioUrl;
             renderDraftTracks();
 
-            newTrack._uploadPromise = null;
-            startTrackAudioUpload(newTrack);
+            newTrack._uploadPromise = uploadFileToCloudinary(file, file.name).then(meta => {
+                newTrack.audioFile = meta.url;
+                newTrack.audioCloudinary = meta;
+                newTrack.cloudinaryPending = false;
+                newTrack.cloudinaryError = '';
+                renderDraftTracks();
+                return meta;
+            }).catch(err => {
+                console.error(err);
+                newTrack.cloudinaryPending = false;
+                newTrack.cloudinaryError = err.message || 'Ошибка загрузки';
+                renderDraftTracks();
+                return null;
+            });
         });
         input.value = ""; 
     }
@@ -4442,7 +4085,7 @@ function buildReleaseDataForDatabase(releaseData) {
         const list = document.getElementById('draftTracksList');
         list.innerHTML = draftRelease.tracks.map((t, idx) => {
             const filledLabel = t.isFilled ? '<span style="color:var(--success); font-size: 11px;">✓ Заполнено</span>' : '<span style="color:var(--danger); font-size: 11px; font-weight:bold;">! Требует заполнения</span>';
-            const uploadLabel = (t.r2Pending || t.cloudinaryPending) ? `<span style="color:var(--warning); font-size: 11px; font-weight:bold;">⏳ Загружается${t.r2Progress ? ' ' + t.r2Progress + '%' : ''}</span>` : ((t.r2Error || t.cloudinaryError) ? `<span style="color:var(--danger); font-size: 11px; font-weight:bold;">Ошибка загрузки: ${escapeHTML(t.r2Error || t.cloudinaryError)}</span>` : ((t.audioR2 || (isRemoteFileUrl(t.audioFile) && !t.audioObjectUrl)) ? '<span style="color:var(--success); font-size: 11px;">✓ Файл загружен</span>' : '<span style="color:var(--warning); font-size: 11px; font-weight:bold;">⏳ Ожидает загрузки</span>'));
+            const uploadLabel = t.cloudinaryPending ? '<span style="color:var(--warning); font-size: 11px; font-weight:bold;">⏳ Загружается файл</span>' : (t.cloudinaryError ? `<span style="color:var(--danger); font-size: 11px; font-weight:bold;">Ошибка Cloudinary: ${escapeHTML(t.cloudinaryError)}</span>` : '<span style="color:var(--success); font-size: 11px;">✓ Файл загружен</span>');
             const statusLabel = `${filledLabel} &nbsp; ${uploadLabel}`;
             const title = escapeHTML(t.title || 'Без названия');
             const filename = escapeHTML(t.filename || 'Аудиофайл');
@@ -4586,9 +4229,7 @@ function buildReleaseDataForDatabase(releaseData) {
                 status: (existingRelease && isAdmin) ? existingRelease.status : 'Модерация',
                 date: existingRelease ? existingRelease.date : new Date().toLocaleDateString(),
                 coverFile: draftRelease.coverFile,
-                coverR2: draftRelease.coverR2 || draftRelease.coverCloudinary || null,
-                coverCloudinary: draftRelease.coverCloudinary || draftRelease.coverR2 || null,
-                appleMusicFiles: draftRelease.appleMusicFiles || {},
+                coverCloudinary: draftRelease.coverCloudinary || null,
                 tracks: draftRelease.tracks,
                 isDeleted: false,
                 upc: document.getElementById('r_upc').value,
@@ -4615,7 +4256,7 @@ function buildReleaseDataForDatabase(releaseData) {
             }
         } catch(err) {
             console.error(err);
-            UI.alert("Ошибка загрузки", `Релиз не отправлен: ${escapeHTML(err.message || err)}. Проверь подключение и попробуй ещё раз.`);
+            UI.alert("Ошибка загрузки", `Релиз не отправлен: ${escapeHTML(err.message || err)}. Проверь Cloudinary Upload preset и попробуй ещё раз.`);
         } finally {
             if(submitBtn) {
                 submitBtn.disabled = false;
@@ -4688,30 +4329,11 @@ function buildReleaseDataForDatabase(releaseData) {
         const r = appState.releases.find(x => String(x.id) === String(releaseId));
         const t = r && r.tracks && r.tracks[trackIndex];
         const audioUrl = t && (t.audioFile || t.audioUrl || t.fileUrl || t.url);
-
-        if(!t || !audioUrl) {
-            return UI.alert('Файл недоступен', 'У этого трека нет загруженного аудиофайла.');
-        }
-
-        let finalUrl = audioUrl;
-
-        try {
-            const u = new URL(audioUrl);
-            // Для R2 Worker просим отдать файл как attachment, чтобы браузер точно начал скачивание.
-            if(u.hostname.includes('workers.dev') && u.pathname === '/file') {
-                u.searchParams.set('download', '1');
-                finalUrl = u.toString();
-            }
-        } catch(e) {}
-
+        if(!t || !audioUrl) return UI.alert('Файл недоступен', 'У этого трека нет загруженного аудиофайла.');
         const a = document.createElement('a');
-        a.href = finalUrl;
+        a.href = audioUrl;
         a.download = t.filename || `${t.artist || r.artist || 'artist'} - ${t.title || r.title || 'track'}.wav`;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+        document.body.appendChild(a); a.click(); a.remove();
     }
     function duplicateRelease(id){
         const r = appState.releases.find(x => String(x.id) === String(id));
@@ -4826,19 +4448,13 @@ function buildReleaseDataForDatabase(releaseData) {
         const label = document.getElementById('t_ttml_name');
         if(!file) return;
         if(!/\.ttml$/i.test(file.name || '')) { input.value = ''; return UI.alert('Ошибка', 'Файл караоке должен быть только в формате TTML.'); }
-        if(file.size > KITE_FILE_LIMITS.ttml) { input.value = ''; return UI.alert('Ошибка', `TTML-файл не должен быть больше ${formatFileSize(KITE_FILE_LIMITS.ttml)}.`); }
         const lyricsEl = document.getElementById('t_lyrics');
         if(lyricsEl && !lyricsEl.value.trim()) UI.alert('Нужен обычный текст', 'Вы добавляете караоке-файл TTML. Не забудьте также добавить обычный текст песни в поле «Текст песни».');
         const reader = new FileReader();
         reader.onload = () => {
             const t = draftRelease.tracks.find(x => x.id === editTrackId);
-            if(t){
-                t.ttmlText = String(reader.result || '');
-                t.ttmlName = file.name;
-                t._ttmlFileObj = file;
-                t.ttmlR2 = null;
-            }
-            if(label) label.textContent = `${file.name} · загрузится при сохранении`;
+            if(t){ t.ttmlText = String(reader.result || ''); t.ttmlName = file.name; }
+            if(label) label.textContent = file.name;
             isDraftDirty = true;
             updateReleaseChangeComment();
         };
