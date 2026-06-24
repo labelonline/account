@@ -1026,6 +1026,7 @@
         .karaoke-line{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:18px;border:1px solid var(--border);background:rgba(255,255,255,.04);transition:.16s;}
         .karaoke-line.active{border-color:rgba(68,110,240,.7);background:rgba(68,110,240,.16);box-shadow:0 12px 32px rgba(68,110,240,.12);}
         .karaoke-line.synced{border-color:rgba(34,197,94,.22);}
+        .karaoke-line.selected-line{border-color:rgba(34,197,94,.72)!important;background:rgba(34,197,94,.10)!important;box-shadow:0 12px 34px rgba(34,197,94,.12)!important;}
         .karaoke-line-time{min-width:92px;color:#92f4b3;font-weight:800;font-variant-numeric:tabular-nums;font-size:13px;}
         .karaoke-line-text{flex:1;line-height:1.45;color:#f5f7fb;white-space:pre-wrap;}
         .karaoke-help{padding:14px 16px;border-radius:18px;background:rgba(68,110,240,.10);border:1px solid rgba(68,110,240,.20);color:#d7deee;line-height:1.6;margin-bottom:16px;}
@@ -5161,13 +5162,13 @@ function renderCard(r, isAdmin) {
     /* ===== Karaoke Text module ===== */
     let karaokeState = {
         mode: '', audioData: '', audioName: '', title: '', artist: '', lyrics: '',
-        lines: [], times: [], activeLine: 0, lastMarkedLine: -1, keyBound: false, viewerItems: [], viewerActive: 0
+        lines: [], times: [], activeLine: 0, selectedLine: -1, lastMarkedLine: -1, keyBound: false, viewerItems: [], viewerActive: 0
     };
 
     function karaokeSetMode(mode){
         karaokeState.mode = mode;
         karaokeState.audioData = ''; karaokeState.audioName = ''; karaokeState.title = ''; karaokeState.artist = ''; karaokeState.lyrics = '';
-        karaokeState.lines = []; karaokeState.times = []; karaokeState.activeLine = 0; karaokeState.lastMarkedLine = -1; karaokeState.viewerItems = []; karaokeState.viewerActive = 0; document.body.classList.remove('karaoke-mobile-sync');
+        karaokeState.lines = []; karaokeState.times = []; karaokeState.activeLine = 0; karaokeState.selectedLine = -1; karaokeState.lastMarkedLine = -1; karaokeState.viewerItems = []; karaokeState.viewerActive = 0; document.body.classList.remove('karaoke-mobile-sync');
         renderKaraoke();
     }
 
@@ -5328,6 +5329,7 @@ function renderCard(r, isAdmin) {
         if(!karaokeState.lines.length) return UI.alert('Ошибка', 'Текст должен содержать хотя бы одну строку.');
         karaokeState.times = Array(karaokeState.lines.length).fill(null);
         karaokeState.activeLine = 0;
+        karaokeState.selectedLine = -1;
         karaokeState.lastMarkedLine = -1;
         renderKaraokeSync();
     }
@@ -5383,6 +5385,7 @@ function renderCard(r, isAdmin) {
         if(karaokeState.activeLine >= karaokeState.lines.length) return;
         const markedIndex = karaokeState.activeLine;
         karaokeState.times[markedIndex] = Math.max(0, audio.currentTime || 0);
+        karaokeState.selectedLine = markedIndex;
         karaokeState.lastMarkedLine = markedIndex;
         karaokeState.activeLine = Math.min(karaokeState.activeLine + 1, karaokeState.lines.length);
         karaokeRenderLines(markedIndex);
@@ -5390,9 +5393,18 @@ function renderCard(r, isAdmin) {
 
     function karaokeRenderLines(scrollToIndex){
         const box = document.getElementById('karaokeLines'); if(!box) return;
-        box.innerHTML = karaokeState.lines.map((line,i)=>`<div id="karaokeLine_${i}" class="karaoke-line ${i===karaokeState.activeLine?'active':''} ${i===karaokeState.lastMarkedLine?'just-synced':''} ${karaokeState.times[i]!=null?'synced':''}" onclick="karaokeState.activeLine=${i};karaokeRenderLines(i)"><div class="karaoke-line-time">${karaokeState.times[i]!=null ? karaokeFormatTime(karaokeState.times[i]) : '—'}</div><div class="karaoke-line-text">${escapeHTML(line)}</div></div>`).join('');
+        const highlightedLine = karaokeState.selectedLine >= 0 ? karaokeState.selectedLine : karaokeState.lastMarkedLine;
+        box.innerHTML = karaokeState.lines.map((line,i)=>`<div id="karaokeLine_${i}" class="karaoke-line ${i===karaokeState.activeLine?'active':''} ${i===highlightedLine?'selected-line':''} ${karaokeState.times[i]!=null?'synced':''}" onclick="karaokeSelectLine(${i})" ontouchstart="karaokeSelectLine(${i})" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();karaokeSelectLine(${i});}"><div class="karaoke-line-time">${karaokeState.times[i]!=null ? karaokeFormatTime(karaokeState.times[i]) : '—'}</div><div class="karaoke-line-text">${escapeHTML(line)}</div></div>`).join('');
         const targetIndex = typeof scrollToIndex === 'number' ? scrollToIndex : karaokeState.activeLine;
         setTimeout(()=>karaokeScrollToLine(targetIndex), 0);
+    }
+
+    function karaokeSelectLine(index){
+        if(!karaokeState.lines.length) return;
+        const i = Math.max(0, Math.min(Number(index)||0, karaokeState.lines.length-1));
+        karaokeState.activeLine = i;
+        karaokeState.selectedLine = i;
+        karaokeRenderLines(i);
     }
 
     function karaokeScrollToLine(index){
@@ -5402,12 +5414,17 @@ function renderCard(r, isAdmin) {
     }
 
     function karaokeResetText(){
-        karaokeState.times = Array(karaokeState.lines.length).fill(null); karaokeState.activeLine = 0; karaokeState.lastMarkedLine = -1; karaokeRenderLines(0);
+        karaokeState.times = Array(karaokeState.lines.length).fill(null); karaokeState.activeLine = 0; karaokeState.selectedLine = -1; karaokeState.lastMarkedLine = -1; karaokeRenderLines(0);
     }
     function karaokeResetLine(){
         if(!karaokeState.lines.length) return;
-        const i = Math.min(karaokeState.activeLine, karaokeState.lines.length-1);
-        karaokeState.times[i] = null; karaokeState.lastMarkedLine = -1; karaokeRenderLines(i);
+        const fallback = karaokeState.activeLine;
+        const i = Math.max(0, Math.min(karaokeState.selectedLine >= 0 ? karaokeState.selectedLine : fallback, karaokeState.lines.length-1));
+        karaokeState.times[i] = null;
+        karaokeState.activeLine = i;
+        karaokeState.selectedLine = i;
+        if(karaokeState.lastMarkedLine === i) karaokeState.lastMarkedLine = -1;
+        karaokeRenderLines(i);
     }
 
     function karaokeFormatTime(sec){
