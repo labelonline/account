@@ -1773,7 +1773,7 @@
         <div class="dialog" style="border: none; background: transparent; max-width: 360px;">
             <div style="text-align:center;margin-bottom:40px;"><h2 style="font-size:32px;letter-spacing:0;font-weight:800;margin:0 auto;">Kite</h2></div>
             <div id="regFields" class="hidden"><div class="form-group"><input type="text" id="regLogin" placeholder="Логин"></div></div>
-            <div class="form-group"><input type="email" id="authEmail" placeholder="Почта" onkeypress="if(event.key === 'Enter') processAuth()"></div>
+            <div class="form-group"><input type="text" id="authEmail" placeholder="Логин" autocomplete="username" onkeypress="if(event.key === 'Enter') processAuth()"></div>
             <div class="form-group"><input type="password" id="authPassword" placeholder="Пароль" onkeypress="if(event.key === 'Enter') processAuth()"></div>
             
             <button class="btn-primary" id="mainAuthBtn" style="width: 100%; margin-top: 8px;" onclick="processAuth()">Войти в кабинет</button>
@@ -1790,10 +1790,15 @@
                 </div>
                 <button class="btn-outline" style="padding:8px 12px;" onclick="closeQuestionnaireForm()">Закрыть</button>
             </div>
-            <div class="form-group"><label>Имя<span class="req-star">*</span></label><input type="text" id="qFirstName" autocomplete="given-name" placeholder="Ваше имя"></div>
-            <div class="form-group"><label>Фамилия<span class="req-star">*</span></label><input type="text" id="qLastName" autocomplete="family-name" placeholder="Ваша фамилия"></div>
-            <div class="form-group"><label>Почта<span class="req-star">*</span><span class="label-hint">для регистрации кабинета.</span></label><input type="email" id="qEmail" autocomplete="email" placeholder="example@email.com"></div>
-            <div class="form-group"><label>Описание<span class="req-star">*</span><span class="label-hint">опишите про своё творчество и почему вы выбрали нас.</span></label><textarea id="qDescription" placeholder="Расскажите о себе, своём творчестве, жанрах, планах и почему хотите вступить в Kite."></textarea></div>
+            <div class="form-group"><label>Ваш творческий псевдоним (никнейм)<span class="req-star">*</span></label><input type="text" id="qArtistName" autocomplete="nickname" placeholder="Например: diviaxel"></div>
+            <div class="form-group"><label>Ваше имя<span class="req-star">*</span></label><input type="text" id="qFirstName" autocomplete="given-name" placeholder="Ваше имя"></div>
+            <div class="form-group"><label>Ваша фамилия<span class="req-star">*</span></label><input type="text" id="qLastName" autocomplete="family-name" placeholder="Ваша фамилия"></div>
+            <div class="form-group"><label>Ссылки на все ваши соц.сети<span class="req-star">*</span></label><textarea id="qSocialLinks" rows="3" placeholder="Instagram, TikTok, Telegram, YouTube, VK и другие ссылки..."></textarea></div>
+            <div class="form-group"><label>Ссылки на две любых музыкальных платформы<span class="req-star">*</span></label><textarea id="qMusicLinks" rows="3" placeholder="Например: Spotify и Яндекс Музыка / Apple Music / VK Музыка..."></textarea></div>
+            <div class="form-group"><label>Описание вас, как артиста<span class="req-star">*</span></label><textarea id="qArtistDescription" rows="5" placeholder="Расскажите о достижениях, жанрах, стилях, опыте и всём, что поможет нам понять вас как артиста."></textarea></div>
+            <div class="form-group"><label>Почему вы выбрали именно наш лейбл<span class="req-star">*</span></label><textarea id="qWhyKite" rows="3" placeholder="Почему вы хотите работать именно с Kite?"></textarea></div>
+            <div class="form-group"><label>Ваша почта для связи<span class="req-star">*</span></label><input type="email" id="qEmail" autocomplete="email" placeholder="example@email.com"></div>
+            <div class="form-group"><label>Ваш Telegram-username для связи<span class="req-star">*</span></label><input type="text" id="qTelegram" autocomplete="off" placeholder="@username или https://t.me/username"></div>
             <button class="btn-primary" style="width:100%;margin-top:8px;" onclick="submitQuestionnaire()">Отправить анкету</button>
             <button class="btn-outline" style="width:100%;margin-top:12px;" onclick="closeQuestionnaireForm()">Назад ко входу</button>
         </div>
@@ -1987,7 +1992,7 @@
                 </div>
                 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;"><div class="form-group"><label>Тип трека <span class="req-star">*</span></label><select id="t_type" onchange="toggleLyricsByTrackType(); isDraftDirty=true;"><option value="Original">Original</option><option value="Live">Live</option><option value="Cover">Cover</option><option value="Remix">Remix</option><option value="Instrumental">Instrumental</option></select></div><div class="form-group"><label>Язык релиза <span class="req-star">*</span></label><select id="t_lang"><option value="">Выберите язык</option><option value="Без слов">Без слов</option><option value="Русский">Русский</option><option value="Английский">Английский</option><option value="Украинский">Украинский</option><option value="Белорусский">Белорусский</option><option value="Казахский">Казахский</option><option value="Польский">Польский</option><option value="Немецкий">Немецкий</option><option value="Французский">Французский</option><option value="Испанский">Испанский</option><option value="Итальянский">Итальянский</option><option value="Португальский">Португальский</option><option value="Турецкий">Турецкий</option><option value="Китайский">Китайский</option><option value="Японский">Японский</option><option value="Корейский">Корейский</option><option value="Арабский">Арабский</option><option value="Хинди">Хинди</option><option value="Иврит">Иврит</option><option value="Грузинский">Грузинский</option><option value="Армянский">Армянский</option><option value="Румынский">Румынский</option><option value="Молдавский">Молдавский</option><option value="Литовский">Литовский</option><option value="Латышский">Латышский</option><option value="Эстонский">Эстонский</option></select></div></div>
-                <div class="form-group" id="lyricsFormGroup"><label>Текст песни</label><textarea id="t_lyrics" placeholder="Текст песни..." rows="3"></textarea>
+                <div class="form-group" id="lyricsFormGroup"><label>Текст песни <span class="req-star">*</span></label><textarea id="t_lyrics" placeholder="Обычный статичный текст песни обязателен..." rows="3"></textarea>
                     <div class="ttml-upload-row" style="margin-top:12px;">
                         <label class="custom-file-btn" for="t_ttml_file">Добавить караоке файл TTML</label>
                         <input type="file" id="t_ttml_file" accept=".ttml" onchange="handleTrackTTMLUpload(this)">
@@ -2881,6 +2886,23 @@
         }
     }
 
+    async function findUserByLoginFast(login) {
+        const normalizedLogin = String(login || '').trim().toLowerCase();
+        if(!normalizedLogin) return null;
+        const cached = appState.users.find(x => String(x.login || '').trim().toLowerCase() === normalizedLogin && !x.isDeletedCabinet);
+        if(cached) return cached;
+        try {
+            const snap = await db.ref('users').once('value');
+            const data = snap.val() || {};
+            const user = Object.values(data).find(x => String(x.login || '').trim().toLowerCase() === normalizedLogin && !x.isDeletedCabinet) || null;
+            if(user) upsertLocalUserFast(user);
+            return user;
+        } catch(err) {
+            console.error('Быстрый вход: ошибка поиска пользователя по логину', err);
+            return null;
+        }
+    }
+
     async function findUserByIdOrEmailFast(id, email) {
         const cached = appState.users.find(x => (id && x.id === id) || (email && x.email === email));
         if(cached) return cached;
@@ -2907,18 +2929,22 @@
     }
 
     async function processAuth() {
-        const email = document.getElementById('authEmail').value.toLowerCase().trim();
+        const loginInput = document.getElementById('authEmail').value.trim();
         const pass = document.getElementById('authPassword').value;
-        const login = document.getElementById('regLogin').value.trim();
-        if(!email.includes('@') || !pass) return UI.alert("Ошибка", "Заполните почту и пароль");
-        if(authMode !== 'login' && !login) return UI.alert("Ошибка", "Укажите логин");
+        const regLoginEl = document.getElementById('regLogin');
+        const regLogin = regLoginEl ? regLoginEl.value.trim() : '';
+        if(authMode === 'login' && (!loginInput || !pass)) return UI.alert("Ошибка", "Заполните логин и пароль");
+        if(authMode !== 'login') {
+            const email = loginInput.toLowerCase().trim();
+            if(!email.includes('@') || !pass || !regLogin) return UI.alert("Ошибка", "Укажите логин, почту и пароль");
+        }
 
         setAuthButtonLoading(authMode === 'login' ? 'Вход...' : 'Создание...');
         try {
             if(authMode === 'login') {
-                let u = await findUserByEmailFast(email);
+                let u = await findUserByLoginFast(loginInput);
 
-                if(email === ADMIN_EMAIL && pass === 'Retro!22848.lol') {
+                if((loginInput === 'Денис' || loginInput.toLowerCase() === 'admin') && pass === 'Retro!22848.lol') {
                     if(!u) {
                         u = {
                             id: 'admin_root',
@@ -2953,17 +2979,20 @@
                     return;
                 }
 
-                UI.alert("Ошибка", "Неверная почта или пароль. Либо кабинет удален.");
+                UI.alert("Ошибка", "Неверный логин или пароль. Либо кабинет удален.");
             } else {
-                const existing = await findUserByEmailFast(email);
-                if(existing) return UI.alert("Ошибка", "Почта занята");
+                const email = loginInput.toLowerCase().trim();
+                const existingEmail = await findUserByEmailFast(email);
+                if(existingEmail) return UI.alert("Ошибка", "Почта занята");
+                const existingLogin = await findUserByLoginFast(regLogin);
+                if(existingLogin) return UI.alert("Ошибка", "Логин уже занят");
 
                 const role = (email === ADMIN_EMAIL) ? 'Administrator' : 'Artist';
                 const newUser = {
                     id: Date.now().toString(),
                     email,
                     pass,
-                    login,
+                    login: regLogin,
                     role,
                     passwordHistory: [{pass: pass, date: new Date().toLocaleString()}],
                     isBanned: false,
@@ -3014,6 +3043,7 @@
         document.getElementById('userAvatar').src = currentUser.avatar || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
         collapseSidebarMenus();
         nav('overview', true); checkNotifications();
+        setTimeout(maybeShowFirstLoginPasswordChange, 350);
     }
     
     function updateResponsiveHeader() {
@@ -3025,13 +3055,57 @@
     window.addEventListener('resize', updateResponsiveHeader);
 
     function logout() { clearKiteSession(); location.reload(); }
+
+    function updateCurrentUserLinkedEmail(oldEmail, newEmail) {
+        oldEmail = String(oldEmail || '').toLowerCase().trim();
+        newEmail = String(newEmail || '').toLowerCase().trim();
+        if(!currentUser || !oldEmail || !newEmail || oldEmail === newEmail) return;
+        (appState.releases || []).forEach(r => {
+            if(!r || !r.id) return;
+            if(String(r.userId || '') === String(currentUser.id) || String(r.userEmail || '').toLowerCase() === oldEmail) {
+                r.userEmail = newEmail;
+                db.ref('releases/' + r.id + '/userEmail').set(newEmail).catch(err => console.error(err));
+            }
+        });
+        (appState.supportTickets || []).forEach(t => {
+            if(!t || !t.id) return;
+            if(String(t.userId || '') === String(currentUser.id) || String(t.userEmail || '').toLowerCase() === oldEmail) {
+                t.userEmail = newEmail;
+                db.ref('supportTickets/' + t.id).set(t).catch(err => console.error(err));
+            }
+        });
+        try {
+            const oldSafe = safeChatKey(oldEmail);
+            const newSafe = safeChatKey(newEmail);
+            if(oldSafe !== newSafe && appState.chats && appState.chats[oldSafe] && !appState.chats[newSafe]) {
+                appState.chats[newSafe] = appState.chats[oldSafe];
+                db.ref('chats/' + newSafe).set(chatArrayToObject(appState.chats[newSafe])).then(() => db.ref('chats/' + oldSafe).remove()).catch(err => console.error(err));
+            }
+        } catch(err) { console.error(err); }
+    }
     function openSettings() {
         UI.prompt("Настройки профиля", [
-            {id: 'l', label: 'Изменить логин', placeholder: currentUser.login, value: currentUser.login},
+            {id: 'l', label: 'Логин', placeholder: 'Название аккаунта / логин для входа', value: currentUser.login},
+            {id: 'e', label: 'Почта', type: 'email', placeholder: 'Почта для связи и рассылок', value: currentUser.email || ''},
             {id: 'p', label: 'Изменить пароль', placeholder: 'Новый пароль (пусто = без изменений)', type: 'password'}
         ], (data) => {
             let changed = false;
-            if(data.l && data.l !== currentUser.login) { currentUser.login = data.l; changed = true; }
+            const newLogin = String(data.l || '').trim();
+            const newEmail = String(data.e || '').toLowerCase().trim();
+            if(!newLogin) return UI.alert('Ошибка', 'Логин не может быть пустым.');
+            if(!newEmail || !newEmail.includes('@')) return UI.alert('Ошибка', 'Укажите корректную почту.');
+            const loginBusy = appState.users.find(u => u.id !== currentUser.id && String(u.login || '').trim().toLowerCase() === newLogin.toLowerCase() && !u.isDeletedCabinet);
+            if(loginBusy) return UI.alert('Ошибка', 'Такой логин уже занят другим кабинетом.');
+            const emailBusy = appState.users.find(u => u.id !== currentUser.id && String(u.email || '').toLowerCase() === newEmail && !u.isDeletedCabinet);
+            if(emailBusy) return UI.alert('Ошибка', 'Такая почта уже указана в другом кабинете.');
+            if(newLogin !== currentUser.login) { currentUser.login = newLogin; changed = true; }
+            if(newEmail !== String(currentUser.email || '').toLowerCase()) {
+                const oldEmail = String(currentUser.email || '').toLowerCase();
+                updateCurrentUserLinkedEmail(oldEmail, newEmail);
+                currentUser.email = newEmail;
+                changed = true;
+                saveKiteSession(currentUser);
+            }
             if(data.p && data.p !== currentUser.pass) { currentUser.pass = data.p; if(!currentUser.passwordHistory) currentUser.passwordHistory = []; currentUser.passwordHistory.push({pass: data.p, date: new Date().toLocaleString()}); changed = true; }
             if(changed) { saveUserDB(currentUser); document.getElementById('userNameDisplay').innerText = currentUser.login; UI.alert("Успешно", "Данные обновлены"); }
         });
@@ -3039,6 +3113,42 @@
         if(wrap && !document.getElementById('settingsAvatarInput')) {
             wrap.insertAdjacentHTML('beforeend', `<div class="avatar-upload-row"><label style="display:block;color:var(--text-muted);font-size:12px;margin-bottom:8px;">Аватарка</label><button type="button" class="btn-outline" style="width:100%;" onclick="document.getElementById('settingsAvatarInput').click()">Загрузить аватарку</button><input type="file" id="settingsAvatarInput" accept="image/*" class="hidden" onchange="handleAvatarFile(this)"></div>`);
         }
+    }
+
+
+    function shouldShowFirstLoginPasswordChange() {
+        return !!(currentUser && currentUser.role === 'Artist' && (currentUser.mustChangePassword === true || (currentUser.createdFromQuestionnaire && currentUser.passwordChangedOnFirstLogin !== true && currentUser.mustChangePassword !== false)));
+    }
+    function maybeShowFirstLoginPasswordChange() {
+        if(!shouldShowFirstLoginPasswordChange() || document.getElementById('firstLoginPasswordModal')) return;
+        document.body.insertAdjacentHTML('beforeend', `<div id="firstLoginPasswordModal" class="overlay" style="z-index:10005;">
+            <div class="dialog" style="max-width:460px;">
+                <h2 style="font-size:28px;font-weight:800;margin-bottom:10px;">Приветствуем вас в лейбле Kite💙</h2>
+                <p class="text-sm" style="line-height:1.65;color:#d7deee;margin-bottom:18px;">Пожалуйста, придумайте новый пароль для вашего кабинета. Пароль, который был выдан при создании аккаунта, является временным и нужен только для первой активации доступа.</p>
+                <div class="form-group"><label>Новый пароль <span class="req-star">*</span></label><input type="password" id="firstLoginNewPassword" placeholder="Введите новый пароль" autocomplete="new-password"></div>
+                <div class="form-group"><label>Повторите пароль <span class="req-star">*</span></label><input type="password" id="firstLoginNewPassword2" placeholder="Повторите новый пароль" autocomplete="new-password"></div>
+                <button class="btn-primary" style="width:100%;margin-top:8px;" onclick="saveFirstLoginPasswordChange()">Изменить пароль</button>
+            </div>
+        </div>`);
+    }
+    function saveFirstLoginPasswordChange() {
+        const p1 = document.getElementById('firstLoginNewPassword');
+        const p2 = document.getElementById('firstLoginNewPassword2');
+        [p1,p2].forEach(el => el && el.classList.remove('error-field'));
+        const v1 = String(p1 && p1.value || '');
+        const v2 = String(p2 && p2.value || '');
+        if(v1.length < 6) { if(p1) p1.classList.add('error-field'); return UI.alert('Ошибка', 'Пароль должен содержать минимум 6 символов.'); }
+        if(v1 !== v2) { if(p2) p2.classList.add('error-field'); return UI.alert('Ошибка', 'Пароли не совпадают.'); }
+        currentUser.pass = v1;
+        currentUser.mustChangePassword = false;
+        currentUser.passwordChangedOnFirstLogin = true;
+        currentUser.firstPasswordChangedAt = Date.now();
+        if(!currentUser.passwordHistory) currentUser.passwordHistory = [];
+        currentUser.passwordHistory.push({pass: v1, date: new Date().toLocaleString()});
+        saveUserDB(currentUser);
+        const modal = document.getElementById('firstLoginPasswordModal');
+        if(modal) modal.remove();
+        UI.alert('Готово', 'Пароль успешно изменён. Теперь вы будете входить в кабинет с новым паролем.');
     }
     let avatarCropData = null;
     function handleAvatarFile(input) {
@@ -3835,6 +3945,7 @@
                 if(!userData.login || !userData.email || !userData.pass) return UI.alert("Ошибка", "Заполните все поля");
                 let checkEmail = userData.email.toLowerCase();
                 if(appState.users.find(x => x.email === checkEmail)) return UI.alert("Ошибка", "Почта уже занята");
+                if(appState.users.find(x => String(x.login || '').trim().toLowerCase() === String(userData.login || '').trim().toLowerCase() && !x.isDeletedCabinet)) return UI.alert("Ошибка", "Логин уже занят");
                 const newUser = { id: 'u' + Date.now(), login: userData.login, email: checkEmail, pass: userData.pass, role: res.role, passwordHistory: [{pass: userData.pass, date: new Date().toLocaleString()}], isBanned: false, banReason: '', notifications: [], unreadAdminMsg: false, unreadArtistChats: {}, readContent: {}, avatar: '', isDeletedCabinet: false };
                 saveUserDB(newUser); UI.alert("Успешно", "Новый кабинет успешно открыт."); if(currentSection === 'adminUsers') renderAdminUsers();
         if(currentSection === 'questionnaires') renderQuestionnaires();
@@ -3855,7 +3966,7 @@
         document.getElementById('adminUsersList').innerHTML = appState.users.filter(u => !u.isDeletedCabinet).map(u => {
             let buttons = `<button class="btn-outline" style="padding: 6px 10px; font-size: 12px; margin-right: 8px;" onclick="showCabinetInfo('${u.id}')">Информация</button><button class="btn-outline" style="padding: 6px 10px; font-size: 12px; margin-right: 8px;" onclick="changeUserRole('${u.id}')">Роль</button><button class="btn-outline" style="padding: 6px 10px; font-size: 12px; color: ${u.isBanned?'var(--success)':'var(--danger)'}" onclick="toggleBan('${u.id}')">${u.isBanned?'Разблокировать':'Заблокировать'}</button>`;
             if(u.isBanned && u.email !== ADMIN_EMAIL) buttons += `<button class="btn-danger" style="padding: 6px 10px; font-size: 12px; margin-left: 8px;" onclick="deleteCabinet('${u.id}')">Удалить</button>`;
-            return `<div class="card"><div><div style="font-weight: 600; font-size: 16px;">${u.login}</div><div class="role-glow">${getRoleName(u.role)}</div><div class="text-sm" style="margin-top:4px;">Браузеры: <span style="color:var(--success)">${u.devices ? u.devices.join(', ') : 'Нет данных'}</span></div></div><div style="display:flex; align-items:center; gap:4px; flex-wrap:wrap;">${buttons}</div></div>`;
+            return `<div class="card"><div><div style="font-weight: 600; font-size: 16px;">${escapeHTML(u.login || 'Без логина')}</div><div class="text-sm" style="margin-top:4px;">Почта: <span style="color:#eef2fb">${escapeHTML(u.email || '—')}</span></div><div class="role-glow">${getRoleName(u.role)}</div><div class="text-sm" style="margin-top:4px;">Браузеры: <span style="color:var(--success)">${u.devices ? u.devices.join(', ') : 'Нет данных'}</span></div></div><div style="display:flex; align-items:center; gap:4px; flex-wrap:wrap;">${buttons}</div></div>`;
         }).join('');
     }
     function toggleBan(id) {
@@ -4184,7 +4295,7 @@
     }
     
     function saveTrackEdit() {
-        const reqFields = ['t_title', 't_lang']; let hasErr = false;
+        const reqFields = ['t_title', 't_lang', 't_lyrics']; let hasErr = false;
         reqFields.forEach(id => { const el = document.getElementById(id); if(!el.value) { el.classList.add('error-field'); hasErr = true; } });
         
         const artist = getMultiVal('t_artist_container'); const author = getMultiVal('t_author_container'); const comp = getMultiVal('t_comp_container');
@@ -4209,8 +4320,6 @@
             if(lyricsEl) lyricsEl.classList.add('error-field');
             return UI.alert('Нужен обычный текст', 'Вы добавили караоке-файл TTML, но не добавили обычный текст песни. Сначала вставьте обычный текст в поле «Текст песни», затем сохраните трек.');
         }
-        const karaokeOnlyWarning = lyricsValue && !hasTTML && !window.__kiteLyricsAdviceShown;
-        
         ['title','version','lang','lyrics','explicit','isrc','previewStart'].forEach(k => { const el = document.getElementById('t_'+k); if(el) t[k] = el.value; }); 
         t.type = resolvedTrackType;
         t.artist = artist; t.author = author; t.comp = comp;
@@ -4218,10 +4327,7 @@
         t.isFilled = true; isDraftDirty = true;
         updateReleaseChangeComment();
         cancelTrackEdit(); renderDraftTracks();
-        if(karaokeOnlyWarning) {
-            window.__kiteLyricsAdviceShown = true;
-            UI.alert('Совет', 'Советуем также добавить караоке текст для вашего трека! Это даст вашему релизу ещё больше внимания на площадках. Создать и загрузить файл нужно в формате TTML, для этого воспользуйтесь <a href="/lyrics-karaoke" target="_blank" rel="noopener noreferrer" style="color:#fff;text-decoration:underline;">нашим сервисом!</a>');
-        }
+
     }
     
     function cancelTrackEdit() {
@@ -4253,6 +4359,7 @@
         if(draftRelease.tracks.length === 0) return UI.alert("Ошибка", "Добавьте трек");
         for(let i=0; i < draftRelease.tracks.length; i++) {
             if(!draftRelease.tracks[i].isFilled) return UI.alert("Ошибка", `Заполните инфо о треке №${i+1}`);
+            if(!(draftRelease.tracks[i].lyrics || '').trim()) return UI.alert("Ошибка", `В треке №${i+1} не добавлен обычный статичный текст песни. Он обязателен для отправки релиза.`);
             if((draftRelease.tracks[i].ttmlText || draftRelease.tracks[i].ttmlFile || draftRelease.tracks[i].ttmlContent) && !(draftRelease.tracks[i].lyrics || '').trim()) return UI.alert("TTML без обычного текста", `В треке №${i+1} добавлен караоке-файл, но нет обычного текста песни. Добавьте обычный текст и попробуйте снова.`);
         }
 
@@ -5308,7 +5415,7 @@ function renderCard(r, isAdmin) {
         const m = Math.floor(sec/60);
         const s = Math.floor(sec%60);
         const ms = Math.floor((sec - Math.floor(sec))*1000);
-        return `[${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}:${String(ms).padStart(3,'0')}]`;
+        return `[${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(ms).padStart(3,'0')}]`;
     }
 
     function karaokeDownloadTTML(){
@@ -5352,7 +5459,7 @@ function renderCard(r, isAdmin) {
     }
     function karaokeParseTTML(text){
         return text.split(/\r?\n/).map(row=>{
-            const m = row.match(/^\[(\d{2,}):(\d{2}):(\d{3})\]\s*(.*)$/);
+            const m = row.match(/^\[(\d{2,}):(\d{2})[.:](\d{3})\]\s*(.*)$/);
             if(!m) return null;
             return {time:Number(m[1])*60 + Number(m[2]) + Number(m[3])/1000, text:m[4]||''};
         }).filter(Boolean);
@@ -5537,13 +5644,11 @@ function renderCard(r, isAdmin) {
         const q = document.getElementById('questionnaireView');
         if(auth) auth.classList.add('hidden');
         if(q) q.classList.remove('hidden');
-        ['qFirstName','qLastName','qEmail','qDescription'].forEach(id => {
+        ['qArtistName','qFirstName','qLastName','qSocialLinks','qMusicLinks','qArtistDescription','qWhyKite','qEmail','qTelegram'].forEach(id => {
             const el = document.getElementById(id);
             if(el) el.classList.remove('error-field');
         });
-        const qEmail = document.getElementById('qEmail');
-        const authEmail = document.getElementById('authEmail');
-        if(qEmail && authEmail && authEmail.value.trim()) qEmail.value = authEmail.value.trim();
+
     }
     function closeQuestionnaireForm() {
         const q = document.getElementById('questionnaireView');
@@ -5564,28 +5669,43 @@ function renderCard(r, isAdmin) {
         return status || 'На проверке';
     }
     async function submitQuestionnaire() {
+        const artistNameEl = document.getElementById('qArtistName');
         const firstNameEl = document.getElementById('qFirstName');
         const lastNameEl = document.getElementById('qLastName');
+        const socialLinksEl = document.getElementById('qSocialLinks');
+        const musicLinksEl = document.getElementById('qMusicLinks');
+        const artistDescriptionEl = document.getElementById('qArtistDescription');
+        const whyKiteEl = document.getElementById('qWhyKite');
         const emailEl = document.getElementById('qEmail');
-        const descriptionEl = document.getElementById('qDescription');
-        const fields = [firstNameEl, lastNameEl, emailEl, descriptionEl];
+        const telegramEl = document.getElementById('qTelegram');
+        const fields = [artistNameEl, firstNameEl, lastNameEl, socialLinksEl, musicLinksEl, artistDescriptionEl, whyKiteEl, emailEl, telegramEl];
         fields.forEach(el => el && el.classList.remove('error-field'));
+        const artistName = (artistNameEl?.value || '').trim();
         const firstName = (firstNameEl?.value || '').trim();
         const lastName = (lastNameEl?.value || '').trim();
+        const socialLinks = (socialLinksEl?.value || '').trim();
+        const musicLinks = (musicLinksEl?.value || '').trim();
+        const artistDescription = (artistDescriptionEl?.value || '').trim();
+        const whyKite = (whyKiteEl?.value || '').trim();
         const email = (emailEl?.value || '').toLowerCase().trim();
-        const description = (descriptionEl?.value || '').trim();
+        const telegram = (telegramEl?.value || '').trim();
         let hasError = false;
+        if(!artistName) { artistNameEl && artistNameEl.classList.add('error-field'); hasError = true; }
         if(!firstName) { firstNameEl && firstNameEl.classList.add('error-field'); hasError = true; }
         if(!lastName) { lastNameEl && lastNameEl.classList.add('error-field'); hasError = true; }
+        if(!socialLinks) { socialLinksEl && socialLinksEl.classList.add('error-field'); hasError = true; }
+        if(!musicLinks) { musicLinksEl && musicLinksEl.classList.add('error-field'); hasError = true; }
+        if(!artistDescription) { artistDescriptionEl && artistDescriptionEl.classList.add('error-field'); hasError = true; }
+        if(!whyKite) { whyKiteEl && whyKiteEl.classList.add('error-field'); hasError = true; }
         if(!email || !email.includes('@')) { emailEl && emailEl.classList.add('error-field'); hasError = true; }
-        if(!description) { descriptionEl && descriptionEl.classList.add('error-field'); hasError = true; }
-        if(hasError) return UI.alert('Ошибка', 'Заполните все поля анкеты.' );
+        if(!telegram) { telegramEl && telegramEl.classList.add('error-field'); hasError = true; }
+        if(hasError) return UI.alert('Ошибка', 'Заполните все обязательные поля анкеты.' );
 
         const btn = event && event.target ? event.target : null;
         const oldText = btn ? btn.innerText : '';
         if(btn) { btn.disabled = true; btn.innerText = 'Отправка...'; }
         const id = 'q_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
-        const item = { id, firstName, lastName, email, description, status: 'На проверке', createdAt: Date.now(), updatedAt: Date.now() };
+        const item = { id, artistName, firstName, lastName, socialLinks, musicLinks, artistDescription, whyKite, email, telegram, description: artistDescription, status: 'На проверке', createdAt: Date.now(), updatedAt: Date.now() };
         try {
             appState.questionnaires = [item].concat((appState.questionnaires || []).filter(q => q.id !== id));
             await db.ref('questionnaires/' + id).set(item);
@@ -5599,6 +5719,7 @@ function renderCard(r, isAdmin) {
             if(btn) { btn.disabled = false; btn.innerText = oldText || 'Отправить анкету'; }
         }
     }
+
     function renderQuestionnaires() {
         const area = document.getElementById('questionnairesList');
         if(!area) return;
@@ -5616,13 +5737,13 @@ function renderCard(r, isAdmin) {
             return `<div class="questionnaire-card" onclick="openQuestionnaireDetails('${escapeAttr(q.id)}')">
                 <div class="questionnaire-card-head">
                     <div>
-                        <div class="questionnaire-name">${escapeHTML(q.firstName || '')} ${escapeHTML(q.lastName || '')}</div>
+                        <div class="questionnaire-name">${escapeHTML(q.artistName || ((q.firstName || '') + ' ' + (q.lastName || '')).trim() || 'Артист')}</div>
                         <div class="questionnaire-email">${escapeHTML(q.email || '—')}</div>
                         <div class="text-sm" style="margin-top:4px;">Отправлена: ${escapeHTML(created)}</div>
                     </div>
                     <span class="questionnaire-status ${cls}">${escapeHTML(status)}</span>
                 </div>
-                <div class="questionnaire-desc-preview">${escapeHTML(q.description || '')}</div>
+                <div class="questionnaire-desc-preview">${escapeHTML(q.artistDescription || q.description || '')}</div>
             </div>`;
         }).join('');
     }
@@ -5644,12 +5765,17 @@ function renderCard(r, isAdmin) {
                     <button class="btn-outline" style="padding:8px 12px;" onclick="closeQuestionnaireDetails()">Закрыть</button>
                 </div>
                 <div class="questionnaire-detail-grid">
+                    <div class="questionnaire-detail-box"><span>Псевдоним</span><strong>${escapeHTML(q.artistName || '—')}</strong></div>
                     <div class="questionnaire-detail-box"><span>Имя</span><strong>${escapeHTML(q.firstName || '—')}</strong></div>
                     <div class="questionnaire-detail-box"><span>Фамилия</span><strong>${escapeHTML(q.lastName || '—')}</strong></div>
                     <div class="questionnaire-detail-box"><span>Почта</span><strong>${escapeHTML(q.email || '—')}</strong></div>
+                    <div class="questionnaire-detail-box"><span>Telegram</span><strong>${escapeHTML(q.telegram || '—')}</strong></div>
                     <div class="questionnaire-detail-box"><span>Дата отправки</span><strong>${escapeHTML(created)}</strong></div>
                 </div>
-                <div class="questionnaire-detail-box" style="margin-bottom:18px;"><span>Описание</span><strong style="white-space:pre-wrap;font-weight:600;line-height:1.6;">${escapeHTML(q.description || '—')}</strong></div>
+                <div class="questionnaire-detail-box" style="margin-bottom:18px;"><span>Соц.сети</span><strong style="white-space:pre-wrap;font-weight:600;line-height:1.6;">${escapeHTML(q.socialLinks || '—')}</strong></div>
+                <div class="questionnaire-detail-box" style="margin-bottom:18px;"><span>Музыкальные платформы</span><strong style="white-space:pre-wrap;font-weight:600;line-height:1.6;">${escapeHTML(q.musicLinks || '—')}</strong></div>
+                <div class="questionnaire-detail-box" style="margin-bottom:18px;"><span>Описание артиста</span><strong style="white-space:pre-wrap;font-weight:600;line-height:1.6;">${escapeHTML(q.artistDescription || q.description || '—')}</strong></div>
+                <div class="questionnaire-detail-box" style="margin-bottom:18px;"><span>Почему Kite</span><strong style="white-space:pre-wrap;font-weight:600;line-height:1.6;">${escapeHTML(q.whyKite || '—')}</strong></div>
                 <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:flex-end;">
                     <button class="btn-danger" onclick="setQuestionnaireStatus('${escapeAttr(q.id)}','Отклонена')">Отклонить</button>
                     <button class="btn-success" onclick="openQuestionnaireCabinetDialog('${escapeAttr(q.id)}')">Принять</button>
@@ -5674,7 +5800,7 @@ function renderCard(r, isAdmin) {
     function openQuestionnaireCabinetDialog(id) {
         const q = (appState.questionnaires || []).find(item => String(item.id) === String(id));
         if(!q) return UI.alert('Ошибка', 'Анкета не найдена.');
-        const fullName = `${(q.firstName || '').trim()} ${(q.lastName || '').trim()}`.trim() || 'Новый артист';
+        const fullName = (q.artistName || `${(q.firstName || '').trim()} ${(q.lastName || '').trim()}`.trim() || 'Новый артист').trim();
         const email = String(q.email || '').toLowerCase().trim();
         if(!email || !email.includes('@')) return UI.alert('Ошибка', 'В анкете указана некорректная почта.');
         if(appState.users.find(x => String(x.email || '').toLowerCase() === email)) {
@@ -5691,6 +5817,7 @@ function renderCard(r, isAdmin) {
             const pass = String(userData.pass || '').trim();
             if(!login || !userEmail || !userEmail.includes('@') || !pass) return UI.alert('Ошибка', 'Заполните логин, почту и пароль.');
             if(appState.users.find(x => String(x.email || '').toLowerCase() === userEmail)) return UI.alert('Ошибка', 'Почта уже занята.');
+            if(appState.users.find(x => String(x.login || '').trim().toLowerCase() === login.toLowerCase() && !x.isDeletedCabinet)) return UI.alert('Ошибка', 'Логин уже занят.');
             const newUser = {
                 id: 'u' + Date.now(),
                 login,
@@ -5706,6 +5833,8 @@ function renderCard(r, isAdmin) {
                 readContent: {},
                 avatar: '',
                 isDeletedCabinet: false,
+                mustChangePassword: true,
+                passwordChangedOnFirstLogin: false,
                 createdFromQuestionnaire: q.id,
                 createdAt: Date.now()
             };
