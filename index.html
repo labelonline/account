@@ -3221,7 +3221,15 @@
     }
     window.addEventListener('resize', updateResponsiveHeader);
 
-    function logout() { clearKiteSession(); try { history.replaceState(null, '', '/'); } catch(e) {} location.replace('/'); }
+    function logout() {
+        clearKiteSession();
+        try {
+            if (typeof stopKiteSessionHeartbeat === 'function') stopKiteSessionHeartbeat();
+        } catch(e) {}
+        currentUser = null;
+        try { history.replaceState(null, '', '/'); } catch(e) {}
+        window.location.replace(window.location.origin + '/');
+    }
 
     function updateCurrentUserLinkedEmail(oldEmail, newEmail) {
         oldEmail = String(oldEmail || '').toLowerCase().trim();
@@ -6776,6 +6784,146 @@ function renderCard(r, isAdmin) {
         fix: '/fixes'
     };
 
+    const adminOnlyPaths = new Set([
+        '/cabinets',
+        '/questionnaires',
+        '/admin-releases',
+        '/deleted',
+        '/content-manager'
+    ]);
+
+    const adminOnlySections = new Set([
+        'adminUsers',
+        'questionnaires',
+        'adminReleases',
+        'adminDeleted',
+        'adminContent'
+    ]);
+
+    function normalizeKitePath(path) {
+        path = String(path || '/').split('?')[0].split('#')[0].replace(/\/$/, '') || '/';
+        return path;
+    }
+
+    function kiteIsArtist() {
+        return !!(currentUser && currentUser.role === 'Artist');
+    }
+
+    function kiteIsAdmin() {
+        return !!(currentUser && currentUser.role === 'Administrator');
+    }
+
+    function ensureKiteAccess404Styles() {
+        if (document.getElementById('kiteAccess404Styles')) return;
+
+        const style = document.createElement('style');
+        style.id = 'kiteAccess404Styles';
+        style.textContent = `
+            body.kite-access-404-lock {
+                overflow: hidden !important;
+            }
+
+            .kite-access-404 {
+                position: fixed;
+                inset: 0;
+                z-index: 2147483647;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 24px;
+                background: radial-gradient(circle at top, rgba(68,110,240,.18), transparent 34%), #0b0d12;
+                color: #fff;
+                text-align: center;
+            }
+
+            .kite-access-404-card {
+                width: min(100%, 460px);
+                padding: 34px 28px;
+                border-radius: 28px;
+                border: 1px solid rgba(255,255,255,.10);
+                background: linear-gradient(180deg, rgba(23,28,39,.96), rgba(15,19,26,.96));
+                box-shadow: 0 28px 80px rgba(0,0,0,.55);
+            }
+
+            .kite-access-404-code {
+                margin-bottom: 14px;
+                font-size: clamp(76px, 18vw, 124px);
+                line-height: .9;
+                font-weight: 900;
+                letter-spacing: -.08em;
+                color: #fff;
+                text-shadow: 0 0 34px rgba(68,110,240,.35);
+            }
+
+            .kite-access-404-card h1 {
+                margin: 0 0 10px;
+                font-size: 26px;
+                font-weight: 800;
+                letter-spacing: -.03em;
+            }
+
+            .kite-access-404-card p {
+                margin: 0 0 24px;
+                color: #aab0c0;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+
+            .kite-access-404-card button {
+                width: 100%;
+                padding: 14px 20px;
+                border: 0;
+                border-radius: 999px;
+                background: linear-gradient(135deg, var(--accent, #446EF0), #5D83FF);
+                color: #fff;
+                font-weight: 800;
+                cursor: pointer;
+                box-shadow: 0 16px 34px rgba(68,110,240,.28);
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    function showKiteAccess404() {
+        ensureKiteAccess404Styles();
+        document.body.classList.add('kite-access-404-lock');
+
+        let screen = document.getElementById('kiteAccess404Screen');
+        if (!screen) {
+            screen = document.createElement('div');
+            screen.id = 'kiteAccess404Screen';
+            screen.className = 'kite-access-404';
+            document.body.appendChild(screen);
+        }
+
+        screen.innerHTML = `
+            <div class="kite-access-404-card">
+                <div class="kite-access-404-code">404</div>
+                <h1>Страница не найдена</h1>
+                <p>Эта страница недоступна для кабинета артиста.</p>
+                <button type="button" id="kiteAccess404HomeBtn">Вернутся домой</button>
+            </div>
+        `;
+
+        const homeBtn = document.getElementById('kiteAccess404HomeBtn');
+        if (homeBtn) {
+            homeBtn.onclick = function () {
+                hideKiteAccess404();
+                setKitePath('/dashboard', true);
+
+                window.__kiteRouteOpening = true;
+                try { nav('overview', true); } catch (e) { console.warn('Kite dashboard open error:', e); }
+                window.__kiteRouteOpening = false;
+            };
+        }
+    }
+
+    function hideKiteAccess404() {
+        document.body.classList.remove('kite-access-404-lock');
+        const screen = document.getElementById('kiteAccess404Screen');
+        if (screen) screen.remove();
+    }
+
     const pathToAction = {
         '/': () => nav('overview'),
         '/dashboard': () => nav('overview'),
@@ -6786,8 +6934,8 @@ function renderCard(r, isAdmin) {
         '/fixes': () => navCatalog('fix'),
         '/news': () => nav('news'),
         '/instruction': () => nav('guide'),
-        '/support': () => { if (typeof supportSetTab === 'function') supportSetTab('qa'); nav(currentUser && currentUser.role === 'Administrator' ? 'adminChats' : 'userChat'); },
-        '/support-ticket': () => { if (typeof supportSetTab === 'function') supportSetTab('tickets'); nav(currentUser && currentUser.role === 'Administrator' ? 'adminChats' : 'userChat'); },
+        '/support': () => { if (typeof supportSetTab === 'function') supportSetTab('qa'); nav(kiteIsAdmin() ? 'adminChats' : 'userChat'); },
+        '/support-ticket': () => { if (typeof supportSetTab === 'function') supportSetTab('tickets'); nav(kiteIsAdmin() ? 'adminChats' : 'userChat'); },
         '/cabinets': () => nav('adminUsers'),
         '/admin-releases': () => nav('adminReleases'),
         '/deleted': () => nav('adminDeleted'),
@@ -6797,14 +6945,31 @@ function renderCard(r, isAdmin) {
         '/questionnaires': () => nav('questionnaires')
     };
 
-    function setKitePath(path) {
+    function setKitePath(path, replace = false) {
+        path = normalizeKitePath(path);
+
+        if (kiteIsArtist() && adminOnlyPaths.has(path)) {
+            showKiteAccess404();
+            return;
+        }
+
         if (location.pathname !== path) {
-            history.pushState({ kitePath: path }, '', path);
+            const state = { kitePath: path };
+            if (replace) history.replaceState(state, '', path);
+            else history.pushState(state, '', path);
         }
     }
 
     function openCurrentPath() {
-        const path = location.pathname.replace(/\/$/, '') || '/';
+        const path = normalizeKitePath(location.pathname);
+
+        if (kiteIsArtist() && adminOnlyPaths.has(path)) {
+            showKiteAccess404();
+            return;
+        }
+
+        hideKiteAccess404();
+
         const action = pathToAction[path] || pathToAction['/dashboard'];
 
         window.__kiteRouteOpening = true;
@@ -6820,6 +6985,13 @@ function renderCard(r, isAdmin) {
         if (typeof window.nav === 'function' && !window.nav.__kitePatched) {
             const oldNav = window.nav;
             window.nav = function (section) {
+                if (kiteIsArtist() && adminOnlySections.has(section)) {
+                    showKiteAccess404();
+                    return;
+                }
+
+                hideKiteAccess404();
+
                 const result = oldNav.apply(this, arguments);
                 if (!window.__kiteRouteOpening && sectionRoutes[section]) {
                     setKitePath(sectionRoutes[section]);
@@ -6832,6 +7004,8 @@ function renderCard(r, isAdmin) {
         if (typeof window.navCatalog === 'function' && !window.navCatalog.__kitePatched) {
             const oldNavCatalog = window.navCatalog;
             window.navCatalog = function (type) {
+                hideKiteAccess404();
+
                 const result = oldNavCatalog.apply(this, arguments);
                 if (!window.__kiteRouteOpening && catalogRoutes[type]) {
                     setKitePath(catalogRoutes[type]);
@@ -6844,6 +7018,8 @@ function renderCard(r, isAdmin) {
         if (typeof window.startNewRelease === 'function' && !window.startNewRelease.__kitePatched) {
             const oldStartNewRelease = window.startNewRelease;
             window.startNewRelease = function () {
+                hideKiteAccess404();
+
                 const result = oldStartNewRelease.apply(this, arguments);
                 if (!window.__kiteRouteOpening) {
                     setKitePath('/new-release');
