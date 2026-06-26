@@ -1720,6 +1720,106 @@
 .support-work-area{animation:fadeIn .16s ease both;}
 .support-tabs{display:none!important;}
 @media(max-width:768px){#supportNavGroup .nav-group-items{padding-left:8px;}}
+
+/* ===== AI usage markers + fixed close buttons ===== */
+.ai-usage-box{
+    margin-top:16px;
+    padding:16px;
+    border-radius:22px;
+    border:1px solid rgba(68,110,240,.26);
+    background:rgba(68,110,240,.08);
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    box-shadow:0 16px 34px rgba(0,0,0,.18);
+}
+.ai-usage-box-cover{margin-top:14px;}
+.ai-usage-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight:900;
+    color:#fff;
+    letter-spacing:-.01em;
+}
+.ai-usage-title .ai-usage-icon{
+    color:#7A98FF;
+    font-size:18px;
+    line-height:1;
+}
+.ai-usage-desc{
+    color:#c8d1e6;
+    font-size:13px;
+    line-height:1.55;
+    margin-top:-4px;
+}
+.ai-usage-check{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    color:#eef2fb;
+    line-height:1.45;
+    cursor:pointer;
+    user-select:none;
+}
+.ai-usage-check input{
+    width:20px;
+    height:20px;
+    min-width:20px;
+    margin-top:1px;
+    accent-color:#5D83FF;
+    cursor:pointer;
+}
+.ai-usage-check span{font-size:14px;}
+.kite-modal-close{
+    position:fixed;
+    top:18px;
+    right:22px;
+    z-index:10020;
+    width:42px;
+    height:42px;
+    padding:0;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,.16);
+    background:rgba(18,23,34,.88);
+    color:#fff;
+    font-size:28px;
+    font-weight:300;
+    line-height:1;
+    display:grid;
+    place-items:center;
+    box-shadow:0 18px 42px rgba(0,0,0,.38);
+    backdrop-filter:blur(12px);
+}
+.kite-modal-close:hover{
+    background:rgba(68,110,240,.22);
+    border-color:rgba(93,131,255,.52);
+}
+.release-track-detail-groups{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-top:12px;
+}
+.release-track-detail-group{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:10px;
+}
+.release-info-ai-summary{
+    margin-top:10px;
+    padding:10px 12px;
+    border-radius:16px;
+    border:1px solid rgba(68,110,240,.20);
+    background:rgba(68,110,240,.08);
+    color:#d7deee;
+    font-size:13px;
+    line-height:1.5;
+}
+@media(max-width:768px){
+    .kite-modal-close{top:12px;right:12px;width:40px;height:40px;font-size:26px;}
+}
+
 </style>
 </head>
 <body>
@@ -1734,9 +1834,9 @@
         </div>
     </div>
     <div id="mediaViewer" class="overlay hidden" style="z-index:10003;" onclick="if(event.target.id==='mediaViewer') closeContentMediaFullscreen()">
+        <button type="button" class="kite-modal-close" onclick="closeContentMediaFullscreen()" aria-label="Закрыть">×</button>
         <div class="media-viewer-dialog">
             <div id="mediaViewerBox"></div>
-            <button class="btn-outline" onclick="closeContentMediaFullscreen()">Закрыть</button>
         </div>
     </div>
     <div id="uiAlert" class="overlay hidden" style="z-index: 10001;"><div class="dialog"><h3 id="uiAlertTitle">Сообщение</h3><div id="uiAlertText" class="text-sm" style="color: #ccc; margin-bottom: 24px; line-height: 1.5; max-height: 50vh; overflow-y: auto;"></div><button class="btn-primary" style="width: 100%;" onclick="document.getElementById('uiAlert').classList.add('hidden')">Понятно</button></div></div>
@@ -1763,14 +1863,15 @@
         </div>
     </div>
     <div id="adminReleaseModal" class="overlay hidden" style="align-items: flex-start; padding: 40px; overflow-y: auto; z-index: 10000;">
+        <button type="button" class="kite-modal-close" onclick="document.getElementById('adminReleaseModal').classList.add('hidden')" aria-label="Закрыть">×</button>
         <div class="dialog" style="max-width: 750px; width: 100%; margin: auto;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;"><h2>Детали релиза</h2><button class="btn-outline" style="padding: 6px 12px;" onclick="document.getElementById('adminReleaseModal').classList.add('hidden')">Закрыть</button></div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;"><h2>Детали релиза</h2></div>
             <div style="display: flex; gap: 24px; margin-bottom: 32px; flex-wrap: wrap;"><div style="width: 250px; max-width: 100%;"><img id="admRelCover" style="width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);"><button class="btn-outline" style="width: 100%; font-size: 12px;" id="admCoverDl">Скачать обложку</button></div><div style="flex: 1; min-width: 250px;" id="admRelInfo"></div></div>
             <h3 style="font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px;">Медиафайлы и информация</h3><div id="admRelTracks" style="display: flex; flex-direction: column; gap: 12px;"></div>
         </div>
     </div>
     <div id="banView" class="overlay hidden" style="background: var(--bg-body); z-index: 9999;"><div style="text-align: center;"><h1 id="banTitleText" style="font-size: 32px; color: var(--danger);">Ваш кабинет заблокирован</h1><button class="btn-outline" onclick="UI.alert('Причина блокировки', currentUser.banReason)" style="margin: 20px 10px;">Узнать причину</button><button class="btn-primary" onclick="logout()" style="margin: 20px 10px;">Выйти</button></div></div>
-    <div id="authView" class="overlay" style="background: var(--bg-body); z-index: 9999;">
+    <div id="authView" class="overlay hidden" style="background: var(--bg-body); z-index: 9999;">
         <div class="dialog" style="border: none; background: transparent; max-width: 360px;">
             <div style="text-align:center;margin-bottom:40px;"><h2 style="font-size:32px;letter-spacing:0;font-weight:800;margin:0 auto;">Kite</h2></div>
             <div id="regFields" class="hidden"><div class="form-group"><input type="text" id="regLogin" placeholder="Логин"></div></div>
@@ -1783,13 +1884,13 @@
         </div>
     </div>
     <div id="questionnaireView" class="overlay hidden" style="background: var(--bg-body); z-index: 9999; overflow-y:auto; padding:24px;">
+        <button type="button" class="kite-modal-close" onclick="closeQuestionnaireForm()" aria-label="Закрыть">×</button>
         <div class="dialog questionnaire-dialog">
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:22px;">
                 <div>
                     <h2 style="font-size:28px;font-weight:800;letter-spacing:-.03em;margin:0 0 8px;">Анкета для вступления в лейбл</h2>
                     <p class="text-sm" style="line-height:1.55;">Заполните данные, чтобы команда Kite могла рассмотреть вашу заявку.</p>
                 </div>
-                <button class="btn-outline" style="padding:8px 12px;" onclick="closeQuestionnaireForm()">Закрыть</button>
             </div>
             <div class="form-group"><label>Ваш творческий псевдоним (никнейм)<span class="req-star">*</span></label><input type="text" id="qArtistName" autocomplete="nickname" placeholder="Например: diviaxel"></div>
             <div class="form-group"><label>Ваше имя<span class="req-star">*</span></label><input type="text" id="qFirstName" autocomplete="given-name" placeholder="Ваше имя"></div>
@@ -1968,6 +2069,15 @@
                     <div style="width: 300px;">
                         <label style="display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">Обложка <span class="req-star">*</span></label>
                         <div class="upload-box" id="r_cover_box" onclick="document.getElementById('r_cover').click()"><span id="coverHint" class="text-sm">Нажмите для загрузки<br>3000x3000<br><small style="display:block;margin-top:6px;color:var(--text-muted);font-size:11px;line-height:1.35;">Максимальный размер: 10 МБ</small></span><img id="coverPreview" class="upload-img hidden"><input type="file" id="r_cover" accept="image/*" class="hidden" onchange="handleCoverUpload(this)"></div>
+                        <div class="ai-usage-box ai-usage-box-cover">
+                            <label class="ai-usage-check">
+                                <input type="checkbox" id="r_cover_ai" onchange="draftRelease.aiCoverUsed=this.checked; isDraftDirty=true;">
+                                <span>
+                                    <span class="ai-usage-title">Использование ИИ <span class="ai-usage-icon">✦</span></span>
+                                    <span class="ai-usage-desc">Отметьте, если при создании обложки использовался искусственный интеллект</span>
+                                </span>
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div id="tracklistArea" class="hidden" style="margin-top: 40px; max-width: 900px; border-top: 1px solid var(--border); padding-top: 32px;">
@@ -1981,6 +2091,14 @@
             </div>
             <div id="sec-trackEdit" class="view-section hidden" style="max-width: 600px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;"><h2>Информация о треке</h2><span id="te_filename" class="text-sm" style="color: var(--accent); word-break: break-all;"></span></div>
+                <div class="ai-usage-box" id="trackAiUsageBox" style="margin-bottom:18px;">
+                    <div class="ai-usage-title">Использование ИИ <span class="ai-usage-icon">✦</span></div>
+                    <div class="ai-usage-desc">Отметьте, если при создании трека использовался искусственный интеллект</div>
+                    <label class="ai-usage-check"><input type="checkbox" class="t_ai_usage" value="Трек полностью сгенерирован ИИ" onchange="isDraftDirty=true;"><span>Трек полностью сгенерирован ИИ</span></label>
+                    <label class="ai-usage-check"><input type="checkbox" class="t_ai_usage" value="ИИ использован частично, только для генерации музыки" onchange="isDraftDirty=true;"><span>ИИ использован частично, только для генерации музыки</span></label>
+                    <label class="ai-usage-check"><input type="checkbox" class="t_ai_usage" value="ИИ использован частично, только для генерации текста" onchange="isDraftDirty=true;"><span>ИИ использован частично, только для генерации текста</span></label>
+                    <label class="ai-usage-check"><input type="checkbox" class="t_ai_usage" value="ИИ использован частично, только для генерации и/или обработки вокала" onchange="isDraftDirty=true;"><span>ИИ использован частично, только для генерации и/или обработки вокала</span></label>
+                </div>
                 <div id="trackEditAudioPlayer" style="margin-bottom:18px;"></div>
                 <div class="form-group"><label>Название трека <span class="req-star">*</span></label><input type="text" id="t_title" placeholder="Название трека"></div>
                 
@@ -2696,7 +2814,7 @@
     let activeCatalogFilter = 'all'; 
     let isDraftDirty = false; 
     let currentDraftId = null; 
-    let draftRelease = { coverFile: null, tracks: [] }; 
+    let draftRelease = { coverFile: null, tracks: [], aiCoverUsed: false }; 
     let editTrackId = null; 
     let activeAdminChatUser = null; 
     let isDBLoaded = false;
@@ -2714,6 +2832,7 @@
             if(updatedUser) {
                 currentUser = updatedUser;
                 if(currentUser.email === ADMIN_EMAIL) currentUser.role = 'Administrator';
+                saveKiteSession(currentUser);
                 if(currentSection === 'userChat' && currentUser.unreadAdminMsg) { currentUser.unreadAdminMsg = false; saveUserDB(currentUser); }
                 if(currentSection === 'adminChats' && activeAdminChatUser) clearArtistChatUnread(activeAdminChatUser, true);
                 document.getElementById('userAvatar').src = currentUser.avatar || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
@@ -2846,20 +2965,59 @@
     }
     
     const KITE_SESSION_KEY = 'kite_active_session';
+    const KITE_SESSION_ACTIVITY_KEY = 'kite_active_session_last_seen';
+    const KITE_SESSION_MAX_IDLE = 60 * 1000;
+    let kiteSessionHeartbeatTimer = null;
+
+    function touchKiteSession() {
+        try { localStorage.setItem(KITE_SESSION_ACTIVITY_KEY, String(Date.now())); } catch(e) {}
+    }
 
     function saveKiteSession(user) {
         try {
-            if(user && user.id) sessionStorage.setItem(KITE_SESSION_KEY, JSON.stringify({ id: user.id, email: user.email || '' }));
+            if(user && user.id) {
+                const payload = JSON.stringify({ id: user.id, email: user.email || '', savedAt: Date.now() });
+                sessionStorage.setItem(KITE_SESSION_KEY, payload);
+                localStorage.setItem(KITE_SESSION_KEY, payload);
+                touchKiteSession();
+            }
         } catch(e) { console.warn('Не удалось сохранить сессию:', e); }
     }
 
     function clearKiteSession() {
         try { sessionStorage.removeItem(KITE_SESSION_KEY); } catch(e) {}
+        try { localStorage.removeItem(KITE_SESSION_KEY); localStorage.removeItem(KITE_SESSION_ACTIVITY_KEY); } catch(e) {}
     }
 
     function getSavedKiteSession() {
-        try { return JSON.parse(sessionStorage.getItem(KITE_SESSION_KEY) || 'null'); }
-        catch(e) { return null; }
+        try {
+            const localRaw = localStorage.getItem(KITE_SESSION_KEY);
+            const sessionRaw = sessionStorage.getItem(KITE_SESSION_KEY);
+            const lastSeen = Number(localStorage.getItem(KITE_SESSION_ACTIVITY_KEY) || 0);
+            const isFresh = sessionRaw || (lastSeen && Date.now() - lastSeen <= KITE_SESSION_MAX_IDLE);
+            if(!isFresh) {
+                localStorage.removeItem(KITE_SESSION_KEY);
+                localStorage.removeItem(KITE_SESSION_ACTIVITY_KEY);
+                return null;
+            }
+            const raw = sessionRaw || localRaw;
+            return raw ? JSON.parse(raw) : null;
+        } catch(e) { return null; }
+    }
+
+    function startKiteSessionHeartbeat() {
+        if(kiteSessionHeartbeatTimer) clearInterval(kiteSessionHeartbeatTimer);
+        touchKiteSession();
+        kiteSessionHeartbeatTimer = setInterval(() => {
+            if(currentUser) touchKiteSession();
+        }, 5000);
+    }
+
+    function showAuthViewIfLoggedOut() {
+        if(currentUser) return;
+        const auth = document.getElementById('authView');
+        if(auth) auth.classList.remove('hidden');
+        enableAuthButton();
     }
 
     function upsertLocalUserFast(user) {
@@ -2919,11 +3077,16 @@
 
     async function restoreKiteSession() {
         const saved = getSavedKiteSession();
-        if(!saved || currentUser) return;
-        setAuthButtonLoading('Вход...');
+        if(!saved || currentUser) {
+            if(!currentUser) showAuthViewIfLoggedOut();
+            return;
+        }
         const u = await findUserByIdOrEmailFast(saved.id, saved.email);
-        enableAuthButton();
-        if(!u) { clearKiteSession(); return; }
+        if(!u) {
+            clearKiteSession();
+            showAuthViewIfLoggedOut();
+            return;
+        }
         currentUser = u;
         if(currentUser.email === ADMIN_EMAIL) currentUser.role = 'Administrator';
         startApp();
@@ -3023,6 +3186,7 @@
     
     function startApp() {
         if(currentUser) saveKiteSession(currentUser);
+        startKiteSessionHeartbeat();
         if (currentUser.email === ADMIN_EMAIL) currentUser.role = 'Administrator';
         if(currentUser.isBanned) { 
             document.getElementById('banView').classList.remove('hidden'); 
@@ -3043,7 +3207,9 @@
         
         document.getElementById('userAvatar').src = currentUser.avatar || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
         collapseSidebarMenus();
-        nav('overview', true); checkNotifications();
+        if(typeof window.openKiteCurrentPath === 'function') window.openKiteCurrentPath();
+        else nav('overview', true);
+        checkNotifications();
         setTimeout(maybeShowFirstLoginPasswordChange, 350);
     }
     
@@ -3412,6 +3578,56 @@
     function escapeHTML(value) {
         return String(value ?? '').replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
     }
+
+    const KITE_TRACK_AI_USAGE_OPTIONS = [
+        'Трек полностью сгенерирован ИИ',
+        'ИИ использован частично, только для генерации музыки',
+        'ИИ использован частично, только для генерации текста',
+        'ИИ использован частично, только для генерации и/или обработки вокала'
+    ];
+    const KITE_AI_USAGE_ALIASES = {
+        'Трек полностью сгенерирован ИИ (Текст + Музыка)': 'Трек полностью сгенерирован ИИ',
+        'ИИ использован частично, только для обработки трека': 'ИИ использован частично, только для генерации и/или обработки вокала',
+        'ИИ использован частично, только для генерации/обработки вокала': 'ИИ использован частично, только для генерации и/или обработки вокала'
+    };
+    function normalizeAiUsage(value) {
+        let list = [];
+        if(Array.isArray(value)) list = value;
+        else if(typeof value === 'string' && value.trim()) list = value.split(/[;\n]+/);
+        else if(value === true) list = ['Использован ИИ'];
+        const normalized = [];
+        list.forEach(item => {
+            const clean = String(item || '').trim();
+            if(!clean) return;
+            const mapped = KITE_AI_USAGE_ALIASES[clean] || clean;
+            if(!normalized.includes(mapped)) normalized.push(mapped);
+        });
+        return normalized;
+    }
+    function getAiUsageChecked(containerId) {
+        const box = document.getElementById(containerId);
+        if(!box) return [];
+        return Array.from(box.querySelectorAll('input[type="checkbox"]:checked')).map(input => input.value);
+    }
+    function setAiUsageChecked(containerId, value) {
+        const selected = normalizeAiUsage(value);
+        const box = document.getElementById(containerId);
+        if(!box) return;
+        box.querySelectorAll('input[type="checkbox"]').forEach(input => {
+            input.checked = selected.includes(input.value);
+        });
+    }
+    function formatAiUsage(value) {
+        const items = normalizeAiUsage(value);
+        return items.length ? items.join('; ') : 'Нет';
+    }
+    function setCoverAiUsed(value) {
+        const checked = !!value;
+        const input = document.getElementById('r_cover_ai');
+        if(input) input.checked = checked;
+        if(typeof draftRelease === 'object' && draftRelease) draftRelease.aiCoverUsed = checked;
+    }
+
     function fileToDataURL(file) {
         return new Promise((resolve, reject) => {
             if(!file) return resolve(null);
@@ -4023,6 +4239,7 @@
                 status: preserveExisting ? (existingRelease.status || 'Черновик') : 'Черновик',
                 date: preserveExisting ? (existingRelease.date || new Date().toLocaleDateString()) : new Date().toLocaleDateString(),
                 coverFile: draftRelease.coverFile, 
+                aiCoverUsed: !!((document.getElementById('r_cover_ai') && document.getElementById('r_cover_ai').checked) || draftRelease.aiCoverUsed),
                 coverCloudinary: draftRelease.coverCloudinary || (existingRelease && existingRelease.coverCloudinary) || null,
                 tracks: draftRelease.tracks, 
                 isDeleted: preserveExisting ? !!existingRelease.isDeleted : false,
@@ -4050,7 +4267,8 @@
     function startNewRelease() {
         const rejectBox = document.getElementById('editRejectReasonBox');
         if(rejectBox) { rejectBox.classList.add('hidden'); rejectBox.innerHTML = ''; }
-        draftRelease = { coverFile: null, tracks: [] }; 
+        draftRelease = { coverFile: null, tracks: [], aiCoverUsed: false }; 
+        setCoverAiUsed(false);
         window.editingOriginalReleaseForComment = null;
         currentDraftId = null; 
         isDraftDirty = false; 
@@ -4093,6 +4311,8 @@
         document.querySelectorAll('.error-field').forEach(el => el.classList.remove('error-field'));
         
         draftRelease.coverFile = r.coverFile; 
+        draftRelease.aiCoverUsed = !!(r.aiCoverUsed || r.coverAiUsed || r.coverAIUsed);
+        setCoverAiUsed(draftRelease.aiCoverUsed);
         draftRelease.tracks = r.tracks || [];
         
         ['type','title','genre','year','upc','releaseDate','comment'].forEach(key => { 
@@ -4215,6 +4435,7 @@
                 explicit: 'Нет',
                 isrc: '',
                 previewStart: '',
+                aiUsage: [],
                 duration: '',
                 isFilled: false,
                 cloudinaryPending: true,
@@ -4275,6 +4496,7 @@
         const ttmlInput = document.getElementById('t_ttml_file');
         if(ttmlInput) ttmlInput.value = '';
         document.getElementById('te_filename').innerText = t.filename;
+        setAiUsageChecked('trackAiUsageBox', t.aiUsage || t.aiUsageOptions || t.aiUsageLabels || []);
         const editAudioBox = document.getElementById('trackEditAudioPlayer');
         if(editAudioBox) {
             if(t.audioFile) {
@@ -4323,6 +4545,7 @@
         }
         ['title','version','lang','lyrics','explicit','isrc','previewStart'].forEach(k => { const el = document.getElementById('t_'+k); if(el) t[k] = el.value; }); 
         t.type = resolvedTrackType;
+        t.aiUsage = getAiUsageChecked('trackAiUsageBox');
         t.artist = artist; t.author = author; t.comp = comp;
 
         t.isFilled = true; isDraftDirty = true;
@@ -4395,6 +4618,7 @@
                 status: (existingRelease && isAdmin) ? existingRelease.status : 'Модерация',
                 date: existingRelease ? existingRelease.date : new Date().toLocaleDateString(),
                 coverFile: draftRelease.coverFile,
+                aiCoverUsed: !!((document.getElementById('r_cover_ai') && document.getElementById('r_cover_ai').checked) || draftRelease.aiCoverUsed),
                 coverCloudinary: draftRelease.coverCloudinary || null,
                 tracks: draftRelease.tracks,
                 isDeleted: false,
@@ -4496,10 +4720,7 @@
         const t = r && r.tracks && r.tracks[trackIndex];
         const audioUrl = t && (t.audioFile || t.audioUrl || t.fileUrl || t.url);
         if(!t || !audioUrl) return UI.alert('Файл недоступен', 'У этого трека нет загруженного аудиофайла.');
-        const a = document.createElement('a');
-        a.href = audioUrl;
-        a.download = t.filename || `${t.artist || r.artist || 'artist'} - ${t.title || r.title || 'track'}.wav`;
-        document.body.appendChild(a); a.click(); a.remove();
+        window.open(audioUrl, '_blank', 'noopener');
     }
     function duplicateRelease(id){
         const r = appState.releases.find(x => String(x.id) === String(id));
@@ -4540,17 +4761,14 @@
         const t = r && r.tracks && r.tracks[trackIndex];
         const ttml = getTrackTTMLText(t).trim();
         if(!ttml) return UI.alert('TTML недоступен', 'Синхронизированный караоке-текст для этого трека не добавлен.');
-        const safe = `${t.artist || r.artist || 'artist'} - ${t.title || r.title || 'track'}`.replace(/[\/:*?"<>|]+/g, '').trim() || 'karaoke-text';
-        const a = document.createElement('a');
-        if(/^data:/i.test(ttml)){
-            a.href = ttml;
-        } else {
-            const blob = new Blob([ttml], {type:'text/plain;charset=utf-8'});
-            a.href = URL.createObjectURL(blob);
-            setTimeout(()=>URL.revokeObjectURL(a.href), 1500);
+        if(/^data:/i.test(ttml)) {
+            window.open(ttml, '_blank', 'noopener');
+            return;
         }
-        a.download = (t.ttmlName && String(t.ttmlName).endsWith('.ttml')) ? t.ttmlName : `${safe}.ttml`;
-        document.body.appendChild(a); a.click(); a.remove();
+        const blob = new Blob([ttml], {type:'text/plain;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank', 'noopener');
+        setTimeout(()=>URL.revokeObjectURL(url), 10000);
     }
     function renderReleaseTrackTable(r){
         const tracks = Array.isArray(r.tracks) ? r.tracks : [];
@@ -4773,7 +4991,10 @@ function renderCard(r, isAdmin) {
         const safeTitle = escapeHTML(r.title || 'Без названия');
         const safeArtist = escapeHTML(r.artist || '—');
         document.getElementById('admRelCover').src = coverUrl;
-        document.getElementById('admCoverDl').onclick = () => { const a = document.createElement('a'); a.href = coverUrl; a.download = `${r.artist || 'artist'}-${r.title || 'cover'}.jpg`; a.click(); };
+        document.getElementById('admCoverDl').onclick = () => {
+            if(!coverUrl) return UI.alert('Обложка недоступна', 'У релиза нет загруженной обложки.');
+            window.open(coverUrl, '_blank', 'noopener');
+        };
 
         const explicit = tracks.some(t => String(t.explicit || '').toLowerCase() === 'да') ? 'Да' : 'Нет';
         const getTrackAudioUrl = (t) => String((t && (t.audioFile || t.audioUrl || t.fileUrl || t.url)) || '').trim();
@@ -4793,25 +5014,37 @@ function renderCard(r, isAdmin) {
             const audioUrl = getTrackAudioUrl(t);
             const trackTitle = t.title || r.title || 'Без названия';
             const trackArtist = t.artist || r.artist || '—';
+            const trackAi = formatAiUsage(t.aiUsage || t.aiUsageOptions || t.aiUsageLabels || '');
             return `
             <div class="release-info-track-card release-info-track-card-full">
                 <div class="release-info-track-num">${idx + 1}</div>
                 <div class="release-info-track-main">
                     <div class="release-info-track-title">${escapeHTML(trackTitle)}</div>
                     <div class="release-info-track-sub">${escapeHTML(trackArtist)}</div>
-                    <div class="release-track-detail-grid">
-                        ${trackDetailRow('Файл', t.filename || '—')}
-                        ${trackDetailRow('Длительность', t.duration || '—')}
-                        ${trackDetailRow('Тип трека', t.type || '—')}
-                        ${trackDetailRow('Версия', t.version || '—')}
-                        ${trackDetailRow('Язык', t.lang || '—')}
-                        ${trackDetailRow('ISRC', t.isrc || '—')}
-                        ${trackDetailRow('Нецензурная лексика', t.explicit || 'Нет')}
-                        ${trackDetailRow('Начало предпрослушивания', t.previewStart ? (t.previewStart + ' сек.') : '—')}
-                        ${trackDetailRow('Автор слов', t.author || '—')}
-                        ${trackDetailRow('Автор музыки', t.comp || '—')}
-                        ${trackDetailRow('Обычный текст', (t.lyrics || '').trim() ? 'Добавлен' : 'Не добавлен')}
-                        ${trackDetailRow('Караоке TTML', ttmlExists(t) ? 'Добавлен' : 'Не добавлен')}
+                    ${trackAi !== 'Нет' ? `<div class="release-info-ai-summary"><strong>Использование ИИ:</strong> ${escapeHTML(trackAi)}</div>` : ''}
+                    <div class="release-track-detail-groups">
+                        <div class="release-track-detail-group">
+                            ${trackDetailRow('Файл', t.filename || '—')}
+                            ${trackDetailRow('Длительность', t.duration || '—')}
+                        </div>
+                        <div class="release-track-detail-group">
+                            ${trackDetailRow('Тип трека', t.type || '—')}
+                            ${trackDetailRow('Версия', t.version || '—')}
+                            ${trackDetailRow('Начало предпрослушивания', t.previewStart ? (t.previewStart + ' сек.') : '—')}
+                            ${trackDetailRow('ISRC', t.isrc || '—')}
+                        </div>
+                        <div class="release-track-detail-group">
+                            ${trackDetailRow('Язык', t.lang || '—')}
+                            ${trackDetailRow('Нецензурная лексика', t.explicit || 'Нет')}
+                        </div>
+                        <div class="release-track-detail-group">
+                            ${trackDetailRow('Автор слов', t.author || '—')}
+                            ${trackDetailRow('Автор музыки', t.comp || '—')}
+                        </div>
+                        <div class="release-track-detail-group">
+                            ${trackDetailRow('Обычный текст', (t.lyrics || '').trim() ? 'Добавлен' : 'Не добавлен')}
+                            ${trackDetailRow('Караоке TTML', ttmlExists(t) ? 'Добавлен' : 'Не добавлен')}
+                        </div>
                     </div>
                     ${(t.lyrics || '').trim() ? `<details class="release-info-details"><summary>Показать текст трека</summary><pre>${escapeHTML(t.lyrics)}</pre></details>` : ''}
                     ${audioUrl ? `
@@ -4863,7 +5096,7 @@ function renderCard(r, isAdmin) {
                     ${infoRow('Год', r.year || '—')}
                     ${infoRow('Жанр', r.genre || '—')}
                     ${infoRow('UPC', r.upc || '—')}
-                    ${infoRow('Нецензурная лексика', explicit)}
+                    ${infoRow('Использование ИИ в обложке', r.aiCoverUsed ? 'Да' : 'Нет')}
                     ${infoRow('Статус', r.status || '—')}
                     ${infoRow('Дата создания', r.date || '—')}
                 </div>
@@ -4871,7 +5104,6 @@ function renderCard(r, isAdmin) {
                     <h3>Комментарий для модератора</h3>
                     <div class="release-info-comment">${moderatorComment ? escapeHTML(moderatorComment) : 'Комментарий не указан.'}</div>
                 </div>
-                <div class="release-info-section"><h3>Персоны и роли</h3><div class="release-info-persons">${personsHtml}</div></div>
             </div>`;
         const admRelTracksBox = document.getElementById('admRelTracks');
         admRelTracksBox.innerHTML = tracksHtml;
@@ -5445,12 +5677,9 @@ function renderCard(r, isAdmin) {
         const rows = karaokeState.lines.map((line,i)=>`${karaokeFormatTime(karaokeState.times[i])} ${line}`);
         rows.push(karaokeFormatTime(endTime));
         const blob = new Blob([rows.join('\n') + '\n'], {type:'text/plain;charset=utf-8'});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        const safe = `${karaokeState.artist} - ${karaokeState.title}`.replace(/[\\/:*?"<>|]+/g,' ').trim() || 'karaoke';
-        a.download = safe + '.ttml';
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank', 'noopener');
+        setTimeout(()=>URL.revokeObjectURL(url), 10000);
     }
 
     function renderKaraokeViewerForm(area){
@@ -5674,7 +5903,7 @@ function renderCard(r, isAdmin) {
         if(auth) auth.classList.remove('hidden');
     }
     function showQuestionnaireCheck() {
-        UI.alert('Проверка анкеты', 'Проверьте свою электронную почту, которую вы указывали при заполнении анкеты.');
+        UI.alert('Проверка анкеты', 'Проверьте свою электронную почту, которую вы указывали при заполнении анкеты. Также не забывайте проверить спам, ведь письмо с ответом может попасть туда.');
     }
     function getQuestionnaireStatusClass(status) {
         const st = String(status || '').toLowerCase();
@@ -5773,13 +6002,13 @@ function renderCard(r, isAdmin) {
         const cls = getQuestionnaireStatusClass(status);
         const created = q.createdAt ? new Date(q.createdAt).toLocaleString('ru-RU') : '—';
         document.body.insertAdjacentHTML('beforeend', `<div id="questionnaireDetailModal" class="overlay" style="z-index:10004; padding:24px; overflow-y:auto; align-items:flex-start;">
+            <button type="button" class="kite-modal-close" onclick="closeQuestionnaireDetails()" aria-label="Закрыть">×</button>
             <div class="dialog questionnaire-dialog" style="margin:auto;">
                 <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:18px;">
                     <div>
                         <h2 style="margin:0 0 8px;font-size:26px;font-weight:800;">Анкета артиста</h2>
                         <span class="questionnaire-status ${cls}">${escapeHTML(status)}</span>
                     </div>
-                    <button class="btn-outline" style="padding:8px 12px;" onclick="closeQuestionnaireDetails()">Закрыть</button>
                 </div>
                 <div class="questionnaire-detail-grid">
                     <div class="questionnaire-detail-box"><span>Псевдоним</span><strong>${escapeHTML(q.artistName || '—')}</strong></div>
@@ -6351,6 +6580,7 @@ function renderCard(r, isAdmin) {
         const tickets = getSupportTickets().filter(ticketNeedsAdminReply);
         if(!tickets.length) return UI.alert('Тикеты', 'Нет тикетов, на которые нужно ответить.');
         const html = `<div class="overlay" id="supportTicketPicker" style="z-index:10004;">
+            <button type="button" class="kite-modal-close" onclick="document.getElementById('supportTicketPicker').remove()" aria-label="Закрыть">×</button>
             <div class="dialog" style="max-width:980px;">
                 <h3>Ответить на тикет</h3>
                 <p class="text-sm" style="margin-bottom:16px;">Выберите тикет артиста, на который нужно ответить.</p>
@@ -6363,7 +6593,6 @@ function renderCard(r, isAdmin) {
                         <div style="margin-top:12px;"><span class="ticket-status open">Открыть историю и ответить</span></div>
                     </div>`;
                 }).join('')}</div>
-                <div class="dialog-actions"><button class="btn-outline" onclick="document.getElementById('supportTicketPicker').remove()">Закрыть</button></div>
             </div>
         </div>`;
         document.body.insertAdjacentHTML('beforeend', html);
@@ -6625,6 +6854,7 @@ function renderCard(r, isAdmin) {
         }
     }
 
+    window.openKiteCurrentPath = openCurrentPath;
     window.addEventListener('popstate', openCurrentPath);
 
     document.addEventListener('DOMContentLoaded', function () {
