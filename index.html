@@ -2094,10 +2094,10 @@
                 <div class="ai-usage-box" id="trackAiUsageBox" style="margin-bottom:18px;">
                     <div class="ai-usage-title">Использование ИИ <span class="ai-usage-icon">✦</span></div>
                     <div class="ai-usage-desc">Отметьте, если при создании трека использовался искусственный интеллект</div>
-                    <label class="ai-usage-check"><input type="checkbox" class="t_ai_usage" value="Трек полностью сгенерирован ИИ" onchange="isDraftDirty=true;"><span>Трек полностью сгенерирован ИИ</span></label>
-                    <label class="ai-usage-check"><input type="checkbox" class="t_ai_usage" value="ИИ использован частично, только для генерации музыки" onchange="isDraftDirty=true;"><span>ИИ использован частично, только для генерации музыки</span></label>
-                    <label class="ai-usage-check"><input type="checkbox" class="t_ai_usage" value="ИИ использован частично, только для генерации текста" onchange="isDraftDirty=true;"><span>ИИ использован частично, только для генерации текста</span></label>
-                    <label class="ai-usage-check"><input type="checkbox" class="t_ai_usage" value="ИИ использован частично, только для генерации и/или обработки вокала" onchange="isDraftDirty=true;"><span>ИИ использован частично, только для генерации и/или обработки вокала</span></label>
+                    <label class="ai-usage-check"><input type="checkbox" class="t_ai_usage" value="Трек полностью сгенерирован ИИ" onchange="handleTrackAiUsageChange(this); isDraftDirty=true;"><span>Трек полностью сгенерирован ИИ</span></label>
+                    <label class="ai-usage-check"><input type="checkbox" class="t_ai_usage" value="ИИ использован частично, только для генерации музыки" onchange="handleTrackAiUsageChange(this); isDraftDirty=true;"><span>ИИ использован частично, только для генерации музыки</span></label>
+                    <label class="ai-usage-check"><input type="checkbox" class="t_ai_usage" value="ИИ использован частично, только для генерации текста" onchange="handleTrackAiUsageChange(this); isDraftDirty=true;"><span>ИИ использован частично, только для генерации текста</span></label>
+                    <label class="ai-usage-check"><input type="checkbox" class="t_ai_usage" value="ИИ использован частично, только для генерации и/или обработки вокала" onchange="handleTrackAiUsageChange(this); isDraftDirty=true;"><span>ИИ использован частично, только для генерации и/или обработки вокала</span></label>
                 </div>
                 <div id="trackEditAudioPlayer" style="margin-bottom:18px;"></div>
                 <div class="form-group"><label>Название трека <span class="req-star">*</span></label><input type="text" id="t_title" placeholder="Название трека"></div>
@@ -3221,7 +3221,7 @@
     }
     window.addEventListener('resize', updateResponsiveHeader);
 
-    function logout() { clearKiteSession(); location.reload(); }
+    function logout() { clearKiteSession(); try { history.replaceState(null, '', '/'); } catch(e) {} location.replace('/'); }
 
     function updateCurrentUserLinkedEmail(oldEmail, newEmail) {
         oldEmail = String(oldEmail || '').toLowerCase().trim();
@@ -6872,5 +6872,291 @@ function renderCard(r, isAdmin) {
     });
 })();
 </script>
+
+
+<style id="kite-ai-checkbox-fix">
+/* ===== AI checkboxes: clean design, no jitter ===== */
+.ai-usage-check{
+    position:relative;
+    align-items:center!important;
+    gap:12px!important;
+    min-height:34px;
+    padding:8px 10px;
+    border-radius:16px;
+    border:1px solid transparent;
+    transition:background .14s ease,border-color .14s ease,opacity .14s ease;
+    -webkit-tap-highlight-color:transparent;
+}
+.ai-usage-check:hover{background:rgba(255,255,255,.045);border-color:rgba(255,255,255,.08);}
+.ai-usage-check input[type="checkbox"]{
+    appearance:none!important;
+    -webkit-appearance:none!important;
+    display:grid!important;
+    place-content:center!important;
+    width:22px!important;
+    height:22px!important;
+    min-width:22px!important;
+    flex:0 0 22px!important;
+    padding:0!important;
+    margin:0!important;
+    border-radius:8px!important;
+    border:1.5px solid rgba(213,221,242,.34)!important;
+    background:rgba(255,255,255,.055)!important;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.025)!important;
+    cursor:pointer!important;
+    transform:none!important;
+    transition:background .12s ease,border-color .12s ease,box-shadow .12s ease,opacity .12s ease!important;
+}
+.ai-usage-check input[type="checkbox"]::before{
+    content:"";
+    width:11px;
+    height:8px;
+    transform:scale(0) rotate(-45deg);
+    transform-origin:center;
+    border-left:2.5px solid #fff;
+    border-bottom:2.5px solid #fff;
+    margin-top:-2px;
+    transition:transform .12s ease;
+}
+.ai-usage-check input[type="checkbox"]:checked{
+    background:linear-gradient(135deg,var(--accent),#5D83FF)!important;
+    border-color:rgba(255,255,255,.28)!important;
+    box-shadow:0 8px 18px rgba(68,110,240,.28)!important;
+}
+.ai-usage-check input[type="checkbox"]:checked::before{transform:scale(1) rotate(-45deg);}
+.ai-usage-check input[type="checkbox"]:focus-visible{outline:2px solid rgba(93,131,255,.72);outline-offset:3px;}
+.ai-usage-check.ai-disabled{opacity:.48;cursor:not-allowed;background:rgba(255,255,255,.025);}
+.ai-usage-check.ai-disabled:hover{border-color:transparent;background:rgba(255,255,255,.025);}
+.ai-usage-check.ai-disabled input[type="checkbox"]{cursor:not-allowed!important;box-shadow:none!important;}
+.ai-usage-check.ai-disabled span{cursor:not-allowed;}
+.ai-readonly-list{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
+.ai-readonly-check{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-height:30px;
+    color:#d7deee;
+    font-size:13px;
+    line-height:1.45;
+}
+.ai-readonly-check input[type="checkbox"]{
+    appearance:none!important;
+    -webkit-appearance:none!important;
+    display:grid!important;
+    place-content:center!important;
+    width:20px!important;
+    height:20px!important;
+    min-width:20px!important;
+    padding:0!important;
+    margin:0!important;
+    border-radius:7px!important;
+    border:1.5px solid rgba(213,221,242,.28)!important;
+    background:rgba(255,255,255,.055)!important;
+    opacity:1!important;
+}
+.ai-readonly-check input[type="checkbox"]::before{
+    content:"";
+    width:10px;
+    height:7px;
+    transform:scale(0) rotate(-45deg);
+    border-left:2.3px solid #fff;
+    border-bottom:2.3px solid #fff;
+    margin-top:-2px;
+}
+.ai-readonly-check input[type="checkbox"]:checked{
+    background:linear-gradient(135deg,var(--accent),#5D83FF)!important;
+    border-color:rgba(255,255,255,.26)!important;
+    box-shadow:0 7px 16px rgba(68,110,240,.24)!important;
+}
+.ai-readonly-check input[type="checkbox"]:checked::before{transform:scale(1) rotate(-45deg);}
+.release-info-ai-checks{
+    margin-top:12px;
+    padding:12px;
+    border-radius:18px;
+    border:1px solid rgba(68,110,240,.20);
+    background:rgba(68,110,240,.075);
+}
+.release-info-ai-checks-title{
+    color:#fff;
+    font-weight:900;
+    font-size:13px;
+    margin-bottom:8px;
+}
+</style>
+
+<script id="kite-ai-logic-fix">
+(function(){
+    const AI_FULL = 'Трек полностью сгенерирован ИИ';
+    const AI_OPTIONS = [
+        AI_FULL,
+        'ИИ использован частично, только для генерации музыки',
+        'ИИ использован частично, только для генерации текста',
+        'ИИ использован частично, только для генерации и/или обработки вокала'
+    ];
+
+    function getTrackAiInputs(box){
+        box = box || document.getElementById('trackAiUsageBox');
+        return box ? Array.from(box.querySelectorAll('input.t_ai_usage')) : [];
+    }
+
+    function setLabelDisabled(input, disabled){
+        const label = input && input.closest ? input.closest('.ai-usage-check') : null;
+        if(label) label.classList.toggle('ai-disabled', !!disabled);
+    }
+
+    function refreshTrackAiUsageLocks(box){
+        const inputs = getTrackAiInputs(box);
+        if(!inputs.length) return;
+        const full = inputs.find(input => input.value === AI_FULL);
+        const partials = inputs.filter(input => input.value !== AI_FULL);
+        const fullChecked = !!(full && full.checked);
+        const partialChecked = partials.some(input => input.checked);
+
+        if(fullChecked){
+            partials.forEach(input => {
+                input.checked = false;
+                input.disabled = true;
+                setLabelDisabled(input, true);
+            });
+            if(full){ full.disabled = false; setLabelDisabled(full, false); }
+            return;
+        }
+
+        partials.forEach(input => {
+            input.disabled = false;
+            setLabelDisabled(input, false);
+        });
+        if(full){
+            full.checked = false;
+            full.disabled = partialChecked;
+            setLabelDisabled(full, partialChecked);
+        }
+    }
+
+    window.handleTrackAiUsageChange = function(input){
+        const box = input && input.closest ? input.closest('#trackAiUsageBox') : document.getElementById('trackAiUsageBox');
+        const inputs = getTrackAiInputs(box);
+        const full = inputs.find(item => item.value === AI_FULL);
+        const partials = inputs.filter(item => item.value !== AI_FULL);
+
+        if(input && input.value === AI_FULL && input.checked){
+            partials.forEach(item => { item.checked = false; });
+        } else if(input && input.value !== AI_FULL && input.checked && full){
+            full.checked = false;
+        }
+
+        refreshTrackAiUsageLocks(box);
+        try { window.isDraftDirty = true; } catch(e) {}
+    };
+
+    const oldSetAiUsageChecked = window.setAiUsageChecked;
+    window.setAiUsageChecked = function(containerId, value){
+        if(typeof oldSetAiUsageChecked === 'function') oldSetAiUsageChecked.apply(this, arguments);
+        if(containerId === 'trackAiUsageBox') refreshTrackAiUsageLocks(document.getElementById(containerId));
+    };
+
+    window.getAiUsageChecked = function(containerId){
+        const box = document.getElementById(containerId);
+        if(!box) return [];
+        return Array.from(box.querySelectorAll('input[type="checkbox"]:checked')).map(input => input.value);
+    };
+
+    function normalizeAiUsageLocal(value){
+        if(typeof window.normalizeAiUsage === 'function') return window.normalizeAiUsage(value);
+        let list = [];
+        if(Array.isArray(value)) list = value;
+        else if(typeof value === 'string' && value.trim()) list = value.split(/[;\n]+/);
+        else if(value === true) list = ['Использован ИИ'];
+        const aliases = {
+            'Трек полностью сгенерирован ИИ (Текст + Музыка)': AI_FULL,
+            'ИИ использован частично, только для обработки трека': 'ИИ использован частично, только для генерации и/или обработки вокала',
+            'Использован ИИ': AI_FULL
+        };
+        const result = [];
+        list.forEach(item => {
+            const clean = String(item || '').trim();
+            if(!clean) return;
+            const mapped = aliases[clean] || clean;
+            if(!result.includes(mapped)) result.push(mapped);
+        });
+        return result;
+    }
+
+    function escapeHTMLLocal(str){
+        if(typeof window.escapeHTML === 'function') return window.escapeHTML(str);
+        return String(str ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    }
+
+    function readonlyAiCheck(label, checked){
+        return `<label class="ai-readonly-check"><input type="checkbox" ${checked ? 'checked' : ''} disabled><span>${escapeHTMLLocal(label)}</span></label>`;
+    }
+
+    function readonlyAiList(selected){
+        selected = normalizeAiUsageLocal(selected);
+        return `<div class="ai-readonly-list">${AI_OPTIONS.map(option => readonlyAiCheck(option, selected.includes(option))).join('')}</div>`;
+    }
+
+    function patchReleaseInfoAiFields(release){
+        const infoBox = document.getElementById('admRelInfo');
+        const tracksBox = document.getElementById('admRelTracks');
+        if(infoBox){
+            Array.from(infoBox.querySelectorAll('.release-info-box')).forEach(box => {
+                const label = box.querySelector('.release-meta-label');
+                if(label && label.textContent.trim() === 'Использование ИИ в обложке'){
+                    box.innerHTML = `<div class="release-meta-label">Использование ИИ в обложке</div><div class="release-meta-value">${readonlyAiCheck('При создании обложки использовался искусственный интеллект', !!(release && release.aiCoverUsed))}</div>`;
+                }
+            });
+        }
+        if(tracksBox){
+            const tracks = Array.isArray(release && release.tracks) ? release.tracks : [];
+            tracksBox.querySelectorAll('.release-info-ai-summary').forEach(el => el.remove());
+            Array.from(tracksBox.querySelectorAll('.release-info-track-card')).forEach((card, index) => {
+                const track = tracks[index] || {};
+                const old = card.querySelector('.release-info-ai-checks');
+                if(old) old.remove();
+                const sub = card.querySelector('.release-info-track-sub');
+                const holder = document.createElement('div');
+                holder.className = 'release-info-ai-checks';
+                holder.innerHTML = `<div class="release-info-ai-checks-title">Использование ИИ</div>${readonlyAiList(track.aiUsage || track.aiUsageOptions || track.aiUsageLabels || '')}`;
+                if(sub && sub.parentNode) sub.insertAdjacentElement('afterend', holder);
+                else card.appendChild(holder);
+            });
+        }
+    }
+
+    const oldViewReleaseAdmin = window.viewReleaseAdmin;
+    window.viewReleaseAdmin = function(id){
+        const result = typeof oldViewReleaseAdmin === 'function' ? oldViewReleaseAdmin.apply(this, arguments) : undefined;
+        let release = null;
+        try { release = (typeof appState !== 'undefined' && Array.isArray(appState.releases)) ? appState.releases.find(x => String(x.id) === String(id)) : null; } catch(e) { release = null; }
+        setTimeout(() => patchReleaseInfoAiFields(release), 0);
+        return result;
+    };
+    try { viewReleaseAdmin = window.viewReleaseAdmin; } catch(e) {}
+
+    const oldLogout = window.logout;
+    window.logout = function(){
+        if(typeof window.clearKiteSession === 'function') window.clearKiteSession();
+        else if(typeof oldLogout === 'function') { try { oldLogout(); } catch(e) {} }
+        try { history.replaceState(null, '', '/'); } catch(e) {}
+        location.replace('/');
+    };
+    try { logout = window.logout; } catch(e) {}
+
+    document.addEventListener('change', function(event){
+        if(event.target && event.target.id === 'r_cover_ai'){
+            try {
+                if(typeof draftRelease !== 'undefined' && draftRelease) draftRelease.aiCoverUsed = !!event.target.checked;
+                if(typeof isDraftDirty !== 'undefined') isDraftDirty = true;
+            } catch(e) {}
+        }
+    }, true);
+
+    document.addEventListener('DOMContentLoaded', function(){
+        refreshTrackAiUsageLocks(document.getElementById('trackAiUsageBox'));
+    });
+})();
+</script>
+
 </body>
 </html>
