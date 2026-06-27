@@ -1712,6 +1712,128 @@
 @media(max-width:1100px){.support-grid,.support-picker-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
 @media(max-width:700px){.support-grid,.support-picker-grid{grid-template-columns:1fr}.support-detail h2{font-size:25px}.support-topbar h2{font-size:24px}.support-actions{width:100%;justify-content:stretch}.support-actions button{flex:1}.support-message,.support-message.admin{max-width:100%;margin-left:0}.support-bubble{max-width:calc(100vw - 96px)}}
 
+
+
+        /* ===== Kite calendar update: компактный календарь, ограничения дат, выбор месяца/года ===== */
+        .release-date-grid{
+            display:grid;
+            grid-template-columns:repeat(3,minmax(0,1fr));
+            gap:16px;
+            align-items:start;
+        }
+        .aether-date-popover{
+            width:min(300px,calc(100vw - 28px))!important;
+            max-height:calc(100dvh - 28px)!important;
+            padding:12px!important;
+            border-radius:22px!important;
+            overflow:auto!important;
+        }
+        .aether-date-popover.kite-positioned{
+            left:var(--kite-date-left,14px)!important;
+            top:var(--kite-date-top,14px)!important;
+            right:auto!important;
+            bottom:auto!important;
+        }
+        .aether-date-head{margin-bottom:8px!important;}
+        .aether-date-title{
+            font-size:15px!important;
+            padding:8px 11px!important;
+            cursor:pointer!important;
+            user-select:none!important;
+        }
+        .aether-date-nav{display:none!important;}
+        .aether-date-week,
+        .aether-date-grid{gap:4px!important;}
+        .aether-date-week span{
+            font-size:11px!important;
+            padding:7px 0!important;
+        }
+        .aether-date-day{
+            height:32px!important;
+            border-radius:11px!important;
+            font-size:13px!important;
+        }
+        .aether-date-day.disabled,
+        .aether-date-day:disabled{
+            opacity:.28!important;
+            cursor:not-allowed!important;
+            transform:none!important;
+            background:transparent!important;
+            border-color:transparent!important;
+            box-shadow:none!important;
+        }
+        .aether-date-actions{
+            margin-top:10px!important;
+            padding-top:10px!important;
+            justify-content:space-between!important;
+        }
+        .aether-date-actions button{
+            padding:8px 12px!important;
+            border-radius:13px!important;
+        }
+        .aether-date-hint{
+            margin-top:8px!important;
+            font-size:11px!important;
+        }
+        .aether-month-year-picker{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:12px;
+            margin-top:10px;
+        }
+        .aether-picker-col{
+            min-width:0;
+        }
+        .aether-picker-col-title{
+            color:var(--text-muted);
+            font-size:12px;
+            font-weight:800;
+            margin:0 0 8px;
+        }
+        .aether-picker-list{
+            max-height:230px;
+            overflow:auto;
+            display:flex;
+            flex-direction:column;
+            gap:6px;
+            padding-right:4px;
+            overscroll-behavior:contain;
+        }
+        .aether-picker-option{
+            width:100%;
+            min-height:36px;
+            display:flex!important;
+            align-items:center!important;
+            justify-content:center!important;
+            padding:0 10px!important;
+            border-radius:13px!important;
+            background:rgba(255,255,255,.05)!important;
+            border:1px solid rgba(255,255,255,.10)!important;
+            color:#eef2fb!important;
+            font-weight:800!important;
+            box-shadow:none!important;
+        }
+        .aether-picker-option:hover,
+        .aether-picker-option.active{
+            background:linear-gradient(135deg,var(--accent),#5D83FF)!important;
+            border-color:rgba(255,255,255,.22)!important;
+            color:#fff!important;
+        }
+
+        .aether-native-date-hidden.error-field + .aether-date-display{
+            border-color:var(--danger)!important;
+            box-shadow:0 0 0 3px rgba(239,68,68,.14)!important;
+        }
+        @media(max-width:768px){
+            .release-date-grid{grid-template-columns:1fr;gap:12px;}
+            .aether-date-popover{
+                width:min(300px,calc(100vw - 28px))!important;
+                max-height:calc(100dvh - 28px)!important;
+                padding:12px!important;
+            }
+            .aether-date-day{height:34px!important;}
+            .aether-picker-list{max-height:210px;}
+        }
 </style>
 
 <style>
@@ -2063,7 +2185,7 @@
                         <div class="form-group"><label>Артисты <span class="req-star">*</span></label><div id="r_artist_container"></div></div>
                         
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;"><div class="form-group"><label>Жанр <span class="req-star">*</span></label><select id="r_genre" onchange="isDraftDirty=true;"><option value="">Выберите жанр</option><option value="Hip Hop/Rap">Hip Hop/Rap</option><option value="Pop">Pop</option><option value="Electronic">Electronic</option><option value="R&B">R&B</option><option value="Rock">Rock</option><option value="Alternative">Alternative</option><option value="Dance">Dance</option><option value="House">House</option><option value="Techno">Techno</option><option value="Trap">Trap</option><option value="Drill">Drill</option><option value="Phonk">Phonk</option><option value="Afrobeats">Afrobeats</option><option value="Reggaeton">Reggaeton</option><option value="Latin">Latin</option><option value="Pop Rock">Pop Rock</option><option value="Indie Pop">Indie Pop</option><option value="Indie Rock">Indie Rock</option><option value="Metal">Metal</option><option value="Punk">Punk</option><option value="Jazz">Jazz</option><option value="Blues">Blues</option><option value="Soul">Soul</option><option value="Funk">Funk</option><option value="Country">Country</option><option value="Folk">Folk</option><option value="Classical">Classical</option><option value="Soundtrack">Soundtrack</option><option value="Ambient">Ambient</option><option value="Lo-Fi">Lo-Fi</option><option value="Children Music">Children Music</option><option value="Spoken Word">Spoken Word</option></select></div><div class="form-group"><label>Год <span class="req-star">*</span></label><select id="r_year" onchange="isDraftDirty=true;"></select></div></div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;"><div class="form-group"><label>Дата релиза <span class="req-star">*</span></label><input type="date" id="r_releaseDate" onchange="isDraftDirty=true;"></div><div class="form-group"><label>UPC</label><input type="text" id="r_upc" placeholder="UPC (если есть)" oninput="isDraftDirty=true;"></div></div>
+                        <div class="release-date-grid"><div class="form-group"><label>Дата релиза <span class="req-star">*</span></label><input type="date" id="r_releaseDate" data-date-role="release" onchange="isDraftDirty=true;"></div><div class="form-group"><label>Оригинальная дата релиза</label><input type="date" id="r_originalReleaseDate" data-date-role="original" onchange="isDraftDirty=true;"></div><div class="form-group"><label>UPC</label><input type="text" id="r_upc" placeholder="UPC (если есть)" oninput="isDraftDirty=true;"></div></div>
                         <div class="form-group"><label>Комментарий модератору</label><textarea id="r_comment" placeholder="Ваши пожелания или комментарии..." rows="2" oninput="isDraftDirty=true;"></textarea></div>
                     </div>
                     <div style="width: 300px;">
@@ -4242,6 +4364,7 @@
                 genre: document.getElementById('r_genre').value, 
                 year: document.getElementById('r_year').value, 
                 releaseDate: document.getElementById('r_releaseDate').value, 
+                originalReleaseDate: document.getElementById('r_originalReleaseDate') ? document.getElementById('r_originalReleaseDate').value : '',
                 upc: document.getElementById('r_upc').value, 
                 comment: document.getElementById('r_comment').value, 
                 status: preserveExisting ? (existingRelease.status || 'Черновик') : 'Черновик',
@@ -4281,7 +4404,7 @@
         currentDraftId = null; 
         isDraftDirty = false; 
         document.querySelectorAll('.error-field').forEach(el => el.classList.remove('error-field'));
-        ['r_type','r_title','r_genre','r_upc','r_releaseDate','r_comment'].forEach(id => document.getElementById(id).value = '');
+        ['r_type','r_title','r_genre','r_upc','r_releaseDate','r_originalReleaseDate','r_comment'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
         setMultiVal('r_artist_container', currentUser.login, 'Артист');
         
         document.getElementById('coverPreview').src = ''; 
@@ -4323,7 +4446,7 @@
         setCoverAiUsed(draftRelease.aiCoverUsed);
         draftRelease.tracks = r.tracks || [];
         
-        ['type','title','genre','year','upc','releaseDate','comment'].forEach(key => { 
+        ['type','title','genre','year','upc','releaseDate','originalReleaseDate','comment'].forEach(key => { 
             document.getElementById('r_'+key).value = (key==='title' && r.title==='Без названия') ? '' : (r[key] || ''); 
         });
         
@@ -4586,6 +4709,7 @@
         if(!getMultiVal('r_artist_container')) { document.getElementById('r_artist_container').classList.add('error-field'); hasError = true; }
         if(!draftRelease.coverFile) { document.getElementById('r_cover_box').classList.add('error-field'); hasError = true; }
         if(hasError) return UI.alert("Ошибка", "Заполните обязательные поля релиза.");
+        if(window.KiteValidateReleaseDates && !window.KiteValidateReleaseDates(true)) return;
 
         const type = document.getElementById('r_type').value;
         if(draftRelease.tracks.length === 0) return UI.alert("Ошибка", "Добавьте трек");
@@ -4622,6 +4746,7 @@
                 genre: document.getElementById('r_genre').value,
                 year: document.getElementById('r_year').value,
                 releaseDate: document.getElementById('r_releaseDate').value,
+                originalReleaseDate: document.getElementById('r_originalReleaseDate') ? document.getElementById('r_originalReleaseDate').value : '',
                 comment: document.getElementById('r_comment').value,
                 status: (existingRelease && isAdmin) ? existingRelease.status : 'Модерация',
                 date: existingRelease ? existingRelease.date : new Date().toLocaleDateString(),
@@ -4803,6 +4928,7 @@
             genre: document.getElementById('r_genre') && document.getElementById('r_genre').value,
             year: document.getElementById('r_year') && document.getElementById('r_year').value,
             releaseDate: document.getElementById('r_releaseDate') && document.getElementById('r_releaseDate').value,
+            originalReleaseDate: document.getElementById('r_originalReleaseDate') && document.getElementById('r_originalReleaseDate').value,
             upc: document.getElementById('r_upc') && document.getElementById('r_upc').value,
             tracks: (draftRelease.tracks || []).map(t => ({title:t.title, artist:t.artist, lyrics:t.lyrics, isrc:t.isrc, ttml:!!(t.ttmlText||t.ttmlFile||t.ttmlContent)}))
         };
@@ -4810,7 +4936,7 @@
     function buildReleaseChangeSummary(oldR, current){
         if(!oldR || !current) return 'данные релиза';
         const changes = [];
-        const map = {type:'формат релиза', title:'название релиза', artist:'артисты', genre:'жанр', year:'год', releaseDate:'дата релиза', upc:'UPC'};
+        const map = {type:'формат релиза', title:'название релиза', artist:'артисты', genre:'жанр', year:'год', releaseDate:'дата релиза', originalReleaseDate:'оригинальная дата релиза', upc:'UPC'};
         Object.keys(map).forEach(k => { if(String(oldR[k] || '') !== String(current[k] || '')) changes.push(map[k]); });
         const oldTracks = oldR.tracks || [];
         const newTracks = current.tracks || [];
@@ -4831,7 +4957,7 @@
         comment.value = `Релиз был изменён: ${summary}.`;
     }
     function bindReleaseChangeCommentWatcher(){
-        ['r_type','r_title','r_genre','r_year','r_releaseDate','r_upc'].forEach(id=>{
+        ['r_type','r_title','r_genre','r_year','r_releaseDate','r_originalReleaseDate','r_upc'].forEach(id=>{
             const el=document.getElementById(id); if(el && !el.dataset.changeWatcher){ el.dataset.changeWatcher='1'; el.addEventListener('input', updateReleaseChangeComment); el.addEventListener('change', updateReleaseChangeComment); }
         });
     }
@@ -4885,6 +5011,7 @@ function renderCard(r, isAdmin) {
                     <div class="release-meta-item"><div class="release-meta-label">UPC</div><div class="release-meta-value">${escapeHTML(r.upc || '—')}</div></div>
                     <div class="release-meta-item"><div class="release-meta-label">Дата создания</div><div class="release-meta-value">${escapeHTML(r.date || '—')}</div></div>
                     <div class="release-meta-item"><div class="release-meta-label">Дата релиза</div><div class="release-meta-value">${escapeHTML(formatReleaseDate(r.releaseDate))}</div></div>
+                    <div class="release-meta-item"><div class="release-meta-label">Ориг. дата релиза</div><div class="release-meta-value">${escapeHTML(formatReleaseDate(r.originalReleaseDate))}</div></div>
                     <div class="release-meta-item"><div class="release-meta-label">Жанр</div><div class="release-meta-value">${escapeHTML(r.genre || '—')}</div></div>
                     <div class="release-meta-item"><div class="release-meta-label">Треков</div><div class="release-meta-value">${tracks.length}</div></div>
                     ${metaAdmin}
@@ -5101,6 +5228,7 @@ function renderCard(r, isAdmin) {
                     ${releaseOwner}
                     ${infoRow('Формат релиза', r.type || '—')}
                     ${infoRow('Дата релиза', formatReleaseDate(r.releaseDate))}
+                    ${infoRow('Оригинальная дата релиза', formatReleaseDate(r.originalReleaseDate))}
                     ${infoRow('Год', r.year || '—')}
                     ${infoRow('Жанр', r.genre || '—')}
                     ${infoRow('UPC', r.upc || '—')}
@@ -5197,13 +5325,19 @@ function renderCard(r, isAdmin) {
     /* ===== Kite custom date picker ===== */
     (function(){
         const monthNames = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+        const monthShort = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
         const weekNames = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
         let active = null;
         let popover = null;
         let viewDate = new Date();
         let originalValueDescriptor = null;
+        let touchStartY = null;
+        let touchLastY = null;
+        let touchAccum = 0;
 
         function pad(n){ return String(n).padStart(2,'0'); }
+        function todayStart(){ const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); }
+        function addDays(d, amount){ const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() + amount); return x; }
         function toIso(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
         function parseIso(v){
             const m = String(v || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -5216,6 +5350,48 @@ function renderCard(r, isAdmin) {
             return d ? `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}` : '';
         }
         function sameDay(a,b){ return a && b && a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+        function beforeDay(a,b){ return a && b && new Date(a.getFullYear(),a.getMonth(),a.getDate()).getTime() < new Date(b.getFullYear(),b.getMonth(),b.getDate()).getTime(); }
+        function afterDay(a,b){ return a && b && new Date(a.getFullYear(),a.getMonth(),a.getDate()).getTime() > new Date(b.getFullYear(),b.getMonth(),b.getDate()).getTime(); }
+
+        function getDateRole(input){
+            return (input && input.dataset && input.dataset.dateRole) || (input && input.id === 'r_releaseDate' ? 'release' : (input && input.id === 'r_originalReleaseDate' ? 'original' : ''));
+        }
+        function getDateLimits(input){
+            const today = todayStart();
+            const role = getDateRole(input);
+            if(role === 'release') {
+                return {
+                    min: addDays(today, 5),
+                    max: null,
+                    hint: 'Дата релиза доступна минимум через 5 дней от сегодняшней даты.'
+                };
+            }
+            if(role === 'original') {
+                return {
+                    min: null,
+                    max: today,
+                    hint: 'Оригинальная дата релиза может быть сегодня или раньше.'
+                };
+            }
+            return { min:null, max:null, hint:'Прокрутите календарь вверх/вниз, чтобы переключать месяцы.' };
+        }
+        function isDisabledForInput(d, input){
+            const lim = getDateLimits(input);
+            return (lim.min && beforeDay(d, lim.min)) || (lim.max && afterDay(d, lim.max));
+        }
+        function refreshNativeLimits(input){
+            if(!input) return;
+            const lim = getDateLimits(input);
+            if(lim.min) input.setAttribute('min', toIso(lim.min)); else input.removeAttribute('min');
+            if(lim.max) input.setAttribute('max', toIso(lim.max)); else input.removeAttribute('max');
+        }
+        function defaultViewFor(input){
+            const selected = parseIso(getNativeValue(input));
+            if(selected) return new Date(selected.getFullYear(), selected.getMonth(), 1);
+            const lim = getDateLimits(input);
+            const base = lim.min || lim.max || todayStart();
+            return new Date(base.getFullYear(), base.getMonth(), 1);
+        }
 
         function getNativeValue(input){
             if(originalValueDescriptor && originalValueDescriptor.get) return originalValueDescriptor.get.call(input);
@@ -5230,9 +5406,9 @@ function renderCard(r, isAdmin) {
         function ensurePopover(){
             if(popover) return popover;
             popover = document.createElement('div');
-            popover.className = 'aether-date-popover hidden';
+            popover.className = 'aether-date-popover kite-positioned hidden';
             document.body.appendChild(popover);
-            popover.addEventListener('mousedown', e => { if(!e.target.closest('button')) e.preventDefault(); });
+            popover.addEventListener('pointerdown', e => { if(!e.target.closest('button')) e.preventDefault(); e.stopPropagation(); });
             let wheelLocked = false;
             popover.addEventListener('wheel', (e) => {
                 if(!active) return;
@@ -5241,43 +5417,61 @@ function renderCard(r, isAdmin) {
                 wheelLocked = true;
                 viewDate.setMonth(viewDate.getMonth() + (e.deltaY > 0 ? 1 : -1));
                 renderPicker();
-                setTimeout(() => wheelLocked = false, 260);
+                setTimeout(() => wheelLocked = false, 120);
             }, { passive:false });
-            let touchStartY = null;
-            popover.addEventListener('touchstart', (e) => { touchStartY = e.touches && e.touches[0] ? e.touches[0].clientY : null; }, { passive:true });
-            popover.addEventListener('touchend', (e) => {
-                if(touchStartY === null || !active) return;
-                const endY = e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientY : touchStartY;
-                const diff = endY - touchStartY;
-                touchStartY = null;
-                if(Math.abs(diff) < 42) return;
-                viewDate.setMonth(viewDate.getMonth() + (diff < 0 ? 1 : -1));
-                renderPicker();
+            popover.addEventListener('touchstart', (e) => {
+                if(!active || !e.touches || !e.touches[0]) return;
+                touchStartY = e.touches[0].clientY;
+                touchLastY = touchStartY;
+                touchAccum = 0;
             }, { passive:true });
+            popover.addEventListener('touchmove', (e) => {
+                if(!active || touchLastY === null || !e.touches || !e.touches[0]) return;
+                e.preventDefault();
+                const y = e.touches[0].clientY;
+                touchAccum += y - touchLastY;
+                touchLastY = y;
+                if(Math.abs(touchAccum) >= 52){
+                    viewDate.setMonth(viewDate.getMonth() + (touchAccum < 0 ? 1 : -1));
+                    touchAccum = 0;
+                    renderPicker();
+                }
+            }, { passive:false });
+            popover.addEventListener('touchend', () => { touchStartY = null; touchLastY = null; touchAccum = 0; }, { passive:true });
             return popover;
+        }
+
+        function positionPopover(input){
+            const p = ensurePopover();
+            const display = input.__aetherDateDisplay;
+            if(!display) return;
+            const rect = display.getBoundingClientRect();
+            const width = Math.min(300, window.innerWidth - 28);
+            const estimatedHeight = Math.min(350, window.innerHeight - 28);
+            let left = Math.min(Math.max(14, rect.left), Math.max(14, window.innerWidth - width - 14));
+            let top = rect.bottom + 8;
+            if(top + estimatedHeight > window.innerHeight) top = rect.top - estimatedHeight - 8;
+            if(top < 14) top = 14;
+            p.style.setProperty('--kite-date-left', left + 'px');
+            p.style.setProperty('--kite-date-top', top + 'px');
         }
 
         function openPicker(input){
             active = input;
-            const selected = parseIso(getNativeValue(input));
-            viewDate = selected ? new Date(selected.getFullYear(), selected.getMonth(), 1) : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-            renderPicker();
-            const rect = input.__aetherDateDisplay.getBoundingClientRect();
+            refreshNativeLimits(input);
+            viewDate = defaultViewFor(input);
             const p = ensurePopover();
             p.classList.remove('hidden');
-            const width = Math.min(340, window.innerWidth - 28);
-            let left = Math.min(Math.max(14, rect.left), window.innerWidth - width - 14);
-            let top = rect.bottom + 10;
-            if(top + 390 > window.innerHeight) top = Math.max(14, rect.top - 390);
-            p.style.left = left + 'px';
-            p.style.top = top + 'px';
+            renderPicker();
+            positionPopover(input);
         }
         function closePicker(){ if(popover) popover.classList.add('hidden'); active = null; }
 
         function renderPicker(){
             const p = ensurePopover();
             const selected = active ? parseIso(getNativeValue(active)) : null;
-            const today = new Date();
+            const today = todayStart();
+            const lim = active ? getDateLimits(active) : {hint:''};
             const year = viewDate.getFullYear();
             const month = viewDate.getMonth();
             const first = new Date(year, month, 1);
@@ -5288,74 +5482,121 @@ function renderCard(r, isAdmin) {
             for(let i=0;i<42;i++){
                 const d = new Date(start);
                 d.setDate(start.getDate()+i);
+                const disabled = active ? isDisabledForInput(d, active) : false;
                 const cls = ['aether-date-day'];
                 if(d.getMonth() !== month) cls.push('other');
                 if(sameDay(d, today)) cls.push('today');
                 if(selected && sameDay(d, selected)) cls.push('selected');
-                days += `<button type="button" class="${cls.join(' ')}" data-date="${toIso(d)}">${d.getDate()}</button>`;
+                if(disabled) cls.push('disabled');
+                days += `<button type="button" class="${cls.join(' ')}" data-date="${toIso(d)}" ${disabled ? 'disabled aria-disabled="true"' : ''}>${d.getDate()}</button>`;
             }
             p.innerHTML = `
                 <div class="aether-date-head">
                     <button type="button" class="aether-date-title" data-action="monthPicker" title="Выбрать месяц и год">${monthNames[month]} ${year}</button>
-                    <div class="aether-date-nav">
-                        <button type="button" data-action="prev" title="Предыдущий месяц">↑</button>
-                        <button type="button" data-action="next" title="Следующий месяц">↓</button>
-                    </div>
                 </div>
                 <div class="aether-date-week">${weekNames.map(w=>`<span>${w}</span>`).join('')}</div>
                 <div class="aether-date-grid">${days}</div>
                 <div class="aether-date-actions">
                     <button type="button" class="danger-lite" data-action="clear">Удалить</button>
-                    <button type="button" data-action="today">Сегодня</button>
                 </div>
-                <div class="aether-date-hint">Прокрутите календарь вверх/вниз, чтобы переключать месяцы.</div>`;
+                <div class="aether-date-hint">${lim.hint || ''}<br>Прокрутите календарь вверх/вниз, чтобы переключать месяцы.</div>`;
             p.querySelector('[data-action="monthPicker"]').onclick = renderMonthYearPicker;
-            p.querySelector('[data-action="prev"]').onclick = () => { viewDate.setMonth(viewDate.getMonth()-1); renderPicker(); };
-            p.querySelector('[data-action="next"]').onclick = () => { viewDate.setMonth(viewDate.getMonth()+1); renderPicker(); };
             p.querySelector('[data-action="clear"]').onclick = () => selectDate('');
-            p.querySelector('[data-action="today"]').onclick = () => selectDate(toIso(new Date()));
-            p.querySelectorAll('[data-date]').forEach(btn => btn.onclick = () => selectDate(btn.dataset.date));
+            p.querySelectorAll('[data-date]:not([disabled])').forEach(btn => btn.onclick = () => selectDate(btn.dataset.date));
+            if(active) positionPopover(active);
         }
 
         function renderMonthYearPicker(){
             const p = ensurePopover();
-            const year = viewDate.getFullYear();
-            const month = viewDate.getMonth();
-            p.innerHTML = `
-                <div class="aether-year-row">
-                    <button type="button" data-action="yearPrev" title="Предыдущий год">←</button>
-                    <div class="aether-year-value">${year}</div>
-                    <button type="button" data-action="yearNext" title="Следующий год">→</button>
-                </div>
-                <div class="aether-month-grid">
-                    ${monthNames.map((name, i) => `<button type="button" class="aether-month-btn ${i === month ? 'active' : ''}" data-month="${i}">${name.slice(0,3)}</button>`).join('')}
-                </div>
-                <div class="aether-date-actions">
-                    <button type="button" class="danger-lite" data-action="back">Назад</button>
-                    <button type="button" data-action="today">Сегодня</button>
-                </div>`;
-            p.querySelector('[data-action="yearPrev"]').onclick = () => { viewDate.setFullYear(viewDate.getFullYear()-1); renderMonthYearPicker(); };
-            p.querySelector('[data-action="yearNext"]').onclick = () => { viewDate.setFullYear(viewDate.getFullYear()+1); renderMonthYearPicker(); };
-            p.querySelector('[data-action="back"]').onclick = renderPicker;
-            p.querySelector('[data-action="today"]').onclick = () => { const now = new Date(); viewDate = new Date(now.getFullYear(), now.getMonth(), 1); renderPicker(); };
-            p.querySelectorAll('[data-month]').forEach(btn => btn.onclick = () => {
-                viewDate.setMonth(Number(btn.dataset.month));
-                renderPicker();
-            });
+            const currentYear = todayStart().getFullYear();
+            const role = getDateRole(active);
+            const minYear = 2000;
+            const maxYear = Math.max(currentYear, viewDate.getFullYear(), role === 'release' ? currentYear + 3 : currentYear);
+            let pickedMonth = viewDate.getMonth();
+            let pickedYear = Math.min(Math.max(viewDate.getFullYear(), minYear), maxYear);
+
+            function draw(){
+                const years = [];
+                for(let y=minYear; y<=maxYear; y++) years.push(y);
+                p.innerHTML = `
+                    <button type="button" class="aether-date-title" data-action="back" title="Вернуться к календарю">${monthNames[pickedMonth]} ${pickedYear}</button>
+                    <div class="aether-month-year-picker">
+                        <div class="aether-picker-col">
+                            <div class="aether-picker-col-title">Месяц</div>
+                            <div class="aether-picker-list">
+                                ${monthNames.map((name, i) => `<button type="button" class="aether-picker-option ${i === pickedMonth ? 'active' : ''}" data-month="${i}">${i+1}. ${monthShort[i]}</button>`).join('')}
+                            </div>
+                        </div>
+                        <div class="aether-picker-col">
+                            <div class="aether-picker-col-title">Год</div>
+                            <div class="aether-picker-list" id="aetherYearList">
+                                ${years.map(y => `<button type="button" class="aether-picker-option ${y === pickedYear ? 'active' : ''}" data-year="${y}">${y}</button>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="aether-date-actions">
+                        <button type="button" class="danger-lite" data-action="back">Назад</button>
+                        <button type="button" data-action="choose">Выбрать</button>
+                    </div>`;
+                p.querySelectorAll('[data-month]').forEach(btn => btn.onclick = () => { pickedMonth = Number(btn.dataset.month); draw(); });
+                p.querySelectorAll('[data-year]').forEach(btn => btn.onclick = () => { pickedYear = Number(btn.dataset.year); draw(); });
+                p.querySelectorAll('[data-action="back"]').forEach(btn => btn.onclick = renderPicker);
+                p.querySelector('[data-action="choose"]').onclick = () => {
+                    viewDate = new Date(pickedYear, pickedMonth, 1);
+                    renderPicker();
+                };
+                setTimeout(() => {
+                    const activeYear = p.querySelector('[data-year].active');
+                    if(activeYear) activeYear.scrollIntoView({block:'center'});
+                }, 0);
+                if(active) positionPopover(active);
+            }
+            draw();
         }
 
         function selectDate(value){
             if(!active) return;
+            if(value){
+                const d = parseIso(value);
+                if(d && isDisabledForInput(d, active)) return;
+            }
             setNativeValue(active, value);
             active.dispatchEvent(new Event('input', { bubbles:true }));
             active.dispatchEvent(new Event('change', { bubbles:true }));
             closePicker();
         }
 
+        function validateOne(input, showAlert){
+            if(!input || !input.value) return true;
+            const d = parseIso(input.value);
+            if(!d) return true;
+            const lim = getDateLimits(input);
+            const label = input.id === 'r_originalReleaseDate' ? 'Оригинальная дата релиза' : 'Дата релиза';
+            if(lim.min && beforeDay(d, lim.min)){
+                input.classList.add('error-field');
+                if(showAlert) UI.alert('Ошибка', `${label} нельзя выбрать раньше ${formatDate(toIso(lim.min))}.`);
+                return false;
+            }
+            if(lim.max && afterDay(d, lim.max)){
+                input.classList.add('error-field');
+                if(showAlert) UI.alert('Ошибка', `${label} не может быть позже сегодняшней даты.`);
+                return false;
+            }
+            input.classList.remove('error-field');
+            return true;
+        }
+
+        window.KiteValidateReleaseDates = function(showAlert = true){
+            const rel = document.getElementById('r_releaseDate');
+            const orig = document.getElementById('r_originalReleaseDate');
+            return validateOne(rel, showAlert) && validateOne(orig, showAlert);
+        };
+
         function initDateInput(input){
             if(input.__aetherDateReady) return;
             input.__aetherDateReady = true;
             if(!originalValueDescriptor) originalValueDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+            refreshNativeLimits(input);
             const wrapper = document.createElement('div');
             wrapper.className = 'aether-date-field';
             const display = document.createElement('input');
@@ -5373,28 +5614,41 @@ function renderCard(r, isAdmin) {
                 Object.defineProperty(input, 'value', {
                     configurable:true,
                     get(){ return getNativeValue(input); },
-                    set(v){ setNativeValue(input, v); }
+                    set(v){ setNativeValue(input, v); refreshNativeLimits(input); }
                 });
             }catch(e){}
+            const openNow = (e) => {
+                if(e){ e.preventDefault(); e.stopPropagation(); }
+                openPicker(input);
+            };
+            display.addEventListener('pointerdown', openNow);
+            display.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); });
             display.addEventListener('focus', () => openPicker(input));
-            display.addEventListener('click', () => openPicker(input));
             display.addEventListener('keydown', (e) => {
                 if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openPicker(input); }
                 if(e.key === 'Escape') closePicker();
             });
-            input.addEventListener('change', () => { display.value = formatDate(getNativeValue(input)); });
+            input.addEventListener('change', () => {
+                refreshNativeLimits(input);
+                display.value = formatDate(getNativeValue(input));
+                validateOne(input, false);
+            });
         }
 
         function initAll(){ document.querySelectorAll('input[type="date"]').forEach(initDateInput); }
         document.addEventListener('DOMContentLoaded', initAll);
         window.addEventListener('load', initAll);
-        document.addEventListener('click', (e) => {
+        document.addEventListener('pointerdown', (e) => {
             if(!popover || popover.classList.contains('hidden')) return;
             const isInsidePopover = popover.contains(e.target);
-            const isDisplay = e.target && e.target.classList && e.target.classList.contains('aether-date-display');
-            if(!isInsidePopover && !isDisplay) closePicker();
+            const isDateField = e.target && e.target.closest && e.target.closest('.aether-date-field');
+            if(!isInsidePopover && !isDateField) closePicker();
         });
-        window.addEventListener('resize', () => { if(active) openPicker(active); });
+        window.addEventListener('resize', () => { if(active) positionPopover(active); });
+        setInterval(() => {
+            document.querySelectorAll('input[type="date"]').forEach(refreshNativeLimits);
+            if(active && popover && !popover.classList.contains('hidden')) renderPicker();
+        }, 60000);
         window.KiteDatePickerInit = initAll;
     })();
 
