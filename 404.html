@@ -2220,6 +2220,14 @@
                     <label class="ai-usage-check"><input type="checkbox" class="t_ai_usage" value="ИИ использован частично, только для генерации музыки" onchange="handleTrackAiUsageChange(this); isDraftDirty=true;"><span>ИИ использован частично, только для генерации музыки</span></label>
                     <label class="ai-usage-check"><input type="checkbox" class="t_ai_usage" value="ИИ использован частично, только для генерации текста" onchange="handleTrackAiUsageChange(this); isDraftDirty=true;"><span>ИИ использован частично, только для генерации текста</span></label>
                     <label class="ai-usage-check"><input type="checkbox" class="t_ai_usage" value="ИИ использован частично, только для генерации и/или обработки вокала" onchange="handleTrackAiUsageChange(this); isDraftDirty=true;"><span>ИИ использован частично, только для генерации и/или обработки вокала</span></label>
+                    <div class="form-group ai-proof-box hidden" id="aiProofSubscriptionBox" data-ai-proof="subscription">
+                        <label class="ai-proof-label">Ссылка на Google Drive / Яндекс Диск <span class="req-star">*</span><button type="button" class="ai-proof-help" aria-label="Подсказка" data-tip="Вставьте ссылку на Google Drive или Яндекс Диск, где будет загружено видео-доказательство о том, что в данной нейросети, где был изготовлен трек, есть подписка.">?</button></label>
+                        <input type="url" id="t_ai_proof_subscription" placeholder="https://drive.google.com/... или https://disk.yandex.ru/..." oninput="isDraftDirty=true;">
+                    </div>
+                    <div class="form-group ai-proof-box hidden" id="aiProofTextBox" data-ai-proof="text">
+                        <label class="ai-proof-label">Ссылка на Google Drive / Яндекс Диск <span class="req-star">*</span><button type="button" class="ai-proof-help" aria-label="Подсказка" data-tip="Вставьте ссылку на Google Drive или Яндекс Диск, где будет загружено видео-доказательство о том, что ваш текст был сгенерирован/изменён через ИИ.">?</button></label>
+                        <input type="url" id="t_ai_proof_text" placeholder="https://drive.google.com/... или https://disk.yandex.ru/..." oninput="isDraftDirty=true;">
+                    </div>
                 </div>
                 <div id="trackEditAudioPlayer" style="margin-bottom:18px;"></div>
                 <div class="form-group"><label>Название трека <span class="req-star">*</span></label><input type="text" id="t_title" placeholder="Название трека"></div>
@@ -2233,9 +2241,9 @@
                 </div>
                 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;"><div class="form-group"><label>Тип трека <span class="req-star">*</span></label><select id="t_type" onchange="toggleLyricsByTrackType(); isDraftDirty=true;"><option value="Original">Original</option><option value="Live">Live</option><option value="Cover">Cover</option><option value="Remix">Remix</option><option value="Instrumental">Instrumental</option></select></div><div class="form-group"><label>Язык релиза <span class="req-star">*</span></label><select id="t_lang"><option value="">Выберите язык</option><option value="Без слов">Без слов</option><option value="Русский">Русский</option><option value="Английский">Английский</option><option value="Украинский">Украинский</option><option value="Белорусский">Белорусский</option><option value="Казахский">Казахский</option><option value="Польский">Польский</option><option value="Немецкий">Немецкий</option><option value="Французский">Французский</option><option value="Испанский">Испанский</option><option value="Итальянский">Итальянский</option><option value="Португальский">Португальский</option><option value="Турецкий">Турецкий</option><option value="Китайский">Китайский</option><option value="Японский">Японский</option><option value="Корейский">Корейский</option><option value="Арабский">Арабский</option><option value="Хинди">Хинди</option><option value="Иврит">Иврит</option><option value="Грузинский">Грузинский</option><option value="Армянский">Армянский</option><option value="Румынский">Румынский</option><option value="Молдавский">Молдавский</option><option value="Литовский">Литовский</option><option value="Латышский">Латышский</option><option value="Эстонский">Эстонский</option></select></div></div>
-                <div class="form-group" id="lyricsFormGroup"><label>Текст песни <span class="req-star">*</span></label><textarea id="t_lyrics" placeholder="Обычный статичный текст песни обязателен..." rows="3"></textarea>
-                    <div class="ttml-upload-row" style="margin-top:12px;">
-                        <label class="custom-file-btn" for="t_ttml_file">Добавить караоке файл TTML</label>
+                <div class="form-group lyrics-ttml-field" id="lyricsFormGroup"><label>Текст песни <span class="req-star">*</span></label><textarea id="t_lyrics" placeholder="Обычный статичный текст песни обязателен..." rows="3"></textarea>
+                    <div class="ttml-upload-row">
+                        <label class="custom-file-btn" for="t_ttml_file">Добавить TTML</label>
                         <input type="file" id="t_ttml_file" accept=".ttml" onchange="handleTrackTTMLUpload(this)">
                         <span class="ttml-upload-name" id="t_ttml_name">Файл не выбран</span>
                     </div>
@@ -4567,6 +4575,8 @@
                 isrc: '',
                 previewStart: '',
                 aiUsage: [],
+                aiProofSubscription: '',
+                aiProofText: '',
                 duration: '',
                 isFilled: false,
                 cloudinaryPending: true,
@@ -4628,6 +4638,15 @@
         if(ttmlInput) ttmlInput.value = '';
         document.getElementById('te_filename').innerText = t.filename;
         setAiUsageChecked('trackAiUsageBox', t.aiUsage || t.aiUsageOptions || t.aiUsageLabels || []);
+        if(typeof window.setTrackAiProofValues === 'function') {
+            window.setTrackAiProofValues(t.aiProofSubscription || t.aiSubscriptionProof || '', t.aiProofText || t.aiTextProof || '');
+        } else {
+            const subProof = document.getElementById('t_ai_proof_subscription');
+            const textProof = document.getElementById('t_ai_proof_text');
+            if(subProof) subProof.value = t.aiProofSubscription || t.aiSubscriptionProof || '';
+            if(textProof) textProof.value = t.aiProofText || t.aiTextProof || '';
+        }
+        if(typeof window.refreshTrackAiProofFields === 'function') window.refreshTrackAiProofFields();
         const editAudioBox = document.getElementById('trackEditAudioPlayer');
         if(editAudioBox) {
             if(t.audioFile) {
@@ -4665,7 +4684,19 @@
         if(!author) { document.getElementById('t_author_container').classList.add('error-field'); hasErr = true; } else document.getElementById('t_author_container').classList.remove('error-field');
         if(!comp) { document.getElementById('t_comp_container').classList.add('error-field'); hasErr = true; } else document.getElementById('t_comp_container').classList.remove('error-field');
 
-        if(hasErr) return UI.alert("Ошибка", "Заполните все обязательные поля (отмечены красной звездочкой).");
+        const aiProofState = typeof window.getTrackAiProofState === 'function' ? window.getTrackAiProofState() : { needsSubscription:false, needsText:false, subscriptionUrl:'', textUrl:'', subscriptionValid:true, textValid:true };
+        if(aiProofState.needsSubscription && (!aiProofState.subscriptionUrl || !aiProofState.subscriptionValid)) {
+            const el = document.getElementById('t_ai_proof_subscription');
+            if(el) el.classList.add('error-field');
+            hasErr = true;
+        }
+        if(aiProofState.needsText && (!aiProofState.textUrl || !aiProofState.textValid)) {
+            const el = document.getElementById('t_ai_proof_text');
+            if(el) el.classList.add('error-field');
+            hasErr = true;
+        }
+
+        if(hasErr) return UI.alert("Ошибка", "Заполните все обязательные поля. Для полного ИИ, генерации музыки или текста ссылка на Google Drive или Яндекс Диск обязательна и должна вести на Google Drive или Яндекс Диск.");
         const t = draftRelease.tracks.find(x => x.id === editTrackId);
         const lyricsEl = document.getElementById('t_lyrics');
         const lyricsValue = lyricsEl ? lyricsEl.value.trim() : '';
@@ -4677,6 +4708,8 @@
         ['title','version','lang','lyrics','explicit','isrc','previewStart'].forEach(k => { const el = document.getElementById('t_'+k); if(el) t[k] = el.value; }); 
         t.type = resolvedTrackType;
         t.aiUsage = getAiUsageChecked('trackAiUsageBox');
+        t.aiProofSubscription = aiProofState.needsSubscription ? aiProofState.subscriptionUrl : '';
+        t.aiProofText = aiProofState.needsText ? aiProofState.textUrl : '';
         t.artist = artist; t.author = author; t.comp = comp;
 
         t.isFilled = true; isDraftDirty = true;
@@ -5412,6 +5445,13 @@ function renderCard(r, isAdmin) {
             let wheelLocked = false;
             popover.addEventListener('wheel', (e) => {
                 if(!active) return;
+                const inPickerList = e.target && e.target.closest && e.target.closest('.aether-picker-list');
+                if(popover.dataset.mode === 'monthYear') {
+                    if(inPickerList) { e.stopPropagation(); return; }
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
                 e.preventDefault();
                 if(wheelLocked) return;
                 wheelLocked = true;
@@ -5427,6 +5467,13 @@ function renderCard(r, isAdmin) {
             }, { passive:true });
             popover.addEventListener('touchmove', (e) => {
                 if(!active || touchLastY === null || !e.touches || !e.touches[0]) return;
+                const inPickerList = e.target && e.target.closest && e.target.closest('.aether-picker-list');
+                if(popover.dataset.mode === 'monthYear') {
+                    if(inPickerList) { e.stopPropagation(); return; }
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
                 e.preventDefault();
                 const y = e.touches[0].clientY;
                 touchAccum += y - touchLastY;
@@ -5469,6 +5516,7 @@ function renderCard(r, isAdmin) {
 
         function renderPicker(){
             const p = ensurePopover();
+            p.dataset.mode = 'calendar';
             const selected = active ? parseIso(getNativeValue(active)) : null;
             const today = todayStart();
             const lim = active ? getDateLimits(active) : {hint:''};
@@ -5508,6 +5556,7 @@ function renderCard(r, isAdmin) {
 
         function renderMonthYearPicker(){
             const p = ensurePopover();
+            p.dataset.mode = 'monthYear';
             const currentYear = todayStart().getFullYear();
             const role = getDateRole(active);
             const minYear = 2000;
@@ -7498,16 +7547,141 @@ function renderCard(r, isAdmin) {
     font-size:13px;
     margin-bottom:8px;
 }
+
+
+/* ===== Bugfix pack: FAQ animation, date picker scroll, AI proof fields, attached TTML ===== */
+@keyframes kiteSupportOpen{
+    from{opacity:0;transform:translateY(10px) scale(.985);filter:blur(2px);}
+    to{opacity:1;transform:translateY(0) scale(1);filter:blur(0);}
+}
+.support-detail,
+.support-grid,
+.support-empty{
+    animation:kiteSupportOpen .22s cubic-bezier(.2,.8,.2,1) both;
+}
+.support-question-actions{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+}
+.support-question-admin-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.aether-date-popover[data-mode="monthYear"]{
+    overscroll-behavior:contain!important;
+}
+.aether-date-popover[data-mode="monthYear"] .aether-picker-list{
+    overscroll-behavior:contain!important;
+    -webkit-overflow-scrolling:touch;
+    touch-action:pan-y!important;
+}
+.ai-proof-box{
+    margin:6px 0 0!important;
+    padding:14px;
+    border-radius:18px;
+    border:1px solid rgba(93,131,255,.22);
+    background:rgba(93,131,255,.075);
+    animation:kiteSupportOpen .18s ease both;
+}
+.ai-proof-label{
+    display:flex!important;
+    align-items:center!important;
+    gap:8px;
+    color:#eef2fb!important;
+    font-weight:800;
+    margin-bottom:8px!important;
+}
+.ai-proof-help{
+    position:relative;
+    width:22px;
+    height:22px;
+    min-width:22px;
+    padding:0!important;
+    display:inline-grid;
+    place-items:center;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,.18)!important;
+    background:rgba(255,255,255,.07)!important;
+    color:#dce5ff!important;
+    font-size:13px!important;
+    font-weight:900!important;
+    box-shadow:none!important;
+}
+.ai-proof-help::after{
+    content:attr(data-tip);
+    position:absolute;
+    left:50%;
+    bottom:calc(100% + 10px);
+    width:min(310px,82vw);
+    transform:translateX(-50%) translateY(6px);
+    padding:12px 13px;
+    border-radius:14px;
+    background:rgba(15,19,27,.98);
+    border:1px solid rgba(255,255,255,.14);
+    color:#eef2fb;
+    box-shadow:0 18px 42px rgba(0,0,0,.38);
+    font-size:12px;
+    font-weight:600;
+    line-height:1.45;
+    white-space:normal;
+    text-align:left;
+    opacity:0;
+    pointer-events:none;
+    transition:.16s ease;
+    z-index:35000;
+}
+.ai-proof-help:hover::after,
+.ai-proof-help.open::after,
+.ai-proof-help:focus-visible::after{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+}
+.ai-proof-box input.error-field{
+    border-color:var(--danger)!important;
+    box-shadow:0 0 0 3px rgba(239,68,68,.14)!important;
+}
+.lyrics-ttml-field textarea{
+    border-bottom-left-radius:0!important;
+    border-bottom-right-radius:0!important;
+    min-height:112px;
+    resize:vertical;
+}
+.lyrics-ttml-field .ttml-upload-row{
+    margin-top:0!important;
+    border-top:0!important;
+    border-top-left-radius:0!important;
+    border-top-right-radius:0!important;
+    justify-content:center!important;
+    text-align:center;
+    padding:16px!important;
+}
+.lyrics-ttml-field .ttml-upload-name{
+    flex-basis:100%;
+    max-width:100%!important;
+    text-align:center;
+}
+.lyrics-ttml-field .custom-file-btn{min-width:min(100%,220px)!important;}
+.release-info-ai-proof-links{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.09);color:#d7deee;font-size:13px;line-height:1.5;}
+.release-info-ai-proof-links a{color:#9db3ff;text-decoration:none;font-weight:800;word-break:break-word;}
+.release-info-ai-proof-links a:hover{text-decoration:underline;text-underline-offset:3px;}
+@media(max-width:768px){
+    .ai-proof-help::after{left:auto;right:-8px;transform:translateY(6px);}
+    .ai-proof-help:hover::after,.ai-proof-help.open::after,.ai-proof-help:focus-visible::after{transform:translateY(0);}
+}
+
 </style>
 
 <script id="kite-ai-logic-fix">
 (function(){
     const AI_FULL = 'Трек полностью сгенерирован ИИ';
+    const AI_MUSIC = 'ИИ использован частично, только для генерации музыки';
+    const AI_TEXT = 'ИИ использован частично, только для генерации текста';
+    const AI_VOCAL = 'ИИ использован частично, только для генерации и/или обработки вокала';
     const AI_OPTIONS = [
         AI_FULL,
-        'ИИ использован частично, только для генерации музыки',
-        'ИИ использован частично, только для генерации текста',
-        'ИИ использован частично, только для генерации и/или обработки вокала'
+        AI_MUSIC,
+        AI_TEXT,
+        AI_VOCAL
     ];
 
     function getTrackAiInputs(box){
@@ -7562,13 +7736,70 @@ function renderCard(r, isAdmin) {
         }
 
         refreshTrackAiUsageLocks(box);
+        if(typeof window.refreshTrackAiProofFields === 'function') window.refreshTrackAiProofFields();
         try { window.isDraftDirty = true; } catch(e) {}
+    };
+
+    function isGoogleDriveUrl(value){
+        const url = String(value || '').trim();
+        if(!url) return false;
+        return /^https?:\/\/(drive\.google\.com|docs\.google\.com|disk\.yandex\.(ru|com)|yadi\.sk)\//i.test(url);
+    }
+
+    function setProofBoxVisible(box, input, visible){
+        if(box) box.classList.toggle('hidden', !visible);
+        if(input){
+            input.required = !!visible;
+            if(!visible) input.classList.remove('error-field');
+        }
+    }
+
+    window.refreshTrackAiProofFields = function(){
+        const box = document.getElementById('trackAiUsageBox');
+        const selected = getTrackAiInputs(box).filter(input => input.checked).map(input => input.value);
+        const needsSubscription = selected.includes(AI_FULL) || selected.includes(AI_MUSIC);
+        const needsText = selected.includes(AI_TEXT);
+        const subBox = document.getElementById('aiProofSubscriptionBox');
+        const textBox = document.getElementById('aiProofTextBox');
+        const subInput = document.getElementById('t_ai_proof_subscription');
+        const textInput = document.getElementById('t_ai_proof_text');
+        setProofBoxVisible(subBox, subInput, needsSubscription);
+        setProofBoxVisible(textBox, textInput, needsText);
+        if(!needsSubscription && subInput) subInput.value = '';
+        if(!needsText && textInput) textInput.value = '';
+    };
+
+    window.getTrackAiProofState = function(){
+        const box = document.getElementById('trackAiUsageBox');
+        const selected = getTrackAiInputs(box).filter(input => input.checked).map(input => input.value);
+        const needsSubscription = selected.includes(AI_FULL) || selected.includes(AI_MUSIC);
+        const needsText = selected.includes(AI_TEXT);
+        const subInput = document.getElementById('t_ai_proof_subscription');
+        const textInput = document.getElementById('t_ai_proof_text');
+        const subscriptionUrl = String((subInput && subInput.value) || '').trim();
+        const textUrl = String((textInput && textInput.value) || '').trim();
+        const subscriptionValid = !needsSubscription || isGoogleDriveUrl(subscriptionUrl);
+        const textValid = !needsText || isGoogleDriveUrl(textUrl);
+        if(subInput) subInput.classList.toggle('error-field', needsSubscription && (!subscriptionUrl || !subscriptionValid));
+        if(textInput) textInput.classList.toggle('error-field', needsText && (!textUrl || !textValid));
+        return { needsSubscription, needsText, subscriptionUrl, textUrl, subscriptionValid, textValid };
+    };
+
+    window.setTrackAiProofValues = function(subscriptionUrl, textUrl){
+        const subInput = document.getElementById('t_ai_proof_subscription');
+        const textInput = document.getElementById('t_ai_proof_text');
+        if(subInput) subInput.value = subscriptionUrl || '';
+        if(textInput) textInput.value = textUrl || '';
+        window.refreshTrackAiProofFields();
     };
 
     const oldSetAiUsageChecked = window.setAiUsageChecked;
     window.setAiUsageChecked = function(containerId, value){
         if(typeof oldSetAiUsageChecked === 'function') oldSetAiUsageChecked.apply(this, arguments);
-        if(containerId === 'trackAiUsageBox') refreshTrackAiUsageLocks(document.getElementById(containerId));
+        if(containerId === 'trackAiUsageBox') {
+            refreshTrackAiUsageLocks(document.getElementById(containerId));
+            if(typeof window.refreshTrackAiProofFields === 'function') window.refreshTrackAiProofFields();
+        }
     };
 
     window.getAiUsageChecked = function(containerId){
@@ -7602,6 +7833,10 @@ function renderCard(r, isAdmin) {
         if(typeof window.escapeHTML === 'function') return window.escapeHTML(str);
         return String(str ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
     }
+    function escapeAttrLocal(str){
+        if(typeof window.escapeAttr === 'function') return window.escapeAttr(str);
+        return String(str ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    }
 
     function readonlyAiCheck(label, checked){
         return `<label class="ai-readonly-check"><input type="checkbox" ${checked ? 'checked' : ''} disabled><span>${escapeHTMLLocal(label)}</span></label>`;
@@ -7626,6 +7861,7 @@ function renderCard(r, isAdmin) {
         if(tracksBox){
             const tracks = Array.isArray(release && release.tracks) ? release.tracks : [];
             tracksBox.querySelectorAll('.release-info-ai-summary').forEach(el => el.remove());
+            tracksBox.querySelectorAll('.release-info-ai-proof-links').forEach(el => el.remove());
             Array.from(tracksBox.querySelectorAll('.release-info-track-card')).forEach((card, index) => {
                 const track = tracks[index] || {};
                 const old = card.querySelector('.release-info-ai-checks');
@@ -7633,7 +7869,13 @@ function renderCard(r, isAdmin) {
                 const sub = card.querySelector('.release-info-track-sub');
                 const holder = document.createElement('div');
                 holder.className = 'release-info-ai-checks';
-                holder.innerHTML = `<div class="release-info-ai-checks-title">Использование ИИ</div>${readonlyAiList(track.aiUsage || track.aiUsageOptions || track.aiUsageLabels || '')}`;
+                const subProof = String(track.aiProofSubscription || track.aiSubscriptionProof || '').trim();
+                const textProof = String(track.aiProofText || track.aiTextProof || '').trim();
+                const proofLinks = [];
+                if(subProof) proofLinks.push(`<a href="${escapeAttrLocal(subProof)}" target="_blank" rel="noopener">Видео-доказательство подписки</a>`);
+                if(textProof) proofLinks.push(`<a href="${escapeAttrLocal(textProof)}" target="_blank" rel="noopener">Видео-доказательство текста</a>`);
+                const proofHtml = proofLinks.length ? `<div class="release-info-ai-proof-links"><strong>Доказательства:</strong> ${proofLinks.join(' • ')}</div>` : '';
+                holder.innerHTML = `<div class="release-info-ai-checks-title">Использование ИИ</div>${readonlyAiList(track.aiUsage || track.aiUsageOptions || track.aiUsageLabels || '')}${proofHtml}`;
                 if(sub && sub.parentNode) sub.insertAdjacentElement('afterend', holder);
                 else card.appendChild(holder);
             });
@@ -7668,8 +7910,26 @@ function renderCard(r, isAdmin) {
         }
     }, true);
 
+    document.addEventListener('click', function(event){
+        const help = event.target && event.target.closest ? event.target.closest('.ai-proof-help') : null;
+        document.querySelectorAll('.ai-proof-help.open').forEach(item => { if(item !== help) item.classList.remove('open'); });
+        if(help){
+            event.preventDefault();
+            event.stopPropagation();
+            help.classList.toggle('open');
+        }
+    }, true);
+
+    document.addEventListener('input', function(event){
+        if(event.target && (event.target.id === 't_ai_proof_subscription' || event.target.id === 't_ai_proof_text')){
+            if(typeof window.getTrackAiProofState === 'function') window.getTrackAiProofState();
+            try { if(typeof isDraftDirty !== 'undefined') isDraftDirty = true; } catch(e) {}
+        }
+    }, true);
+
     document.addEventListener('DOMContentLoaded', function(){
         refreshTrackAiUsageLocks(document.getElementById('trackAiUsageBox'));
+        if(typeof window.refreshTrackAiProofFields === 'function') window.refreshTrackAiProofFields();
     });
 })();
 </script>
